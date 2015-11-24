@@ -15,6 +15,18 @@ void WServer::listen(const QHostAddress &address, quint16 port)
     server->listen(address, port);
 }
 
+void WServer::close() 
+{
+    server->close();
+    lastId = 0;
+    QHash<quint64, WSocket*>::const_iterator it;
+    QHash<quint64, WSocket*>::const_iterator end = connections.end();
+    
+    for (it = connections.begin(); it != end; ++it) {
+	(*it)->close();
+    }
+}
+
 void WServer::onNewConnection()
 {
     QWebSocket *webSocket = server->nextPendingConnection();
@@ -37,4 +49,5 @@ void WServer::onSocketConnected() {
 void WServer::onSocketDisconnected() {
     WSocket * socket = static_cast<WSocket*>(sender());
     connections.remove(socket->getId());
+    delete socket;
 }

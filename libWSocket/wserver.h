@@ -19,6 +19,7 @@ public:
     explicit WServer(const QString& name = QString(), QObject *parent = 0);
 
     void listen(const QHostAddress& address = QHostAddress::Any, quint16 port = 0);
+    void close();
 
     QHash <quint64, WSocket*> connections;
 

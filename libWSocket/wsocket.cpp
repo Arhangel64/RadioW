@@ -74,6 +74,8 @@ void WSocket::onBinaryMessageReceived(const QByteArray& ba) {
     WEvent * ev = WEvent::createFromQByteArray(ba);
     switch(ev->getEventType())
     {
+    case WEvent::tWEvent:
+	break;    
     case WEvent::tWSetId:
         getRemoteId(static_cast<WSetId*>(ev));
         break;
@@ -85,9 +87,14 @@ void WSocket::onBinaryMessageReceived(const QByteArray& ba) {
 }
 
 void WSocket::getRemoteId(WSetId* ev) {
-    if (id == 0 && state == Connecting && ev->getVersion() == WEvent::version) {
-        id = ev->getSenderId();
-        setRemoteName();
+    if (id == 0 && state == Connecting) {
+	if (ev->getVersion() == WEvent::version) {
+	    id = ev->getSenderId();
+	    setRemoteName();
+	} else {
+	    emit t_ev(QString("Connecting socket protocol has incompatible"));
+	    close();
+	}
     } else {
         emit t_ev(QString("id has'nt been set"));
         //todo exeption

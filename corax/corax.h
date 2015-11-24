@@ -3,11 +3,8 @@
 
 #include <QtCore/QObject>
 
-//#include <wSocket/wsocket.h>
-//#include <wSocket/wserver.h>
-
-#include <wserver.h>
-#include <wsocket.h>
+#include "libWSocket/wsocket.h"
+#include "libWSocket/wserver.h"
 
 class Corax: public QObject
 {

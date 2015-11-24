@@ -9,6 +9,8 @@ set(CMAKE_AUTOMOC ON)
 
 add_executable(corax main.cpp corax.cpp)
 
+target_include_directories(corax PUBLIC ../)
+
 target_link_libraries(corax Qt5::Core)
 target_link_libraries(corax Qt5::Network)
 

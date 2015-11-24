@@ -3,5 +3,3 @@ project(RadioW)
 
 add_subdirectory(libWSocket)
 add_subdirectory(corax)
-
-target_include_directories(corax PUBLIC libWSocket)

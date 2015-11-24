@@ -3,7 +3,7 @@
 
 #include <QtCore/QUrl>
 
-#include <wsocket.h>
+#include <libWSocket/wsocket.h>
 
 #include "corax.h"
 

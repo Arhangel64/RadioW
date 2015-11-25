@@ -6,22 +6,27 @@
 #include "libWSocket/wsocket.h"
 #include "libWSocket/wserver.h"
 
+#include "libWSocket/wEvent/wteststring.h"
+
 class Corax: public QObject
 {
-	Q_OBJECT
+    Q_OBJECT
 	
 public:
-	Corax(QObject *parent = 0);
+    Corax(QObject *parent = 0);
 	
 private:
-	WServer *server;
+    WServer *server;
     WSocket *socket;
 
 public slots:
-	void onNewConnection(WSocket *socket);
+    void onNewConnection(WSocket *socket);
     void onSocketConnected();
     void onSocketEvent(const QString& msg);
     void onServerEvent(const QString& msg);
+    
+    void onServerTest(WTestString msg);
+    void onSocketTest(WTestString msg);
 	
 };
 

@@ -5,6 +5,7 @@
 
 #include "wsetid.h"
 #include "wsetremotename.h"
+#include "wteststring.h"
 
 using std::cout;
 using std::endl;
@@ -61,6 +62,9 @@ WEvent* WEvent::createFromQByteArray(const QByteArray & ba)
     case WEvent::tWSetRemoteName:
         ret = new WSetRemoteName();
         break;
+    case WEvent::tWTestString:
+	ret = new WTestString();
+	break;
     }
     ret->deserialize(ds);
     return ret;

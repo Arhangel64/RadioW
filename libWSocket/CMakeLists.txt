@@ -10,6 +10,7 @@ set(CMAKE_AUTOMOC ON)
 
 set(LWS wserver.cpp wsocket.cpp)
 add_library(wSocket SHARED ${LWS})
+
 target_include_directories(wSocket PUBLIC wEvent)
 
 add_subdirectory(wEvent)

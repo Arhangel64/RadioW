@@ -6,7 +6,7 @@
 class WSetId : public WEvent
 {
 public:
-    WSetId(quint64);
+    WSetId(quint64 id_p);
     WSetId();
 
     QString getVersion() const;

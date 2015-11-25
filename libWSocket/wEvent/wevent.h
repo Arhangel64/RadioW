@@ -13,7 +13,8 @@ public:
     {
         tWEvent,
         tWSetId,
-        tWSetRemoteName
+        tWSetRemoteName,
+	tWTestString
     };
     WEvent(quint64 senderId_p, typeId eventType_p = tWEvent);
     WEvent(typeId eventType_p = tWEvent);

@@ -1,13 +1,11 @@
 #include "wsocket.h"
 
-#include "wevent.h"
-#include "wsetid.h"
-#include "wsetremotename.h"
 #include <QDebug>
 
 WSocket::WSocket(const QString& p_name, QObject *parent):
     QObject(parent),
     id(0),
+    serverCreated(false),
     state(Disconnected),
     socket(new QWebSocket()),
     name(p_name),
@@ -20,6 +18,7 @@ WSocket::WSocket(const QString& p_name, QObject *parent):
 WSocket::WSocket(const QString& p_name, QWebSocket *p_socket, QObject *parent):
     QObject(parent),
     id(0),
+    serverCreated(true),
     state(Connecting),
     socket(p_socket),
     name(p_name),
@@ -42,6 +41,7 @@ void WSocket::close()
     if (state != Disconnected && state != Disconnecting) {
         state = Disconnecting;
         socket->close();
+	emit t_ev(QString("socket closing"));
     }
 }
 
@@ -67,6 +67,7 @@ void WSocket::onSocketConnected() {
 void WSocket::onSocketDisconnected() {
     state = Disconnected;
     id = 0;
+    emit t_ev(QString("socket closed"));
     emit disconnected();
 }
 
@@ -82,6 +83,9 @@ void WSocket::onBinaryMessageReceived(const QByteArray& ba) {
     case WEvent::tWSetRemoteName:
         getRemoteName(static_cast<WSetRemoteName*>(ev));
         break;
+    case WEvent::tWTestString:
+	emit testString(*(static_cast<WTestString*>(ev)));
+	break;
     }
     delete ev;
 }
@@ -102,7 +106,9 @@ void WSocket::getRemoteId(WSetId* ev) {
 }
 
 void WSocket::finishHandshake() {
-    setRemoteName();
+    if (serverCreated) {
+	setRemoteName();
+    }
     state = Connected;
     emit connected();
 }
@@ -127,4 +133,10 @@ void WSocket::setRemoteName() {
 
 quint64 WSocket::getId() const {
     return id;
+}
+
+
+void WSocket::send(WEvent* ev)
+{
+    socket->sendBinaryMessage(WEvent::serializeToQByteArray(ev));
 }

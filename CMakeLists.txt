@@ -3,3 +3,4 @@ project(RadioW)
 
 add_subdirectory(libWSocket)
 add_subdirectory(corax)
+add_subdirectory(lorgar)

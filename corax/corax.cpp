@@ -7,13 +7,13 @@ using std::cout;
 using std::endl;
 
 Corax::Corax(QObject *parent):
-	QObject(parent),
-	server(new WServer(QString("corax"), this)),
-	socket(new WSocket(QString("corax_test"), this))
+    QObject(parent),
+    server(new WServer(QString("corax"), this)),
+    socket(new WSocket(QString("corax_test"), this))
 {
-	connect(server, SIGNAL(newConnection(WSocket*)), SLOT(onNewConnection(WSocket*)));
-	
-	server->listen(QHostAddress::Any, 8080);
+    connect(server, SIGNAL(newConnection(WSocket*)), SLOT(onNewConnection(WSocket*)));
+
+    server->listen(QHostAddress::Any, 8080);
     
     
     connect(socket, SIGNAL(connected()), this, SLOT(onSocketConnected()));
@@ -26,7 +26,7 @@ void Corax::onNewConnection(WSocket* wsocket)
 {
     connect(wsocket, SIGNAL(t_ev(const QString&)), this, SLOT(onServerEvent(const QString&)));
     connect(wsocket, SIGNAL(testString(WTestString)), SLOT(onServerTest(WTestString)));
-	cout << "New connection on sever side" << endl;
+    cout << "New connection on sever side" << endl;
 }
 
 void Corax::onSocketConnected()

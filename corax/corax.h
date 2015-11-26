@@ -11,14 +11,14 @@
 class Corax: public QObject
 {
     Q_OBJECT
-	
+    
 public:
     Corax(QObject *parent = 0);
-	
+    
 private:
     WServer *server;
     WSocket *socket;
-
+    
 public slots:
     void onNewConnection(WSocket *socket);
     void onSocketConnected();
@@ -27,7 +27,6 @@ public slots:
     
     void onServerTest(WTestString msg);
     void onSocketTest(WTestString msg);
-	
 };
 
 #endif // CORAX_H

@@ -3,3 +3,4 @@ project(lorgar)
 
 add_subdirectory(css)
 configure_file(index.html index.html)
+configure_file(favicon.ico favicon.ico COPYONLY)

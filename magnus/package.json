@@ -9,6 +9,10 @@
     "express": "*",
     "async": "*",
     "winston": "*",
-    "morgan": "*"
+    "morgan": "*",
+    "nconf": "*",
+    "errorhandler": "*",
+    "serve-favicon": "*",
+    "jade": "*"
   }
 }

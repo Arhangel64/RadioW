@@ -1,6 +1,11 @@
 cmake_minimum_required(VERSION 2.8.12)
 project(magnus)
 
+add_subdirectory(config)
+add_subdirectory(lib)
+add_subdirectory(middleware)
+add_subdirectory(views)
+
 configure_file(package.json package.json)
 configure_file(app.js app.js)
 

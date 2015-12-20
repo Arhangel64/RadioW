@@ -3,10 +3,10 @@
 
 #include <QtCore/QObject>
 
-#include "libWSocket/wsocket.h"
-#include "libWSocket/wserver.h"
+#include <wSocket/wsocket.h>
+#include <wSocket/wserver.h>
 
-#include "libWSocket/wEvent/wteststring.h"
+#include <wSocket/wEvent/wteststring.h>
 
 class Corax: public QObject
 {

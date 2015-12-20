@@ -41,7 +41,7 @@ void WSocket::close()
     if (state != Disconnected && state != Disconnecting) {
         state = Disconnecting;
         socket->close();
-	emit t_ev(QString("socket closing"));
+        emit t_ev(QString("socket closing"));
     }
 }
 

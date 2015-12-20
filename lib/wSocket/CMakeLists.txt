@@ -19,3 +19,4 @@ target_link_libraries(wSocket Qt5::Core)
 target_link_libraries(wSocket Qt5::Network)
 target_link_libraries(wSocket Qt5::WebSockets)
 target_link_libraries(wSocket wEvent)
+

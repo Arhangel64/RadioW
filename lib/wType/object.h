@@ -15,7 +15,8 @@ namespace W {
         {
             string,
             vocabulary,
-            uint64
+            uint64,
+            address
         };
         
         typedef uint32_t size_type;

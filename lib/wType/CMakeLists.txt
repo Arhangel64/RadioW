@@ -7,6 +7,7 @@ set(HEADERS
     string.h
     vocabulary.h
     uint64.h
+    address.h
 )
 
 set(SOURCES
@@ -15,6 +16,7 @@ set(SOURCES
     string.cpp
     vocabulary.cpp
     uint64.cpp
+    address.cpp
 )
 
 add_library(wType ${HEADERS} ${SOURCES})

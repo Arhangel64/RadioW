@@ -9,6 +9,7 @@
 #include <wType/string.h>
 #include <wType/vocabulary.h>
 #include <wType/uint64.h>
+#include <wType/address.h>
 
 class TestTypes : public CxxTest::TestSuite
 {
@@ -86,6 +87,36 @@ public:
         TS_ASSERT_EQUALS(val2, val1);
         
         delete deserialized;
+    }
+    void testAddressOperators()
+    {
+        W::Address a1({U"hey"});
+        W::Address a2({U"hey", U"you"});
+        W::Address a3({U"hey1", U"you"});
+        W::Address a4({U"hey", U"you1"});
+        
+        TS_ASSERT_EQUALS(a1, a1);
+        TS_ASSERT_DIFFERS(a1, a2);
+        TS_ASSERT_LESS_THAN(a1, a2);
+        TS_ASSERT_LESS_THAN(a2, a3);
+        TS_ASSERT_LESS_THAN(a2, a4);
+        TS_ASSERT_LESS_THAN(a4, a3);
+    }
+    void testAddressSerialization()
+    {
+        W::Address addr({U"hello", U"world"});
+        
+        W::ByteArray bytes;
+        bytes << addr;
+        
+        W::Object *obj = W::Object::fromByteArray(bytes);
+        W::Address *addrd = static_cast<W::Address*>(obj);
+        
+        TS_ASSERT_EQUALS(addr, *addrd);
+        TS_TRACE(addr.toString());
+        TS_TRACE(addrd->toString());
+        
+        delete addrd;
     }
 };
 

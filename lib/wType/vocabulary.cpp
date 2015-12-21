@@ -152,7 +152,7 @@ const W::Object& W::Vocabulary::at(const W::String& key) const
     
     if (itr == data->end())
     {
-        //TODO exception
+        throw NoElement(key);
     }
     
     return *(itr->second);

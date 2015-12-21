@@ -3,6 +3,7 @@
 #include "string.h"
 #include "vocabulary.h"
 #include "uint64.h"
+#include "address.h"
 //#include <stdint.h>
 
 W::Object::Object()
@@ -33,6 +34,10 @@ W::Object* W::Object::fromByteArray(ByteArray& in)
             
         case uint64:
             answer = new Uint64();
+            break;
+            
+        case address:
+            answer = new Address();
             break;
     }
     

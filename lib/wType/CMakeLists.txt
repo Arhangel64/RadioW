@@ -8,6 +8,7 @@ set(HEADERS
     vocabulary.h
     uint64.h
     address.h
+    boolean.h
 )
 
 set(SOURCES
@@ -17,6 +18,7 @@ set(SOURCES
     vocabulary.cpp
     uint64.cpp
     address.cpp
+    boolean.cpp
 )
 
 add_library(wType ${HEADERS} ${SOURCES})

@@ -4,6 +4,7 @@
 #include "vocabulary.h"
 #include "uint64.h"
 #include "address.h"
+#include "boolean.h"
 //#include <stdint.h>
 
 W::Object::Object()
@@ -38,6 +39,10 @@ W::Object* W::Object::fromByteArray(ByteArray& in)
             
         case address:
             answer = new Address();
+            break;
+            
+        case boolean:
+            answer = new Boolean();
             break;
     }
     

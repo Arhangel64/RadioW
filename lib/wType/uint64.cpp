@@ -1,5 +1,6 @@
 #include "uint64.h"
 #include <string>
+
 W::Uint64::Uint64():
     Object(),
     data(0)

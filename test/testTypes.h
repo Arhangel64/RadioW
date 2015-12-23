@@ -10,6 +10,7 @@
 #include <wType/vocabulary.h>
 #include <wType/uint64.h>
 #include <wType/address.h>
+#include <wType/boolean.h>
 
 class TestTypes : public CxxTest::TestSuite
 {
@@ -117,6 +118,46 @@ public:
         TS_TRACE(addrd->toString());
         
         delete addrd;
+    }
+    void testBooleanSerialization()
+    {
+        W::Boolean a(true);
+        W::Boolean b(false);
+        W::Boolean c;
+        W::Boolean d;
+        c = false;
+        d = true;
+        
+        TS_ASSERT_EQUALS(a, true);
+        TS_ASSERT_EQUALS(b, false);
+        TS_ASSERT_EQUALS(c, false);
+        TS_ASSERT_EQUALS(d, true);
+        
+        W::ByteArray bytes;
+        bytes << a << b << c << d;
+        
+        W::Object *a_o = W::Object::fromByteArray(bytes);
+        W::Object *b_o = W::Object::fromByteArray(bytes);
+        W::Object *c_o = W::Object::fromByteArray(bytes);
+        W::Object *d_o = W::Object::fromByteArray(bytes);
+        
+        W::Boolean *ad = static_cast<W::Boolean*>(a_o);
+        W::Boolean *bd = static_cast<W::Boolean*>(b_o);
+        W::Boolean *cd = static_cast<W::Boolean*>(c_o);
+        W::Boolean *dd = static_cast<W::Boolean*>(d_o);
+        
+        TS_ASSERT_EQUALS(*ad, a);
+        TS_ASSERT_EQUALS(*bd, b);
+        TS_ASSERT_EQUALS(*cd, c);
+        TS_ASSERT_EQUALS(*dd, d);
+        
+        TS_TRACE(ad->toString());
+        TS_TRACE(bd->toString());
+        
+        delete ad;
+        delete bd;
+        delete cd;
+        delete dd;
     }
 };
 

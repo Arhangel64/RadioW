@@ -60,18 +60,20 @@ W::Object::StdStr W::Vocabulary::toString() const
 {
     StdStr result;
     
-    Map::const_iterator itr = data->begin();
+    Map::const_iterator itr;
+    Map::const_iterator beg = data->begin();
     Map::const_iterator end = data->end();
     
-    result += "{\n";
-    for (; itr != end; ++itr)
+    result += "{";
+    for (itr = beg; itr != end; ++itr)
     {
-        //result += "\t";
+        if (itr != beg)
+        {
+            result += ", ";
+        }
         result += itr->first.toString();
-        //result += ":\t";
         result += ": ";
         result += itr->second->toString();
-        result += "\n";
     }
     result += "}";
     
@@ -109,6 +111,8 @@ void W::Vocabulary::serialize(W::ByteArray& out) const
 
 void W::Vocabulary::deserialize(W::ByteArray& in)
 {
+    data->clear();
+    
     ByteArray::size_type length;
     in >> length;
     

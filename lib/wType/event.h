@@ -3,6 +3,7 @@
 
 #include "object.h"
 #include "address.h"
+#include "uint64.h"
 #include "boolean.h"
 
 namespace W
@@ -12,7 +13,7 @@ namespace W
     {
     public:
         Event();
-        Event(const Address& p_addr, const Object& p_data, bool p_system = false);
+        Event(const Address& p_addr, const Object& p_data, uint64_t p_sender, bool p_system = false);
         Event(const Event& original);
         ~Event();
         
@@ -25,9 +26,18 @@ namespace W
         
         static const objectType type = event;
         
+        void serialize(ByteArray& out) const;
+        void deserialize(ByteArray& in);
+        
+        bool isSystem() const;
+        const Address& getDestination() const;
+        uint64_t getSenderId() const;
+        const Object& getData() const;
+        
     private:
         Boolean system;
         Address destination;
+        Uint64 sender;
         Object* data;
         
     };

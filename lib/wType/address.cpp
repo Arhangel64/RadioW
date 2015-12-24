@@ -95,6 +95,8 @@ void W::Address::serialize(W::ByteArray& out) const
 
 void W::Address::deserialize(W::ByteArray& in)
 {
+    data->clear();
+    
     size_type length;
     in >> length;
     

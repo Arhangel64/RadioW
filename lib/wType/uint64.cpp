@@ -98,3 +98,8 @@ void W::Uint64::deserialize(W::ByteArray& in)
     
     data = (h << 32) | l;
 }
+
+W::Uint64::operator uint64_t() const
+{
+    return data;
+}

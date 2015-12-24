@@ -81,6 +81,8 @@ void W::String::serialize(W::ByteArray& out) const
 
 void W::String::deserialize(W::ByteArray& in)
 {
+    data->clear();
+    
     ByteArray::size_type length;
     in >> length;
     

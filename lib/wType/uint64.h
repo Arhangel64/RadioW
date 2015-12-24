@@ -35,6 +35,8 @@ namespace W
         void serialize(ByteArray& out) const;
         void deserialize(ByteArray& in);
         
+        operator uint64_t() const;
+        
     private:
         uint64_t data;
         

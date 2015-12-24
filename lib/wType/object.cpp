@@ -5,6 +5,7 @@
 #include "uint64.h"
 #include "address.h"
 #include "boolean.h"
+#include "event.h"
 //#include <stdint.h>
 
 W::Object::Object()
@@ -43,6 +44,10 @@ W::Object* W::Object::fromByteArray(ByteArray& in)
             
         case boolean:
             answer = new Boolean();
+            break;
+            
+        case event:
+            answer = new Event();
             break;
     }
     

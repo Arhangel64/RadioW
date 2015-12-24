@@ -9,6 +9,7 @@ set(HEADERS
     uint64.h
     address.h
     boolean.h
+    event.h
 )
 
 set(SOURCES
@@ -19,6 +20,7 @@ set(SOURCES
     uint64.cpp
     address.cpp
     boolean.cpp
+    event.cpp
 )
 
 add_library(wType ${HEADERS} ${SOURCES})

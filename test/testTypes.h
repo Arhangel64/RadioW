@@ -11,6 +11,7 @@
 #include <wType/uint64.h>
 #include <wType/address.h>
 #include <wType/boolean.h>
+#include <wType/event.h>
 
 class TestTypes : public CxxTest::TestSuite
 {
@@ -158,6 +159,34 @@ public:
         delete bd;
         delete cd;
         delete dd;
+    }
+    void testEventSerialization()
+    {
+        W::Address dest({U"to", U"somebody"});
+        uint64_t id = 5;
+        W::Vocabulary dat;
+        W::String val(U"some value");
+        W::Uint64 val2(7887198479813);
+        dat.insert(U"key1", val);
+        dat.insert(U"key2", val2);
+        
+        W::Event ev(dest, dat, id);
+        
+        W::ByteArray bytes;
+        
+        bytes << ev;
+        
+        W::Object *obj = W::Object::fromByteArray(bytes);
+        W::Event *evd = static_cast<W::Event*>(obj);
+        
+        TS_ASSERT_EQUALS(evd->isSystem(), false);
+        TS_ASSERT_EQUALS(evd->getDestination(), dest);
+        const W::Vocabulary vcd = static_cast<const W::Vocabulary&>(evd->getData());
+        TS_ASSERT_EQUALS(static_cast<const W::String&>(vcd.at(U"key1")), val);
+        TS_ASSERT_EQUALS(static_cast<const W::Uint64&>(vcd.at(U"key2")), val2);
+        TS_ASSERT_EQUALS(evd->getSenderId(), id);
+        
+        delete obj;
     }
 };
 

@@ -19,7 +19,7 @@ set(MAGNUS_DIR ${CMAKE_BINARY_DIR}/magnus)
 set(LORGAR_DIR ${MAGNUS_DIR}/public)
 
 add_subdirectory(lib)
-add_subdirectory(corax ${CORAX_DIR})
+#add_subdirectory(corax ${CORAX_DIR})
 add_subdirectory(magnus ${MAGNUS_DIR})
 add_subdirectory(lorgar ${LORGAR_DIR})
 

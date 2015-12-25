@@ -3,7 +3,7 @@
 
 #include <QtCore/QObject>
 
-#include <wSocket/wsocket.h>
+#include <wSocket/socket.h>
 #include <wSocket/wserver.h>
 
 #include <wSocket/wEvent/wteststring.h>

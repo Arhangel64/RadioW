@@ -8,15 +8,18 @@ find_package(Qt5WebSockets REQUIRED)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
 
-set(LWS wserver.cpp wsocket.cpp)
-add_library(wSocket SHARED ${LWS})
+set(HEADERS
+    socket.h
+)
 
-target_include_directories(wSocket PUBLIC wEvent)
+set(SOURCES
+    socket.cpp
+)
 
-add_subdirectory(wEvent)
+add_library(wSocket ${HEADERS} ${SOURCES})
 
 target_link_libraries(wSocket Qt5::Core)
 target_link_libraries(wSocket Qt5::Network)
 target_link_libraries(wSocket Qt5::WebSockets)
-target_link_libraries(wSocket wEvent)
 
+target_link_libraries(wSocket wType)

@@ -31,6 +31,9 @@ namespace W{
         bool operator==(const String& other) const;
         bool operator!=(const String& other) const;
         
+        bool operator==(const char32_t* other) const;
+        bool operator!=(const char32_t* other) const;
+        
         static const objectType type = string;
         
         void serialize(ByteArray& out) const;

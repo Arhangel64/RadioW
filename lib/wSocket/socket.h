@@ -7,6 +7,11 @@
 
 #include <wType/string.h>
 #include <wType/uint64.h>
+#include <wType/bytearray.h>
+#include <wType/event.h>
+#include <wType/vocabulary.h>
+
+#include <utils/exception.h>
 
 namespace W
 {
@@ -28,10 +33,18 @@ namespace W
         explicit Socket(const String& p_name, QObject* parent = 0);
         ~Socket();
         
+        void send(Event ev) const;
+        
     private:
         explicit Socket(const String& p_name, QWebSocket *p_socket, QObject *parent = 0);
         
         void setHandlers();
+        void setId(const Uint64& p_id);
+        
+        void setRemoteName();
+        
+        static ByteArray* QtoW(const QByteArray& in);
+        static QByteArray* WtoQ(const ByteArray& in);
         
         bool serverCreated;
         State state;
@@ -47,6 +60,16 @@ namespace W
         void onSocketConnected();
         void onSocketDisconnected();
         void onBinaryMessageReceived(const QByteArray& ba);
+        
+    private:
+        class ErrorIdSetting: 
+            public Utils::Exception
+        {
+        public:
+            ErrorIdSetting():Exception(){}
+            
+            std::string getMessage() const{return "An attempt to set id to the socket not in connecting state";}
+        };
         
     };
 }

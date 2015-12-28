@@ -10,15 +10,26 @@ W::Event::Event():
 
 }
 
-W::Event::Event(const W::Address& p_addr, const W::Object& p_data, uint64_t p_sender, bool p_system):
+W::Event::Event(const W::Address& p_addr, const W::Object& p_data, bool p_system):
     Object(),
     system(p_system),
     destination(p_addr),
-    sender(p_sender),
+    sender(0),
     data(p_data.copy())
 {
 
 }
+
+W::Event::Event(const W::Address& p_addr, W::Object* p_data, bool p_system):
+    Object(),
+    system(p_system),
+    destination(p_addr),
+    sender(0),
+    data(p_data)
+{
+
+}
+
 
 W::Event::Event(const W::Event& original):
     Object(),
@@ -93,8 +104,11 @@ W::Object::StdStr W::Event::toString() const
 void W::Event::serialize(W::ByteArray& out) const
 {
     system.serialize(out);
-    destination.serialize(out);
-    sender.serialize(out);
+    if (!system)
+    {
+        destination.serialize(out);
+        sender.serialize(out);
+    }
     
     out << *data;
 }
@@ -102,8 +116,11 @@ void W::Event::serialize(W::ByteArray& out) const
 void W::Event::deserialize(W::ByteArray& in)
 {
     system.deserialize(in);
-    destination.deserialize(in);
-    sender.deserialize(in);
+    if (!system)
+    {
+        destination.deserialize(in);
+        sender.deserialize(in);
+    }
     
     delete data;
     
@@ -129,3 +146,9 @@ const W::Object& W::Event::getData() const
 {
     return *data;
 }
+
+void W::Event::setSenderId(const W::Uint64& senderId)
+{
+    sender = senderId;
+}
+

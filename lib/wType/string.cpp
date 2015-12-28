@@ -128,3 +128,13 @@ bool W::String::operator==(const W::String& other) const
 {
     return (*data) == *(other.data);
 }
+
+bool W::String::operator==(const char32_t* other) const
+{
+    return *data == other;
+}
+
+bool W::String::operator!=(const char32_t* other) const
+{
+    return *data != other;
+}

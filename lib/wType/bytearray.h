@@ -1,7 +1,7 @@
 #ifndef BYTEARRAY_H
 #define BYTEARRAY_H
 
-#include <deque>
+#include <list>
 #include <stdint.h>
 
 namespace W 
@@ -10,7 +10,8 @@ namespace W
     
     class ByteArray
     {
-        typedef std::deque<uint8_t> Container;
+        friend class Socket;
+        typedef std::list<uint8_t> Container;
         
     public:
         typedef uint32_t size_type;

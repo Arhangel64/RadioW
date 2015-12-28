@@ -13,7 +13,8 @@ namespace W
     {
     public:
         Event();
-        Event(const Address& p_addr, const Object& p_data, uint64_t p_sender, bool p_system = false);
+        Event(const Address& p_addr, const Object& p_data, bool p_system = false);
+        Event(const Address& p_addr, Object* p_data, bool p_system = false);
         Event(const Event& original);
         ~Event();
         
@@ -33,6 +34,8 @@ namespace W
         const Address& getDestination() const;
         uint64_t getSenderId() const;
         const Object& getData() const;
+        
+        void setSenderId(const Uint64& senderId);
         
     private:
         Boolean system;

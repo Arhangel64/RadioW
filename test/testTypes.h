@@ -163,14 +163,15 @@ public:
     void testEventSerialization()
     {
         W::Address dest({U"to", U"somebody"});
-        uint64_t id = 5;
+        W::Uint64 id(5);
         W::Vocabulary dat;
         W::String val(U"some value");
         W::Uint64 val2(7887198479813);
         dat.insert(U"key1", val);
         dat.insert(U"key2", val2);
         
-        W::Event ev(dest, dat, id);
+        W::Event ev(dest, dat);
+        ev.setSenderId(id);
         
         W::ByteArray bytes;
         

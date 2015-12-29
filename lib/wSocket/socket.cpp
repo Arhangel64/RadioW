@@ -1,5 +1,10 @@
 #include "socket.h"
 
+#include <iostream>
+
+using std::cout;
+using std::endl;
+
 W::Socket::Socket(const W::String& p_name, QObject* parent): 
     QObject(parent),
     serverCreated(false),
@@ -13,17 +18,18 @@ W::Socket::Socket(const W::String& p_name, QObject* parent):
     setHandlers();
 }
 
-W::Socket::Socket(const W::String& p_name, QWebSocket* p_socket, QObject* parent): 
+W::Socket::Socket(const W::String& p_name, QWebSocket* p_socket, uint64_t p_id, QObject* parent): 
     QObject(parent),
     serverCreated(true),
     state(connecting_s),
     socket(p_socket),
-    id(0),
+    id(p_id),
     name(p_name),
     remoteName()
 {
     socket->setParent(this);
     setHandlers();
+    setRemoteId();
 }
 
 W::Socket::~Socket()
@@ -31,15 +37,38 @@ W::Socket::~Socket()
 
 }
 
-void W::Socket::send(W::Event ev) const
+void W::Socket::open(const W::String& addr, const W::Uint64& port)
 {
-    ev.setSenderId(id);
-    ByteArray *wba;
-    *wba << ev;
+    if (state == disconnected_s) {
+        String::StdStr url_str("ws://" + addr.toString() + ":" + port.toString());
+        QUrl url(url_str.c_str());
+        state = connecting_s;
+        socket->open(url);
+    }
+}
+
+void W::Socket::close()
+{
+    if (state != disconnected_s && state != disconnecting_s) {
+        state = disconnecting_s;
+        socket->close();
+    }
+}
+
+void W::Socket::send(W::Event* ev) const
+{
+    ev->setSenderId(id);
+    ByteArray *wba = new ByteArray();
+    *wba << *ev;
     QByteArray *ba = WtoQ(*wba);
     delete wba;
     socket->sendBinaryMessage(*ba);
     delete ba;
+}
+
+W::Uint64 W::Socket::getId()
+{
+    return id;
 }
 
 void W::Socket::setHandlers() {
@@ -50,7 +79,7 @@ void W::Socket::setHandlers() {
 
 void W::Socket::onSocketConnected()
 {
-
+    
 }
 
 void W::Socket::onSocketDisconnected()
@@ -74,11 +103,16 @@ void W::Socket::onBinaryMessageReceived(const QByteArray& ba)
         if (command == U"setId")
         {
             setId(static_cast<const Uint64&>(vc.at(U"id")));
+            setRemoteName();
             
         }
-        else if (command == U"setRemoteName")
+        else if (command == U"setName")
         {
-            
+            setName(static_cast<const String&>(vc.at(U"name")));
+            if (serverCreated)
+            {
+                setRemoteName();
+            }
         }
     }
     else
@@ -94,7 +128,6 @@ void W::Socket::setId(const W::Uint64& p_id)
     if (id == 0 && state == connecting_s)
     {
         id = p_id;
-        setRemoteName();
     }
     else
     {
@@ -102,18 +135,48 @@ void W::Socket::setId(const W::Uint64& p_id)
     }
 }
 
+void W::Socket::setRemoteId()
+{
+    String command(U"setId");
+    Vocabulary *vc = new Vocabulary();
+    
+    vc->insert(U"command", command);
+    vc->insert(U"id", id);
+    
+    Address addr;
+    Event *ev = new Event(addr, vc, true);
+    send(ev);
+    delete ev;
+}
+
 void W::Socket::setRemoteName()
 {
-    String command(U"setRemoteName");
-    Vocabulary *vc;
+    String command(U"setName");
+    Vocabulary *vc = new Vocabulary();
     
     vc->insert(U"command", command);
     vc->insert(U"name", name);
     
     Address addr;
-    Event ev(addr, vc, true);
+    Event *ev = new Event(addr, vc, true);
     send(ev);
+    delete ev;
 }
+
+void W::Socket::setName(const W::String& p_name)
+{
+    if (id != 0 && state == connecting_s)
+    {
+        remoteName = p_name;
+        state = connected_s;
+        emit connected();
+    }
+    else
+    {
+        throw ErrorNameSetting();
+    }
+}
+
 
 W::ByteArray* W::Socket::QtoW(const QByteArray& in)
 {

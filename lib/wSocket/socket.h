@@ -19,7 +19,7 @@ namespace W
         public QObject
     {
         Q_OBJECT
-        friend class WServer;
+        friend class Server;
         
         enum State
         {
@@ -33,15 +33,19 @@ namespace W
         explicit Socket(const String& p_name, QObject* parent = 0);
         ~Socket();
         
-        void send(Event ev) const;
+        void send(Event* ev) const;
+        void open(const String& addr, const Uint64& port);
+        void close();
+        Uint64 getId();
         
     private:
-        explicit Socket(const String& p_name, QWebSocket *p_socket, QObject *parent = 0);
+        explicit Socket(const String& p_name, QWebSocket *p_socket, uint64_t p_id, QObject *parent = 0);
         
         void setHandlers();
         void setId(const Uint64& p_id);
-        
+        void setRemoteId();
         void setRemoteName();
+        void setName(const String& p_name);
         
         static ByteArray* QtoW(const QByteArray& in);
         static QByteArray* WtoQ(const ByteArray& in);
@@ -54,6 +58,7 @@ namespace W
         String remoteName;
         
     signals:
+        void connected();
         void disconnected();
         
     private slots:
@@ -69,6 +74,15 @@ namespace W
             ErrorIdSetting():Exception(){}
             
             std::string getMessage() const{return "An attempt to set id to the socket not in connecting state";}
+        };
+        
+        class ErrorNameSetting: 
+            public Utils::Exception
+        {
+        public:
+            ErrorNameSetting():Exception(){}
+            
+            std::string getMessage() const{return "An attempt to set name to the socket not in connecting state";}
         };
         
     };

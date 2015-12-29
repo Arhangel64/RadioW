@@ -10,10 +10,12 @@ set(CMAKE_AUTOMOC ON)
 
 set(HEADERS
     socket.h
+    server.h
 )
 
 set(SOURCES
     socket.cpp
+    server.cpp
 )
 
 add_library(wSocket ${HEADERS} ${SOURCES})

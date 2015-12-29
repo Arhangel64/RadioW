@@ -4,9 +4,10 @@
 #include <QtCore/QObject>
 
 #include <wSocket/socket.h>
-#include <wSocket/wserver.h>
+#include <wSocket/server.h>
 
-#include <wSocket/wEvent/wteststring.h>
+#include <wType/string.h>
+#include <wType/uint64.h>
 
 class Corax: public QObject
 {
@@ -16,17 +17,12 @@ public:
     Corax(QObject *parent = 0);
     
 private:
-    WServer *server;
-    WSocket *socket;
+    W::Server *server;
+    W::Socket *socket;
     
 public slots:
-    void onNewConnection(WSocket *socket);
+    void onNewConnection(const W::Socket& socket);
     void onSocketConnected();
-    void onSocketEvent(const QString& msg);
-    void onServerEvent(const QString& msg);
-    
-    void onServerTest(WTestString msg);
-    void onSocketTest(WTestString msg);
 };
 
 #endif // CORAX_H

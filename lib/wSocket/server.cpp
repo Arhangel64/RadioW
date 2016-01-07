@@ -56,13 +56,31 @@ void W::Server::onNewConnection()
 
 void W::Server::onSocketConnected() {
     Socket* socket = static_cast<Socket*>(sender());
+    String r_name = socket->getRemoteName();
+    
+    p_map::iterator itr = peers.find(r_name);
+    if (itr == peers.end())
+    {
+        std::pair<p_map::iterator, bool> elem = peers.emplace(r_name, std::map<uint64_t, Socket*>());
+        if (!elem.second)
+        {
+            throw 1; //TODO
+        }
+        itr = elem.first;
+    }
+    itr->second.insert(std::make_pair(socket->getId(), socket));
     emit newConnection(*socket);
 }
 
 void W::Server::onSocketDisconnected() {
     Socket* socket = static_cast<Socket*>(sender());
     std::map<uint64_t, Socket*>::const_iterator it = connections.find(socket->getId());
+    p_map::const_iterator itn = peers.find(socket->getRemoteName());
     connections.erase(it);
+    if (itn != peers.end())
+    {
+        peers.erase(itn);
+    }
     socket->deleteLater();
 }
 

@@ -33,10 +33,12 @@ namespace W
         explicit Socket(const String& p_name, QObject* parent = 0);
         ~Socket();
         
-        void send(Event* ev) const;
+        void send(const Event& ev) const;
         void open(const String& addr, const Uint64& port);
         void close();
+        
         Uint64 getId();
+        String getRemoteName() const;
         
     private:
         explicit Socket(const String& p_name, QWebSocket *p_socket, uint64_t p_id, QObject *parent = 0);
@@ -60,6 +62,11 @@ namespace W
     signals:
         void connected();
         void disconnected();
+        void message(const Event&);
+        void proxy(const Event&);
+        
+    public slots:
+        void cantDeliver(const Event& event) const;
         
     private slots:
         void onSocketConnected();

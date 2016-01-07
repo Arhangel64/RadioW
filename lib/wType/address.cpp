@@ -153,3 +153,13 @@ W::Address& W::Address::operator+=(const W::String::u32string& other)
     String hop(other);
     operator+=(hop);
 }
+
+const W::String& W::Address::front() const
+{
+    return data->front();
+}
+
+const W::String& W::Address::back() const
+{
+    return data->back();
+}

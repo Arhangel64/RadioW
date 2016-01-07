@@ -45,6 +45,9 @@ namespace W
         
         static const objectType type = address;
         
+        const String& front() const;
+        const String& back() const;
+        
     private:
         List *data;
     };

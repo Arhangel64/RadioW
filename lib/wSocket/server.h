@@ -12,6 +12,8 @@
 
 #include "socket.h"
 
+#include <utils/exception.h>
+
 namespace W
 {
     class Server:
@@ -26,8 +28,11 @@ namespace W
         void stop();
         
     private:
+        typedef std::map<String, std::map<uint64_t, Socket*>> p_map;
+        
         uint64_t lastId;
         std::map<uint64_t, Socket*> connections;
+        p_map peers;
         QWebSocketServer* server;
         String name;
         
@@ -42,6 +47,16 @@ namespace W
         
         void onSocketConnected();
         void onSocketDisconnected();
+        
+    private:
+        class HandshakeNameError: 
+            public Utils::Exception
+        {
+        public:
+            HandshakeNameError():Exception(){}
+            
+            std::string getMessage() const{return "Name of connected socket haven't been found, but registering returned an error";}
+        };
     };
 }
 

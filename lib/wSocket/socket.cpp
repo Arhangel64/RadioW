@@ -55,11 +55,10 @@ void W::Socket::close()
     }
 }
 
-void W::Socket::send(W::Event* ev) const
+void W::Socket::send(const W::Event& ev) const
 {
-    ev->setSenderId(id);
     ByteArray *wba = new ByteArray();
-    *wba << *ev;
+    *wba << ev;
     QByteArray *ba = WtoQ(*wba);
     delete wba;
     socket->sendBinaryMessage(*ba);
@@ -69,6 +68,11 @@ void W::Socket::send(W::Event* ev) const
 W::Uint64 W::Socket::getId()
 {
     return id;
+}
+
+W::String W::Socket::getRemoteName() const
+{
+    return remoteName; //TODO may be throw the exception, when socket is not connected?
 }
 
 void W::Socket::setHandlers() {
@@ -85,6 +89,7 @@ void W::Socket::onSocketConnected()
 void W::Socket::onSocketDisconnected()
 {
     id = W::Uint64(0);
+    remoteName = String(U"");
     state = disconnected_s;
     emit disconnected();
 }
@@ -117,7 +122,23 @@ void W::Socket::onBinaryMessageReceived(const QByteArray& ba)
     }
     else
     {
-        
+        const Address& addr = ev->getDestination();
+        const String& first = addr.front();
+        if (name == first)
+        {
+            emit message(*ev);
+        }
+        else
+        {
+            if (serverCreated)
+            {
+                emit proxy(*ev);
+            }
+            else
+            {
+                cantDeliver(*ev);
+            }
+        }
     }
     
     delete ev;
@@ -144,9 +165,9 @@ void W::Socket::setRemoteId()
     vc->insert(U"id", id);
     
     Address addr;
-    Event *ev = new Event(addr, vc, true);
+    Event ev(addr, vc, true);
+    ev.setSenderId(id);
     send(ev);
-    delete ev;
 }
 
 void W::Socket::setRemoteName()
@@ -158,9 +179,10 @@ void W::Socket::setRemoteName()
     vc->insert(U"name", name);
     
     Address addr;
-    Event *ev = new Event(addr, vc, true);
+    Event ev(addr, vc, true);
+    ev.setSenderId(id);
     send(ev);
-    delete ev;
+    
 }
 
 void W::Socket::setName(const W::String& p_name)
@@ -208,3 +230,16 @@ QByteArray* W::Socket::WtoQ(const ByteArray& in)
     return out;
 }
 
+void W::Socket::cantDeliver(const W::Event& event) const
+{
+    String command(U"cantDeliver");
+    Vocabulary *vc = new Vocabulary();
+    
+    vc->insert(U"command", command);
+    vc->insert(U"event", event);
+    
+    Address addr;
+    Event ev(addr, vc, true);
+    ev.setSenderId(id);
+    send(ev);
+}

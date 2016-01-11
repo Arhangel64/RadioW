@@ -1,4 +1,4 @@
-#ifndef TESETYPES_H
+#ifndef TESTTYPES_H
 #define TESTTYPES_H
 
 #include <cxxtest/TestSuite.h>

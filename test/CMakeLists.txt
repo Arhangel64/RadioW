@@ -1,16 +1,20 @@
 cmake_minimum_required(VERSION 2.8.12)
 project(test)
 
-set(HEADERS
-    testTypes.h
-)
-
 find_package(CxxTest)
 if(CXXTEST_FOUND)
     include_directories(${CXXTEST_INCLUDE_DIR})
     enable_testing()
-    CXXTEST_ADD_TEST(unittest unittest.cpp ${CMAKE_CURRENT_SOURCE_DIR}/${HEADERS})
-    target_link_libraries(unittest wType)
+    CXXTEST_ADD_TEST(testtypes testtypes.cpp ${CMAKE_CURRENT_SOURCE_DIR}/testTypes.h)
+    target_link_libraries(testtypes wType)
+    
+    find_package(Qt5Core REQUIRED)
+    find_package(Qt5Network REQUIRED)
+
+    set(CMAKE_INCLUDE_CURRENT_DIR ON)
+    set(CMAKE_AUTOMOC ON)
+    CXXTEST_ADD_TEST(testsocket testsocket.cpp ${CMAKE_CURRENT_SOURCE_DIR}/testSocket.h)
+    target_link_libraries(testsocket Qt5::Core)
     
 endif()
 

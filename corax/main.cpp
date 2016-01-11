@@ -1,4 +1,3 @@
-#include <iostream>
 #include <QtCore/QCoreApplication>
 
 #include "corax.h"

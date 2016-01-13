@@ -154,6 +154,47 @@ W::Address& W::Address::operator+=(const W::String::u32string& other)
     operator+=(hop);
 }
 
+W::Address W::Address::operator>>(W::Object::size_type count) const
+{
+    W::Address res;
+    if (count < size())
+    { 
+        List::const_iterator itr = data->end();
+        for (size_type i = 0; i != count; ++i)
+        {
+            itr--;
+        }
+        List::const_iterator beg = data->begin();
+        res.data->insert(res.data->end(), beg, itr);
+    }
+    return res;
+}
+
+W::Address W::Address::operator<<(W::Object::size_type count) const
+{
+    W::Address res;
+    if (count < size())
+    { 
+        List::const_iterator itr = data->begin();
+        for (size_type i = 0; i != count; ++i)
+        {
+            itr++;
+        }
+        List::const_iterator end = data->end();
+        res.data->insert(res.data->end(), itr, end);
+    }
+    return res;
+}
+
+W::Address W::Address::operator+(const W::Address& other) const
+{
+    W::Address res;
+    res += *this;
+    res += other;
+    
+    return res;
+}
+
 const W::String& W::Address::front() const
 {
     return data->front();

@@ -43,6 +43,10 @@ namespace W
         Address& operator+=(const String& other);
         Address& operator+=(const String::u32string& other);
         
+        Address operator>>(size_type count) const;
+        Address operator<<(size_type count) const;
+        Address operator+(const Address& other) const;
+        
         static const objectType type = address;
         
         const String& front() const;

@@ -138,3 +138,9 @@ bool W::String::operator!=(const char32_t* other) const
 {
     return *data != other;
 }
+
+W::String::operator u32string() const
+{
+    return *data;
+}
+

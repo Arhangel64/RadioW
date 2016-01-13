@@ -36,6 +36,8 @@ namespace W{
         
         static const objectType type = string;
         
+        operator u32string() const;
+        
         void serialize(ByteArray& out) const;
         void deserialize(ByteArray& in);
         

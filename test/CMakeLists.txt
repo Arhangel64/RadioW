@@ -15,6 +15,7 @@ if(CXXTEST_FOUND)
     set(CMAKE_AUTOMOC ON)
     CXXTEST_ADD_TEST(testsocket testsocket.cpp ${CMAKE_CURRENT_SOURCE_DIR}/testSocket.h)
     target_link_libraries(testsocket Qt5::Core)
+    target_link_libraries(testsocket wSocket)
     
 endif()
 

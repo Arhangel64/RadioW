@@ -39,6 +39,7 @@ namespace W
         
         Uint64 getId();
         String getRemoteName() const;
+        String getName() const;
         
     private:
         explicit Socket(const String& p_name, QWebSocket *p_socket, uint64_t p_id, QObject *parent = 0);
@@ -62,8 +63,8 @@ namespace W
     signals:
         void connected();
         void disconnected();
-        void message(const Event&);
-        void proxy(const Event&);
+        void message(const W::Event&);
+        void proxy(const W::Event&);
         
     public slots:
         void cantDeliver(const Event& event) const;

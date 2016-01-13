@@ -75,6 +75,11 @@ W::String W::Socket::getRemoteName() const
     return remoteName; //TODO may be throw the exception, when socket is not connected?
 }
 
+W::String W::Socket::getName() const
+{
+    return name;
+}
+
 void W::Socket::setHandlers() {
     connect(socket, SIGNAL(connected()), SLOT(onSocketConnected()));
     connect(socket, SIGNAL(disconnected()), SLOT(onSocketDisconnected()));
@@ -122,23 +127,25 @@ void W::Socket::onBinaryMessageReceived(const QByteArray& ba)
     }
     else
     {
-        const Address& addr = ev->getDestination();
-        const String& first = addr.front();
-        if (name == first)
-        {
-            emit message(*ev);
-        }
-        else
-        {
-            if (serverCreated)
-            {
-                emit proxy(*ev);
-            }
-            else
-            {
-                cantDeliver(*ev);
-            }
-        }
+        emit message(*ev);
+        
+//         const Address& addr = ev->getDestination();
+//         const String& first = addr.front();
+//         if (name == first)
+//         {
+//             emit message(*ev);
+//         }
+//         else
+//         {
+//             if (serverCreated)
+//             {
+//                 emit proxy(*ev);
+//             }
+//             else
+//             {
+//                 cantDeliver(*ev);
+//             }
+//         }
     }
     
     delete ev;

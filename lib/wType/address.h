@@ -39,6 +39,9 @@ namespace W
         bool operator==(const Address& other) const;
         bool operator!=(const Address& other) const;
         
+        bool begins(const Address& other) const;
+        bool ends(const Address& other) const;
+        
         Address& operator+=(const Address& other);
         Address& operator+=(const String& other);
         Address& operator+=(const String::u32string& other);

@@ -53,7 +53,7 @@ void W::Dispatcher::unregisterDispatcher(W::Dispatcher* dp)
         W::Address addr;
         dp->setAbsoluteAddress(addr);
         disconnect(this, SIGNAL(absoluteAddressChanged(const W::Address&)), dp, SLOT(onParentAbsoluteAddressChanged(const W::Address&)));
-    
+        
         nodes.erase(itr);
     }
     else

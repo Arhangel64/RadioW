@@ -104,6 +104,44 @@ public:
         TS_ASSERT_LESS_THAN(a2, a4);
         TS_ASSERT_LESS_THAN(a4, a3);
     }
+    void testAddressFunctions()
+    {
+        W::Address a1({U"1st", U"2nd", U"3rd", U"4th"});
+        W::Address a2 = a1 >> 1;
+        W::Address a3 = a1 << 1;
+        
+        W::Address ae;
+        W::Address a4({U"1st"});
+        W::Address a5({U"1st", U"2nd"});
+        
+        W::Address a6({U"1st", U"3rd"});
+        
+        W::Address a7({U"3rd", U"4th"});
+        W::Address a8({U"4th"});
+        
+        W::Address a2c({U"1st", U"2nd", U"3rd"});
+        W::Address a3c({U"2nd", U"3rd", U"4th"});
+        
+        TS_ASSERT_EQUALS(a2, a2c);
+        TS_ASSERT_EQUALS(a3, a3c);
+        
+        TS_ASSERT(a4.begins(ae));
+        TS_ASSERT(a4.ends(ae));
+        
+        TS_ASSERT(a1.begins(ae));
+        TS_ASSERT(a1.ends(ae));
+        
+        TS_ASSERT(a1.begins(a4));
+        TS_ASSERT(a1.begins(a5));
+        TS_ASSERT(!a1.begins(a6));
+        
+        TS_ASSERT(a1.ends(a7));
+        TS_ASSERT(a1.ends(a8));
+        TS_ASSERT(!a1.ends(a6));
+        
+        TS_ASSERT(a1.begins(a2c));
+        TS_ASSERT(a1.ends(a3c));
+    }
     void testAddressSerialization()
     {
         W::Address addr({U"hello", U"world"});

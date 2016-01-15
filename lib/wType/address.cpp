@@ -137,6 +137,56 @@ bool W::Address::operator>=(const W::Address& other) const
     return *data >= *other.data;
 }
 
+bool W::Address::begins(const W::Address& other) const
+{
+    if (other.size() > size())
+    {
+        return false;
+    }
+    
+    bool res = true;
+    
+    List::const_iterator itr_o = other.data->begin();
+    List::const_iterator end_o = other.data->end();
+    
+    List::const_iterator itr_i = data->begin();
+    
+    while (res == true && itr_o != end_o)
+    {
+        res = *itr_o == *itr_i;
+        
+        ++itr_o;
+        ++itr_i;
+    }
+    
+    return res;
+}
+
+bool W::Address::ends(const W::Address& other) const
+{
+    if (other.size() > size())
+    {
+        return false;
+    }
+    
+    bool res = true;
+    
+    List::const_reverse_iterator itr_o = other.data->rbegin();
+    List::const_reverse_iterator end_o = other.data->rend();
+    
+    List::const_reverse_iterator itr_i = data->rbegin();
+    
+    while (res == true && itr_o != end_o)
+    {
+        res = *itr_o == *itr_i;
+        
+        ++itr_o;
+        ++itr_i;
+    }
+    
+    return res;
+}
+
 W::Address& W::Address::operator+=(const W::Address& other)
 {
     data->insert(data->end(), other.data->begin(), other.data->end());

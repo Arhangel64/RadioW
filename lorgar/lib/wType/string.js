@@ -1,0 +1,57 @@
+"use strict";
+(function string_js() {
+    var moduleName = "lib/wType/string";
+    
+    var defineArray = [];
+    defineArray.push("lib/utils/class");
+    defineArray.push("lib/wType/char32");
+    
+    define(moduleName, defineArray, function string_module() {
+        var Class = require("lib/utils/class");
+        var Char32 = require("lib/wType/char32");
+        
+        var String = Class.inherit({
+            "className": "String",
+            "constructor": function(source) {
+                Class.fn.constructor.call(this);
+                
+                this._data = [];
+                this._parseSource(source || "");
+            },
+            "deserialize": function(ba) {
+                var size = ba.pop_front();
+                
+                for (var i = 0; i < size; ++i) {
+                    this._data.push(Char32.fromCharCode(ba.pop_front()));
+                }
+            },
+            "serialize": function(ba) {
+                ba.push_back(this.size());
+                
+                for (var i = 0; i < this._data.length; ++i) {
+                    ba.push_back(this._data[i].valueOf());
+                }
+            },
+            "size": function() {
+                return this._data.length;
+            },
+            "toString": function() {
+                var ret = "";
+                for (var i = 0; i < this._data.length; ++i) {
+                    ret += this._data[i].toString();
+                }
+                return ret;
+            },
+            "_parseSource": function(source) {
+                if (typeof source !== "string") {
+                    throw new Error("Wrong argument to construct String");
+                }
+                for (var i = 0; i < source.length; ++i) {
+                    this._data.push(Char32.fromChar(source[i]));
+                }
+            }
+        });
+        
+        return String;
+    });
+})();

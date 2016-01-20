@@ -42,6 +42,9 @@
                 }
                 return ret;
             },
+            "valueOf": function() {
+                return this.toString();
+            },
             "_parseSource": function(source) {
                 if (typeof source !== "string") {
                     throw new Error("Wrong argument to construct String");

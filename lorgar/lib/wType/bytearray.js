@@ -5,19 +5,27 @@
     var defineArray =[];
     defineArray.push("lib/wType/object");
     
+    defineArray.push("lib/wType/string");
+    defineArray.push("lib/wType/uint64");
+    defineArray.push("lib/wType/vocabulary");
+    //defineArray.push("lib/wType/object");
+    
     define(moduleName, defineArray, function bytearray_module() {
         var Object = require("lib/wType/object");
+        var String = require("lib/wType/string");
+        var Uint64 = require("lib/wType/uint64");
+        var Vocabulary = require("lib/wType/vocabulary");
         
         var ByteArray = Object.inherit({
             "className": "ByteArray",
-            "constructor": function(uint8arrr) {
+            "constructor": function(arr) {
                 Object.fn.constructor.call(this);
                 
-                if ((uint8arrr !== undefined) && !(uint8arrr instanceof Uint8Array)) {
+                if ((arr !== undefined) && !(uint8arrr instanceof Array)) {
                     throw new Error("Wrong argument to construct ByteArray");
                 }
                 
-                this._data = [];
+                this._data = arr || [];
             },
             "<<": function(obj) {
                 if (!(obj instanceof Object)) {
@@ -25,6 +33,29 @@
                 }
                 this.push_back(obj.getType());
                 obj.serialize(this);
+            },
+            ">>": function() {
+                var type = this.pop_front();
+                var Type;
+                
+                switch (type) {
+                    case Object.objectType.String:
+                        Type = String;
+                        break;
+                    case Object.objectType.Uint64:
+                        Type = Uint64;
+                        break;
+                    case Object.objectType.Vocabulary:
+                        Type = Vocabulary;
+                        break;
+                    default:
+                        throw new Error("Unsupported data type founf during deserialization");
+                }
+                
+                var obj = new Type();
+                obj.deserialize(this);
+                
+                return obj;
             },
             "size": function() {
                 return this._data.length;

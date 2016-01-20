@@ -12,10 +12,16 @@
             "className": "Char32",
             "constructor": function(source) {
                 Object.fn.constructor.call(this);
+                 
+                this._l = 0;
+                this._h = 0;
                 
                 this._parseSource(source || 0);
             },
             "toString": function() {
+                if (this._h != 0) {
+                    throw new Error("Don't know yet how to show char32 in javascript");
+                }
                 return String.fromCharCode(this._l);
             },
             "valueOf": function() {

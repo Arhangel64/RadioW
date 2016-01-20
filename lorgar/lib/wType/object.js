@@ -11,7 +11,7 @@
         var Object = Class.inherit({
             "className": "Object",
             "constructor": function() {
-                
+                Class.fn.constructor.call(this);
             },
             "getType": function() {
                 var type = Object.objectType[this.className];
@@ -21,6 +21,12 @@
                 }
                 
                 return type;
+            },
+            "toString": function() {
+                throw new Error("Object has no reimplemented method \"toString\"");
+            },
+            "valueOf": function() {
+                throw new Error("Object has no reimplemented method \"valueOf\"");
             }
         });
         
@@ -31,7 +37,7 @@
             "Address"   :   3,
             "Boolean"   :   4,
             "Event"     :   5
-        }
+        };
         
         return Object;
     });

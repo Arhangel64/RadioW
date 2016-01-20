@@ -3,15 +3,15 @@
     var moduleName = "lib/wType/char32";
     
     var defineArray = [];
-    defineArray.push("lib/utils/class");
+    defineArray.push("lib/wType/object");
     
     define(moduleName, defineArray, function char32_module() {
-        var Class = require("lib/utils/class");
+        var Object = require("lib/wType/object");
         
-        var Char32 = Class.inherit({
+        var Char32 = Object.inherit({
             "className": "Char32",
             "constructor": function(source) {
-                Class.fn.constructor.call(this);
+                Object.fn.constructor.call(this);
                 
                 this._parseSource(source || 0);
             },

@@ -3,17 +3,17 @@
     var moduleName = "lib/wType/string";
     
     var defineArray = [];
-    defineArray.push("lib/utils/class");
+    defineArray.push("lib/wType/object");
     defineArray.push("lib/wType/char32");
     
     define(moduleName, defineArray, function string_module() {
-        var Class = require("lib/utils/class");
+        var Object = require("lib/wType/object");
         var Char32 = require("lib/wType/char32");
         
-        var String = Class.inherit({
+        var String = Object.inherit({
             "className": "String",
             "constructor": function(source) {
-                Class.fn.constructor.call(this);
+                Object.fn.constructor.call(this);
                 
                 this._data = [];
                 this._parseSource(source || "");

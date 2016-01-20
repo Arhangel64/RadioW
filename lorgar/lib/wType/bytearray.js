@@ -3,21 +3,28 @@
     var moduleName = "lib/wType/bytearray";
     
     var defineArray =[];
-    defineArray.push("lib/utils/class");
+    defineArray.push("lib/wType/object");
     
     define(moduleName, defineArray, function bytearray_module() {
-        var Class = require("lib/utils/class");
+        var Object = require("lib/wType/object");
         
-        var ByteArray = Class.inherit({
+        var ByteArray = Object.inherit({
             "className": "ByteArray",
             "constructor": function(uint8arrr) {
-                Class.fn.constructor.call(this);
+                Object.fn.constructor.call(this);
                 
                 if ((uint8arrr !== undefined) && !(uint8arrr instanceof Uint8Array)) {
                     throw new Error("Wrong argument to construct ByteArray");
                 }
                 
                 this._data = [];
+            },
+            "<<": function(obj) {
+                if (!(obj instanceof Object)) {
+                    throw new Error("An attempt to serialize not a W::Object");
+                }
+                this.push_back(obj.getType());
+                obj.serialize(this);
             },
             "size": function() {
                 return this._data.length;

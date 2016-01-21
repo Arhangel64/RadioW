@@ -11,6 +11,7 @@
     defineArray.push("lib/wType/uint64");
     defineArray.push("lib/wType/bytearray");
     defineArray.push("lib/wType/vocabulary");
+    defineArray.push("lib/wType/address");
     
     require(defineArray, function main_module() {
         var Subscribable = require("lib/utils/subscribable");
@@ -18,6 +19,7 @@
         var Uint64 = require("lib/wType/uint64");
         var ByteArray = require("lib/wType/bytearray");
         var Vocabulary = require("lib/wType/vocabulary");
+        var Address = require("lib/wType/address");
         
         var Some = Subscribable.inherit({});
         
@@ -27,9 +29,14 @@
             var int = new Uint64(64);
             var vc1 = new Vocabulary();
             var vc2 = new Vocabulary();
+            var addr = new Address(["to", "my"]);
+            var addr2 = new Address(["home"]);
             
-            vc1.insert("vc1", vc2);
+            addr["+="](addr2);
+            
             vc2.insert(str, int);
+            vc2.insert("someAddr", addr);
+            vc1.insert("vc1", vc2);
             
             var ba = new ByteArray();
             
@@ -44,6 +51,7 @@
             console.log(str2);
             console.log(int2);
             console.log(vcd.at("vc1").at(str2).toString());
+            console.log(vcd.at("vc1").at("someAddr").toString());
         });
         some.trigger("hey");
     });

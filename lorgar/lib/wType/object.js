@@ -13,6 +13,18 @@
             "constructor": function() {
                 Class.fn.constructor.call(this);
             },
+            "<": function(other) {
+                throw new Error("Object has no reimplemented method \"<\"");
+            },
+            ">": function(other) {
+                throw new Error("Object has no reimplemented method \">\"");
+            },
+            "==": function(other) {
+                throw new Error("Object has no reimplemented method \"==\"");
+            },
+            "clone": function(other) {
+                throw new Error("Object has no reimplemented method \"clone\"");
+            },
             "getType": function() {
                 var type = Object.objectType[this.className];
                 

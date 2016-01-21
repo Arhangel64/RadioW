@@ -18,6 +18,79 @@
                 this._data = [];
                 this._parseSource(source || "");
             },
+            "destructor": function () {
+                this.clear();
+                
+                Object.fn.destructor.call(this);
+            },
+            "<": function(other) {
+                if (!(other instanceof String)) {
+                    throw new Error("Can compare String only with String");
+                }
+                var lt = true;
+                if (!(this._data.length < other._data.length)) {
+                    return false;
+                }
+                for (var i = 0; i < this._data.length; ++i) {
+                    charMe = this._data[i];
+                    charOt = other._data[i];
+                    if ( !(charMe["<"](charOt)) ) {
+                        lt = false;
+                        break;
+                    }
+                }
+                return lt;
+            },
+            ">": function(other) {
+                if (!(other instanceof String)) {
+                    throw new Error("Can compare String only with String");
+                }
+                var gt = true;
+                if (!(this._data.length > other._data.length)) {
+                    return false;
+                }
+                for (var i = 0; i < this._data.length; ++i) {
+                    charMe = this._data[i];
+                    charOt = other._data[i];
+                    if ( !(charMe[">"](charOt)) ) {
+                        gt = false;
+                        break;
+                    }
+                }
+                return gt;
+            },
+            "==": function(other) {
+                if (!(other instanceof String)) {
+                    throw new Error("Can compare String only with String");
+                }
+                var eq = true;
+                if (this._data.length !== other._data.length) {
+                    return false;
+                }
+                for (var i = 0; i < this._data.length; ++i) {
+                    charMe = this._data[i];
+                    charOt = other._data[i];
+                    if ( !(charMe["=="](charOt)) ) {
+                        eq = false;
+                        break;
+                    }
+                }
+                return eq;
+            },
+            "clear": function() {
+                for (var i = 0; i < this._data.length; ++i) {
+                    this._data[i].destructor();
+                }
+                this._data = [];
+            },
+            "clone": function() {
+                var clone = new String();
+                for (var i = 0; i < this._data.length; ++i) {
+                    clone._data.push(this._data[i].clone());
+                }
+                
+                return clone;
+            },
             "deserialize": function(ba) {
                 var size = ba.pop_front();
                 

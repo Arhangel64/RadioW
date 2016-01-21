@@ -18,6 +18,31 @@
                 
                 this._parseSource(source || 0);
             },
+            "<": function(other) {
+                if (!(other instanceof Char32)) {
+                    throw new Error("Can compare Char32 only with Char32");
+                }
+                return this.valueOf() < other.valueOf();
+            },
+            ">": function(other) {
+                if (!(other instanceof Char32)) {
+                    throw new Error("Can compare Char32 only with Char32");
+                }
+                return this.valueOf() > other.valueOf();
+            },
+            "==": function(other) {
+                if (!(other instanceof Char32)) {
+                    throw new Error("Can compare Char32 only with Char32");
+                }
+                return this.valueOf() == other.valueOf();
+            },
+            "clone": function() {
+                var clone = new Char32();
+                clone._l = this._l;
+                clone._h = this._h;
+                
+                return clone;
+            },
             "toString": function() {
                 if (this._h != 0) {
                     throw new Error("Don't know yet how to show char32 in javascript");

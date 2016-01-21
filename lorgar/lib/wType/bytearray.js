@@ -8,13 +8,14 @@
     defineArray.push("lib/wType/string");
     defineArray.push("lib/wType/uint64");
     defineArray.push("lib/wType/vocabulary");
-    //defineArray.push("lib/wType/object");
+    defineArray.push("lib/wType/address");
     
     define(moduleName, defineArray, function bytearray_module() {
         var Object = require("lib/wType/object");
         var String = require("lib/wType/string");
         var Uint64 = require("lib/wType/uint64");
         var Vocabulary = require("lib/wType/vocabulary");
+        var Address = require("lib/wType/address");
         
         var ByteArray = Object.inherit({
             "className": "ByteArray",
@@ -47,6 +48,9 @@
                         break;
                     case Object.objectType.Vocabulary:
                         Type = Vocabulary;
+                        break;
+                    case Object.objectType.Address:
+                        Type = Address;
                         break;
                     default:
                         throw new Error("Unsupported data type founf during deserialization");

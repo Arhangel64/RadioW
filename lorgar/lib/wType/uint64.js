@@ -18,6 +18,43 @@
                 
                 this._parseSource(int | 0);
             },
+            "<": function(other) {
+                if (!(other instanceof Uint64)) {
+                    throw new Error("Can compare Uint64 only with Uint64");
+                }
+                if (this._h < other._h) {
+                    return true;
+                } else if(this._h === other._h) {
+                    return this._l < other._l;
+                } else {
+                    return false;
+                }
+            },
+            ">": function(other) {
+                if (!(other instanceof Uint64)) {
+                    throw new Error("Can compare Uint64 only with Uint64");
+                }
+                if (this._h > other._h) {
+                    return true;
+                } else if(this._h === other._h) {
+                    return this._l > other._l;
+                } else {
+                    return false;
+                }
+            },
+            "==": function(other) {
+                if (!(other instanceof Uint64)) {
+                    throw new Error("Can compare Uint64 only with Uint64");
+                }
+                return (this._h == other._h) && (this._l == other._l);
+            },
+            "clone": function() {
+                var clone = new Uint64();
+                clone._l = this._l;
+                clone._h = this._h;
+                
+                return clone;
+            },
             "deserialize": function(ba) {
                 this._h = ba.pop_front();
                 this._l = ba.pop_front();

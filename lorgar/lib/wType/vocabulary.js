@@ -24,7 +24,7 @@
                 Object.fn.destructor.call(this);
             },
             "at": function(str) {
-                return this._data[str];
+                return this._data[str].clone(); //TODO may be, it's better to clone?
             },
             "clear": function() {
                 for (var key in this._data) {
@@ -33,6 +33,16 @@
                 
                 this._data = window.Object.create(null);
                 this._length = 0;
+            },
+            "clone": function() {
+                var clone = new Vocabulary();
+                
+                for (var key in this._data) {
+                    clone._data[key] = this._data[key].clone();
+                }
+                clone._length = this._length;
+                
+                return clone;
             },
             "deserialize": function(ba) {
                 this._length = ba.pop_front();
@@ -49,7 +59,7 @@
                 if (!(value instanceof Object)) {
                     throw new Error("An attempt to insert not a W::Object into vocabulary");
                 }
-                this._data[key] = value;
+                this._data[key] = value.clone(); //TODO may be, it's better to clone?
                 
                 ++this._length;
             },

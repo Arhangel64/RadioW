@@ -1,18 +1,18 @@
 #ifndef HANDLER_H
 #define HANDLER_H
 
-#include "node.h"
+#include "QtCore/QObject"
+#include "wType/address.h"
+#include "wType/event.h"
 
 namespace W 
 {
     template<typename InstanceType, typename MethodType>
     class ImplHandle;
     
-    class Handler: public Node
+    class Handler: public QObject
     {
         Q_OBJECT
-        
-        
         
     public:
         Handler(const Address& p_rel_addr, QObject* parent = 0);
@@ -23,6 +23,13 @@ namespace W
         {
             return new ImplHandle<InstanceType, MethodType>(addr, inst, mth, parent);
         }
+        
+        const W::Address& getAddress() const;
+        
+        virtual void pass(const W::Event& ev) const = 0;
+        
+    private:
+        W::Address address;
     };
     
     template<typename InstanceType, typename MethodType>
@@ -39,7 +46,7 @@ namespace W
             
             void pass(const W::Event& ev) const
             {
-                ( ( *inst ).*mth )( ev );
+                ( ( *inst ).*mth )(ev);
             }
             
         private:

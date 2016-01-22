@@ -27,43 +27,45 @@
                 if (!(other instanceof Address)) {
                     throw new Error("Can compare Address only with Address");
                 }
-                var lt = true;
-                if (!(this._data.length < other._data.length)) {
-                    return false;
-                }
+                
                 for (var i = 0; i < this._data.length; ++i) {
                     hopMe = this._data[i];
                     hopOt = other._data[i];
+                    
+                    if (hopOt === undefined) {
+                        return false;
+                    }
+                    
                     if ( !(hopMe["<"](hopOt)) ) {
-                        lt = false;
-                        break;
+                        return false;
                     }
                 }
-                return lt;
+                return true;
             },
             ">": function(other) {
                 if (!(other instanceof Address)) {
                     throw new Error("Can compare Address only with Address");
                 }
-                var gt = true;
-                if (!(this._data.length > other._data.length)) {
-                    return false;
-                }
+                
                 for (var i = 0; i < this._data.length; ++i) {
                     hopMe = this._data[i];
                     hopOt = other._data[i];
+                    
+                    if (hopOt === undefined) {
+                        return true;
+                    }
+                    
                     if ( !(hopMe[">"](hopOt)) ) {
-                        gt = false;
-                        break;
+                        return false
                     }
                 }
-                return gt;
+                return true
             },
             "==": function(other) {
                 if (!(other instanceof Address)) {
                     throw new Error("Can compare Address only with Address");
                 }
-                var eq = true;
+                
                 if (this._data.length !== other._data.length) {
                     return false;
                 }
@@ -71,11 +73,10 @@
                     hopMe = this._data[i];
                     hopOt = other._data[i];
                     if ( !(hopMe["=="](hopOt)) ) {
-                        eq = false;
-                        break;
+                        return false;
                     }
                 }
-                return eq;
+                return true;
             },
             "+": function(other) {
                 var res = this.clone();

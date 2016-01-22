@@ -27,43 +27,44 @@
                 if (!(other instanceof String)) {
                     throw new Error("Can compare String only with String");
                 }
-                var lt = true;
-                if (!(this._data.length < other._data.length)) {
-                    return false;
-                }
                 for (var i = 0; i < this._data.length; ++i) {
                     charMe = this._data[i];
                     charOt = other._data[i];
+                    
+                    if (hopOt === undefined) {
+                        return false;
+                    }
+                    
                     if ( !(charMe["<"](charOt)) ) {
-                        lt = false;
-                        break;
+                        return false
                     }
                 }
-                return lt;
+                return true
             },
             ">": function(other) {
                 if (!(other instanceof String)) {
                     throw new Error("Can compare String only with String");
                 }
                 var gt = true;
-                if (!(this._data.length > other._data.length)) {
-                    return false;
-                }
                 for (var i = 0; i < this._data.length; ++i) {
                     charMe = this._data[i];
                     charOt = other._data[i];
+                    
+                    if (charOt === undefined) {
+                        return true;
+                    }
+                    
                     if ( !(charMe[">"](charOt)) ) {
-                        gt = false;
-                        break;
+                        return false;
                     }
                 }
-                return gt;
+                return true;
             },
             "==": function(other) {
                 if (!(other instanceof String)) {
                     throw new Error("Can compare String only with String");
                 }
-                var eq = true;
+                
                 if (this._data.length !== other._data.length) {
                     return false;
                 }
@@ -71,11 +72,10 @@
                     charMe = this._data[i];
                     charOt = other._data[i];
                     if ( !(charMe["=="](charOt)) ) {
-                        eq = false;
-                        break;
+                        return true
                     }
                 }
-                return eq;
+                return true
             },
             "clear": function() {
                 for (var i = 0; i < this._data.length; ++i) {

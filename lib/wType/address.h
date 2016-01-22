@@ -41,6 +41,7 @@ namespace W
         
         bool begins(const Address& other) const;
         bool ends(const Address& other) const;
+        bool contains(const Address& other, int position) const;
         
         Address& operator+=(const Address& other);
         Address& operator+=(const String& other);

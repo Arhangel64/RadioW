@@ -15,15 +15,14 @@ class TestObject: public QObject
     Q_OBJECT
     
 public:
-    TestObject(W::String hop, W::Dispatcher* p_rdp):
+    TestObject(const W::Address& addr, W::Dispatcher* p_dp):
         QObject(),
-        dp(new W::Dispatcher(W::Address({hop}), this)),
         right_h(0),
         wrong_h(0),
-        root_dp(p_rdp)
+        dp(p_dp)
     {
-        right_h = W::Handler::create(W::Address({U"right"}), this, &TestObject::right);
-        wrong_h = W::Handler::create(W::Address({U"wrong"}), this, &TestObject::wrong);
+        right_h = W::Handler::create(addr + W::Address({U"right"}), this, &TestObject::right);
+        wrong_h = W::Handler::create(addr + W::Address({U"wrong"}), this, &TestObject::wrong);
         
         dp->registerHandler(right_h);
         dp->registerHandler(wrong_h);
@@ -36,24 +35,21 @@ public:
         
         delete right_h;
         delete wrong_h;
-        
-        delete dp;
     }
     
-    void right(const W::Event& ev)
+    void right(const W::Object& data)
     {
         emit success();
     }
     
-    void wrong(const W::Event& ev)
+    void wrong(const W::Object& data)
     {
         
     }
-    
-    W::Dispatcher* dp;
+
     W::Handler* right_h;
     W::Handler* wrong_h;
-    W::Dispatcher* root_dp;
+    W::Dispatcher* dp;
     
 signals:
     void success();
@@ -62,8 +58,7 @@ public slots:
     void launch()
     {
         W::Event ev(W::Address({U"client", U"123", U"some_hop", U"main", U"right"}), W::String(U"hello!"));
-        
-        root_dp->pass(ev);
+        dp->pass(ev);
     }
     
 };
@@ -78,13 +73,10 @@ public:
         char* argv[] = {a1};
         int   argc   = (int)(sizeof(argv) / sizeof(argv[0])) - 1;
         QCoreApplication app (argc, argv);
+
+        W::Dispatcher* root_dp = new W::Dispatcher();
         
-        W::Dispatcher *root_dp = new W::Dispatcher(W::Address({U"client", U"123"}));
-        W::Dispatcher *hop_dp = new W::Dispatcher(W::Address({U"some_hop"}));
-        TestObject *test_object = new TestObject(W::String(U"main"), root_dp);
-        
-        root_dp->registerDispatcher(hop_dp);
-        hop_dp->registerDispatcher(test_object->dp);
+        TestObject *test_object = new TestObject(W::Address({U"client", U"123", U"some_hop", U"main"}), root_dp);
         
         QObject::connect(test_object, SIGNAL(success()), &app, SLOT(quit()));
         
@@ -94,9 +86,8 @@ public:
         
         app.exec();
         
-        delete root_dp;
-        delete hop_dp;
         delete test_object;
+        delete root_dp;
     }
 };
 

@@ -9,13 +9,11 @@ set(CMAKE_AUTOMOC ON)
 set(HEADERS
     dispatcher.h
     handler.h
-    node.h
 )
 
 set(SOURCES
     dispatcher.cpp
     handler.cpp
-    node.cpp
 )
 
 add_library(wDispatcher ${HEADERS} ${SOURCES})

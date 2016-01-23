@@ -13,7 +13,7 @@ namespace W
         public Object
     {
         typedef std::list<String> List;
-        typedef std::initializer_list<String::u32string> InitList;
+        typedef std::initializer_list<String::u16string> InitList;
         
     public:
         Address();
@@ -45,7 +45,7 @@ namespace W
         
         Address& operator+=(const Address& other);
         Address& operator+=(const String& other);
-        Address& operator+=(const String::u32string& other);
+        Address& operator+=(const String::u16string& other);
         
         Address operator>>(size_type count) const;
         Address operator<<(size_type count) const;

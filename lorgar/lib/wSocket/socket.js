@@ -99,6 +99,8 @@
                 this._state = CONNECTED;
             },
             "onDisconnected": function(ev) {
+                this._state = DISCONNECTED;
+                
                 this._id.destructor();
                 this._id = new Uint64(0);
                 

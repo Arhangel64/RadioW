@@ -37,19 +37,19 @@
                 return new Boolean(this._data);
             },
             "deserialize": function(ba) {
-                var int = ba.pop_front();
+                var int = ba.pop();
                 
-                if (int === 0) {
-                    this._data = false;
-                } else {
+                if (int === 253) {
                     this._data = true;
+                } else {
+                    this._data = false;
                 }
             },
             "serialize": function(ba) {
                 if (this._data) {
-                    ba.push_back(0xffffffff);
+                    ba.push(253);
                 } else {
-                    ba.push_back(0);
+                    ba.push(0);
                 }
             },
             "toString": function() {

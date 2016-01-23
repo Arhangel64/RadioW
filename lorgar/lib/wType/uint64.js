@@ -16,7 +16,7 @@
                 this._h = 0;
                 this._l = 0;
                 
-                this._parseSource(int | 0);
+                this._parseSource(int || 0);
             },
             "<": function(other) {
                 if (!(other instanceof Uint64)) {
@@ -56,15 +56,15 @@
                 return clone;
             },
             "deserialize": function(ba) {
-                this._h = ba.pop_front();
-                this._l = ba.pop_front();
+                this._h = Object.pop32int(ba);
+                this._l = Object.pop32int(ba);
             },
             "serialize": function(ba) {
-                ba.push_back(this._h);
-                ba.push_back(this._l);
+                Object.push32int(this._h, ba);
+                Object.push32int(this._l, ba);
             },
             "size": function() {
-                return 2;
+                return 8;
             },
             "toString": function() {
                 if (this._h !== 0) {
@@ -79,11 +79,11 @@
                 return this._l;
             },
             "_parseSource": function(int) {
-                if (((int | 0) !== int) || int < 0) {
+                if (parseInt(int) !== int) {
                     throw new Error("Wrong argument to construct Uint64");
                 }
                 
-                this._l = int;
+                this._l = int & 0xffffffff;
             }
         });
         

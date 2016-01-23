@@ -51,6 +51,27 @@
             "Event"     :   5
         };
         
+        Object.push32int = function(int, ba) {
+            var hh = (int >> 24) & 0xff;
+            var hl = (int >> 16) & 0xff;
+            var lh = (int >> 8) & 0xff;
+            var ll = int & 0xff;
+                
+            ba.push(hh);
+            ba.push(hl);
+            ba.push(lh);
+            ba.push(ll);
+        };
+        
+        Object.pop32int = function(ba) {
+            var ret = ba.pop() << 24;
+            ret = ret | (ba.pop() << 16);
+            ret = ret | (ba.pop() << 8);
+            ret = ret | ba.pop();
+                
+            return ret;
+        }
+        
         return Object;
     });
 })();

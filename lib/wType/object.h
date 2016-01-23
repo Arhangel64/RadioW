@@ -36,6 +36,9 @@ namespace W {
         virtual void serialize(ByteArray& out) const = 0;
         virtual void deserialize(ByteArray& in) = 0;
         
+        void pushSize(ByteArray& out) const;
+        size_type popSize(ByteArray& in) const;
+        
     public:
         static Object* fromByteArray(ByteArray& in);
         

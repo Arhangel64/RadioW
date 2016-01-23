@@ -41,11 +41,11 @@
                 if (!(obj instanceof Object)) {
                     throw new Error("An attempt to serialize not a W::Object");
                 }
-                this.push_back(obj.getType());
+                this.push(obj.getType());
                 obj.serialize(this);
             },
             ">>": function() {
-                var type = this.pop_front();
+                var type = this.pop();
                 var Type;
                 
                 switch (type) {
@@ -79,31 +79,16 @@
             "size": function() {
                 return this._data.length;
             },
-            "push_back": function(int) {
+            "push": function(int) {
                 
-                var hh = (int >> 24) & 0xff;
-                var hl = (int >> 16) & 0xff;
-                var lh = (int >> 8) & 0xff;
-                var ll = int & 0xff;
-                
-                this._data.push(hh);
-                this._data.push(hl);
-                this._data.push(lh);
-                this._data.push(ll);
-            },
-            "pop_front": function() {
-                var temp = new Uint8Array(this._data.splice(0, 4));
-                
-                if (temp.length != 4) {
-                    throw new Error("Not enough data in ByteArray to pop");
+                if ((int < 0) || (int > 255)) {
+                    throw new Error("An attempt to push into byte array a number bigger than byte");
                 }
                 
-                var ret = temp[0] << 24;
-                ret = ret | (temp[1] << 16);
-                ret = ret | (temp[2] << 8);
-                ret = ret | temp[3];
-                
-                return ret;
+                this._data.push(int);
+            },
+            "pop": function() {
+                return this._data.shift();
             },
             "toArrayBuffer": function() {
                 var uarr = new Uint8Array(this._data);

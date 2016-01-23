@@ -14,7 +14,7 @@ class TestServer : public QObject
     public:
         TestServer(QObject* parent):
             QObject(parent),
-            server(new W::Server(W::String(U"test_server"), this))
+            server(new W::Server(W::String(u"test_server"), this))
         {
             connect(server, SIGNAL(newConnection(const W::Socket&)), SLOT(onNewConnection(const W::Socket&)));
             server->listen(8080);
@@ -40,7 +40,7 @@ class TestServer : public QObject
             const W::String& msg = static_cast<const W::String&>(event.getData());
             
             TS_ASSERT_EQUALS(addr, event.getDestination());
-            TS_ASSERT_EQUALS(msg, U"Hello, dear test server!");
+            TS_ASSERT_EQUALS(msg, u"Hello, dear test server!");
             emit success();
         }
     };
@@ -51,10 +51,10 @@ class TestServer : public QObject
     public:
         TestClient(QObject* parent):
             QObject(parent),
-            socket(new W::Socket(W::String(U"test_client"), this))
+            socket(new W::Socket(W::String(u"test_client"), this))
         {
             connect(socket, SIGNAL(connected()), SLOT(onConnected()));
-            socket->open(W::String(U"localhost"), W::Uint64(8080));
+            socket->open(W::String(u"localhost"), W::Uint64(8080));
         }
         
     private:
@@ -64,7 +64,7 @@ class TestServer : public QObject
         void onConnected()
         {
             W::Address addr({socket->getRemoteName()});
-            W::String message(U"Hello, dear test server!");
+            W::String message(u"Hello, dear test server!");
             W::Event ev(addr, message);
             
             ev.setSenderId(socket->getId());

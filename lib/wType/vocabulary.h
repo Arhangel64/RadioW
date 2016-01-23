@@ -28,9 +28,9 @@ namespace W
         objectType getType() const;
         
         void clear();
-        void insert(const String::u32string& key, const Object& value);
+        void insert(const String::u16string& key, const Object& value);
         void insert(const String& key, const Object& value);
-        const Object& at(const String::u32string& key) const;
+        const Object& at(const String::u16string& key) const;
         const Object& at(const String& key) const;
         
         static const objectType type = vocabulary;

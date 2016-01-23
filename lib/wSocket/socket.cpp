@@ -94,7 +94,7 @@ void W::Socket::onSocketConnected()
 void W::Socket::onSocketDisconnected()
 {
     id = W::Uint64(0);
-    remoteName = String(U"");
+    remoteName = String(u"");
     state = disconnected_s;
     emit disconnected();
 }
@@ -108,17 +108,17 @@ void W::Socket::onBinaryMessageReceived(const QByteArray& ba)
     if (ev->isSystem())
     {
         const Vocabulary& vc = static_cast<const Vocabulary&>(ev->getData());
-        const String& command = static_cast<const String&>(vc.at(U"command"));
+        const String& command = static_cast<const String&>(vc.at(u"command"));
         
-        if (command == U"setId")
+        if (command == u"setId")
         {
-            setId(static_cast<const Uint64&>(vc.at(U"id")));
+            setId(static_cast<const Uint64&>(vc.at(u"id")));
             setRemoteName();
             
         }
-        else if (command == U"setName")
+        else if (command == u"setName")
         {
-            setName(static_cast<const String&>(vc.at(U"name")));
+            setName(static_cast<const String&>(vc.at(u"name")));
             if (serverCreated)
             {
                 setRemoteName();
@@ -165,11 +165,11 @@ void W::Socket::setId(const W::Uint64& p_id)
 
 void W::Socket::setRemoteId()
 {
-    String command(U"setId");
+    String command(u"setId");
     Vocabulary *vc = new Vocabulary();
     
-    vc->insert(U"command", command);
-    vc->insert(U"id", id);
+    vc->insert(u"command", command);
+    vc->insert(u"id", id);
     
     Address addr;
     Event ev(addr, vc, true);
@@ -179,11 +179,11 @@ void W::Socket::setRemoteId()
 
 void W::Socket::setRemoteName()
 {
-    String command(U"setName");
+    String command(u"setName");
     Vocabulary *vc = new Vocabulary();
     
-    vc->insert(U"command", command);
-    vc->insert(U"name", name);
+    vc->insert(u"command", command);
+    vc->insert(u"name", name);
     
     Address addr;
     Event ev(addr, vc, true);
@@ -239,11 +239,11 @@ QByteArray* W::Socket::WtoQ(const ByteArray& in)
 
 void W::Socket::cantDeliver(const W::Event& event) const
 {
-    String command(U"cantDeliver");
+    String command(u"cantDeliver");
     Vocabulary *vc = new Vocabulary();
     
-    vc->insert(U"command", command);
-    vc->insert(U"event", event);
+    vc->insert(u"command", command);
+    vc->insert(u"event", event);
     
     Address addr;
     Event ev(addr, vc, true);

@@ -8,11 +8,11 @@ namespace W{
     class String : public Object
     {
     public:
-        typedef std::u32string u32string;
+        typedef std::u16string u16string;
         
         String();
-        explicit String(const u32string& p_data);
-        explicit String(const char32_t* p_data);
+        explicit String(const u16string& p_data);
+        explicit String(const char16_t* p_data);
         String(const String& original);
         
         ~String();
@@ -31,18 +31,18 @@ namespace W{
         bool operator==(const String& other) const;
         bool operator!=(const String& other) const;
         
-        bool operator==(const char32_t* other) const;
-        bool operator!=(const char32_t* other) const;
+        bool operator==(const char16_t* other) const;
+        bool operator!=(const char16_t* other) const;
         
         static const objectType type = string;
         
-        operator u32string() const;
+        operator u16string() const;
         
         void serialize(ByteArray& out) const;
         void deserialize(ByteArray& in);
         
     private:
-        u32string* data;
+        u16string* data;
         
     };
 

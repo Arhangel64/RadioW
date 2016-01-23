@@ -7,7 +7,7 @@ using std::endl;
 
 Corax::Corax(QObject *parent):
     QObject(parent),
-    server(new W::Server(W::String(U"corax"), this))
+    server(new W::Server(W::String(u"corax"), this))
 {
     connect(server, SIGNAL(newConnection(const W::Socket&)), SLOT(onNewConnection(const W::Socket&)));
 

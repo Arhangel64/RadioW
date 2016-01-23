@@ -99,30 +99,30 @@ bool W::Boolean::operator>=(const W::Boolean& other) const
 
 void W::Boolean::serialize(W::ByteArray& out) const
 {
-    uint32_t val;
+    uint8_t val;
     if (data)
     {
-        val = 0xFFFFFFFF;
+        val = 253;
     }
     else
     {
         val = 0;
     }
     
-    out << val;
+    out.push(val);
 }
 
 void W::Boolean::deserialize(W::ByteArray& in)
 {
-    uint32_t val = in.pop();
+    uint8_t val = in.pop();
     
-    if (val == 0)
+    if (val == 253)
     {
-        data = false;
+        data = true;
     }
     else
     {
-        data = true;
+        data = false;
     }
 }
 

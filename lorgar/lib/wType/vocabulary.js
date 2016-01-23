@@ -47,7 +47,7 @@
             "deserialize": function(ba) {
                 this.clear();
                 
-                this._length = ba.pop_front();
+                this._length = Object.pop32int(ba);
                 
                 for (var i = 0; i < this._length; ++i) {
                     var key = new String();
@@ -66,7 +66,7 @@
                 ++this._length;
             },
             "serialize": function(ba) {
-                ba.push_back(this._length);
+                Object.push32int(this._length, ba);
                 
                 for (var key in this._data) {
                     var sKey = new String(key);

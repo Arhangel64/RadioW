@@ -111,7 +111,7 @@
             },
             "deserialize": function(ba) {
                 this.clear()
-                var length = ba.pop_front();
+                var length = Object.pop32int(ba);
                 
                 for (var i = 0; i < length; ++i) {
                     var hop = new String();
@@ -120,7 +120,7 @@
                 }
             },
             "serialize": function(ba) {
-                ba.push_back(this._data.length);
+                Object.push32int(this._data.length, ba);
                 
                 for (var i = 0; i < this._data.length; ++i) {
                     this._data[i].serialize(ba);

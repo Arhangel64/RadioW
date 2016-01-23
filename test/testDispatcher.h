@@ -21,8 +21,8 @@ public:
         wrong_h(0),
         dp(p_dp)
     {
-        right_h = W::Handler::create(addr + W::Address({U"right"}), this, &TestObject::right);
-        wrong_h = W::Handler::create(addr + W::Address({U"wrong"}), this, &TestObject::wrong);
+        right_h = W::Handler::create(addr + W::Address({u"right"}), this, &TestObject::right);
+        wrong_h = W::Handler::create(addr + W::Address({u"wrong"}), this, &TestObject::wrong);
         
         dp->registerHandler(right_h);
         dp->registerHandler(wrong_h);
@@ -57,7 +57,7 @@ signals:
 public slots:
     void launch()
     {
-        W::Event ev(W::Address({U"client", U"123", U"some_hop", U"main", U"right"}), W::String(U"hello!"));
+        W::Event ev(W::Address({u"client", u"123", u"some_hop", u"main", u"right"}), W::String(u"hello!"));
         dp->pass(ev);
     }
     
@@ -76,7 +76,7 @@ public:
 
         W::Dispatcher* root_dp = new W::Dispatcher();
         
-        TestObject *test_object = new TestObject(W::Address({U"client", U"123", U"some_hop", U"main"}), root_dp);
+        TestObject *test_object = new TestObject(W::Address({u"client", u"123", u"some_hop", u"main"}), root_dp);
         
         QObject::connect(test_object, SIGNAL(success()), &app, SLOT(quit()));
         

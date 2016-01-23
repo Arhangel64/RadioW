@@ -97,14 +97,14 @@ W::Object::objectType W::Vocabulary::getType() const
 
 void W::Vocabulary::serialize(W::ByteArray& out) const
 {
-    out << size();
+    pushSize(out);
     
     Map::const_iterator itr = data->begin();
     Map::const_iterator end = data->end();
     for (; itr != end; ++itr)
     {
         itr->first.serialize(out);
-        out << itr->second->getType();
+        out.push(itr->second->getType());
         itr->second->serialize(out);
     }
 }
@@ -113,10 +113,9 @@ void W::Vocabulary::deserialize(W::ByteArray& in)
 {
     data->clear();
     
-    ByteArray::size_type length;
-    in >> length;
+    size_type length = popSize(in);
     
-    for (ByteArray::size_type i = 0; i != length; ++i)
+    for (size_type i = 0; i != length; ++i)
     {
         String key;
         key.deserialize(in);
@@ -126,7 +125,7 @@ void W::Vocabulary::deserialize(W::ByteArray& in)
     }
 }
 
-void W::Vocabulary::insert(const W::String::u32string& key, const W::Object& value)
+void W::Vocabulary::insert(const W::String::u16string& key, const W::Object& value)
 {
     String strKey(key);
     insert(strKey, value);
@@ -144,7 +143,7 @@ void W::Vocabulary::insert(const W::String& key, const W::Object& value)
 }
 
 
-const W::Object& W::Vocabulary::at(const String::u32string& key) const
+const W::Object& W::Vocabulary::at(const String::u16string& key) const
 {
     String strKey(key);
     return at(strKey);

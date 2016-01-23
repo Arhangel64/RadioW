@@ -81,7 +81,7 @@ W::Object* W::Address::copy() const
 
 void W::Address::serialize(W::ByteArray& out) const
 {
-    out << size();
+    pushSize(out);
     
     List::const_iterator itr;
     List::const_iterator beg = data->begin();
@@ -97,8 +97,7 @@ void W::Address::deserialize(W::ByteArray& in)
 {
     data->clear();
     
-    size_type length;
-    in >> length;
+    size_type length = popSize(in);
     
     for (size_type i = 0; i != length; ++i)
     {
@@ -227,7 +226,7 @@ W::Address& W::Address::operator+=(const W::String& other)
     data->push_back(other);
 }
 
-W::Address& W::Address::operator+=(const W::String::u32string& other)
+W::Address& W::Address::operator+=(const W::String::u16string& other)
 {
     String hop(other);
     operator+=(hop);

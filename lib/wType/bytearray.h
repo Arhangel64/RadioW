@@ -25,10 +25,8 @@ namespace W
         ByteArray& operator<<(const Object& object);
         ByteArray& operator>>(Object& object);
         
-        ByteArray& operator<<(const uint32_t& item);
-        ByteArray& operator>>(uint32_t& item);
-        
-        uint32_t pop();
+        void push(uint8_t byte);
+        uint8_t pop();
         
         size_type size() const;
         

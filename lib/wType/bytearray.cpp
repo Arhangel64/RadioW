@@ -1,7 +1,6 @@
 #include "bytearray.h"
 
 #include "object.h"
-#include <arpa/inet.h>
 
 W::ByteArray::ByteArray():
     data(new Container())
@@ -38,7 +37,7 @@ W::ByteArray::size_type W::ByteArray::size() const
 
 W::ByteArray& W::ByteArray::operator<<(const W::Object& object)
 {
-    operator<<(object.getType());
+    push(object.getType());
     object.serialize(*this);
     
     return *this;
@@ -51,32 +50,15 @@ W::ByteArray& W::ByteArray::operator>>(W::Object& object)
     return *this;
 }
 
-W::ByteArray& W::ByteArray::operator<<(const uint32_t& item)
+void W::ByteArray::push(uint8_t byte)
 {
-    uint32_t converted = htonl(item);
-    for (uint8_t i(0); i < 4; ++i)
-    {
-        data->push_back(((uint8_t*)&converted)[i]);
-    }
-    return *this;
+    data->push_back(byte);
 }
 
-W::ByteArray& W::ByteArray::operator>>(uint32_t& item)
+uint8_t W::ByteArray::pop()
 {
-    item = pop();
-    
-    return *this;
-}
-
-uint32_t W::ByteArray::pop()
-{
-    uint8_t source[4] = {0,0,0,0};
-    
-    for (uint8_t i(0); i < 4; ++i)
-    {
-        source[i] = data->front();
-        data->pop_front();
-    }
-    return ntohl(*((uint32_t*) source));
+    uint8_t byte = data->front();
+    data->pop_front();
+    return byte;
 }
 

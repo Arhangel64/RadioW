@@ -19,27 +19,27 @@ class TestTypes : public CxxTest::TestSuite
 public:
     void testStringSize() 
     {
-        W::String str(U"hey!");
+        W::String str(u"hey!");
         TS_ASSERT_EQUALS(str.size(), 4);
     }
     
     void testStringToString()
     {
-        W::String str(U"hello world!");
+        W::String str(u"hello world!");
         TS_ASSERT_EQUALS(str.toString(), "hello world!");
     }
     void testStringCopying()
     {
-        W::String str(U"string");
+        W::String str(u"string");
         W::String str2 = str; 
     }
     
     void testStringSerialization()
     {
-        W::String str(U"serialization");
+        W::String str(u"serialization");
         W::ByteArray bytes;
         bytes << str;
-        TS_ASSERT_EQUALS(bytes.size(), (13 + 1 + 1)*4);
+        TS_ASSERT_EQUALS(bytes.size(), 13*2 + 1*4 + 1);
         
         W::Object *obj = W::Object::fromByteArray(bytes);
         W::String *str2 = static_cast<W::String*>(obj);
@@ -57,7 +57,7 @@ public:
         
         bytes << a;
         
-        TS_ASSERT_EQUALS(bytes.size(), 3 * 4);
+        TS_ASSERT_EQUALS(bytes.size(), 1 + 8);
         
         W::Object *obj = W::Object::fromByteArray(bytes);
         W::Uint64 *b = static_cast<W::Uint64*>(obj);
@@ -67,8 +67,8 @@ public:
     }
     void testVCSerialization()
     {
-        W::String key1(U"foo");
-        W::String val1(U"bar");
+        W::String key1(u"foo");
+        W::String val1(u"bar");
         
         W::Vocabulary vc;
         
@@ -92,10 +92,10 @@ public:
     }
     void testAddressOperators()
     {
-        W::Address a1({U"hey"});
-        W::Address a2({U"hey", U"you"});
-        W::Address a3({U"hey1", U"you"});
-        W::Address a4({U"hey", U"you1"});
+        W::Address a1({u"hey"});
+        W::Address a2({u"hey", u"you"});
+        W::Address a3({u"hey1", u"you"});
+        W::Address a4({u"hey", u"you1"});
         
         TS_ASSERT_EQUALS(a1, a1);
         TS_ASSERT_DIFFERS(a1, a2);
@@ -106,21 +106,21 @@ public:
     }
     void testAddressFunctions()
     {
-        W::Address a1({U"1st", U"2nd", U"3rd", U"4th"});
+        W::Address a1({u"1st", u"2nd", u"3rd", u"4th"});
         W::Address a2 = a1 >> 1;
         W::Address a3 = a1 << 1;
         
         W::Address ae;
-        W::Address a4({U"1st"});
-        W::Address a5({U"1st", U"2nd"});
+        W::Address a4({u"1st"});
+        W::Address a5({u"1st", u"2nd"});
         
-        W::Address a6({U"1st", U"3rd"});
+        W::Address a6({u"1st", u"3rd"});
         
-        W::Address a7({U"3rd", U"4th"});
-        W::Address a8({U"4th"});
+        W::Address a7({u"3rd", u"4th"});
+        W::Address a8({u"4th"});
         
-        W::Address a2c({U"1st", U"2nd", U"3rd"});
-        W::Address a3c({U"2nd", U"3rd", U"4th"});
+        W::Address a2c({u"1st", u"2nd", u"3rd"});
+        W::Address a3c({u"2nd", u"3rd", u"4th"});
         
         TS_ASSERT_EQUALS(a2, a2c);
         TS_ASSERT_EQUALS(a3, a3c);
@@ -144,7 +144,7 @@ public:
     }
     void testAddressSerialization()
     {
-        W::Address addr({U"hello", U"world"});
+        W::Address addr({u"hello", u"world"});
         
         W::ByteArray bytes;
         bytes << addr;
@@ -200,13 +200,13 @@ public:
     }
     void testEventSerialization()
     {
-        W::Address dest({U"to", U"somebody"});
+        W::Address dest({u"to", u"somebody"});
         W::Uint64 id(5);
         W::Vocabulary dat;
-        W::String val(U"some value");
+        W::String val(u"some value");
         W::Uint64 val2(7887198479813);
-        dat.insert(U"key1", val);
-        dat.insert(U"key2", val2);
+        dat.insert(u"key1", val);
+        dat.insert(u"key2", val2);
         
         W::Event ev(dest, dat);
         ev.setSenderId(id);
@@ -221,8 +221,8 @@ public:
         TS_ASSERT_EQUALS(evd->isSystem(), false);
         TS_ASSERT_EQUALS(evd->getDestination(), dest);
         const W::Vocabulary vcd = static_cast<const W::Vocabulary&>(evd->getData());
-        TS_ASSERT_EQUALS(static_cast<const W::String&>(vcd.at(U"key1")), val);
-        TS_ASSERT_EQUALS(static_cast<const W::Uint64&>(vcd.at(U"key2")), val2);
+        TS_ASSERT_EQUALS(static_cast<const W::String&>(vcd.at(u"key1")), val);
+        TS_ASSERT_EQUALS(static_cast<const W::Uint64&>(vcd.at(u"key2")), val2);
         TS_ASSERT_EQUALS(evd->getSenderId(), id);
         
         delete obj;

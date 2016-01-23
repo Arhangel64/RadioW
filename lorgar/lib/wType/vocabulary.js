@@ -24,7 +24,7 @@
                 Object.fn.destructor.call(this);
             },
             "at": function(str) {
-                return this._data[str].clone(); //TODO may be, it's better to clone?
+                return this._data[str];
             },
             "clear": function() {
                 for (var key in this._data) {
@@ -45,6 +45,8 @@
                 return clone;
             },
             "deserialize": function(ba) {
+                this.clear();
+                
                 this._length = ba.pop_front();
                 
                 for (var i = 0; i < this._length; ++i) {
@@ -59,7 +61,7 @@
                 if (!(value instanceof Object)) {
                     throw new Error("An attempt to insert not a W::Object into vocabulary");
                 }
-                this._data[key] = value.clone(); //TODO may be, it's better to clone?
+                this._data[key] = value
                 
                 ++this._length;
             },
@@ -75,6 +77,24 @@
             },
             "size": function() {
                 return this._length;
+            },
+            "toString": function() {
+                var str = "{";
+                
+                var ft = true;
+                
+                for (var key in this._data) {
+                    if (ft) {
+                        ft = false;
+                    } else {
+                        str += ", ";
+                    }
+                    str += key;
+                    str += this._data[key].toString();
+                    
+                }
+                str += "}";
+                return str;
             }
         });
         

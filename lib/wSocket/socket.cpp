@@ -34,7 +34,7 @@ W::Socket::Socket(const W::String& p_name, QWebSocket* p_socket, uint64_t p_id, 
 
 W::Socket::~Socket()
 {
-
+    close();
 }
 
 void W::Socket::open(const W::String& addr, const W::Uint64& port)

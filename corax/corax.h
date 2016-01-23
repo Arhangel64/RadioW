@@ -18,11 +18,9 @@ public:
     
 private:
     W::Server *server;
-    W::Socket *socket;
     
 public slots:
     void onNewConnection(const W::Socket& socket);
-    void onSocketConnected();
 };
 
 #endif // CORAX_H

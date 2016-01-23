@@ -22,7 +22,7 @@
             "==": function(other) {
                 throw new Error("Object has no reimplemented method \"==\"");
             },
-            "clone": function(other) {
+            "clone": function() {
                 throw new Error("Object has no reimplemented method \"clone\"");
             },
             "getType": function() {

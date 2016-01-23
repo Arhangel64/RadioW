@@ -110,6 +110,7 @@
                 return clone;
             },
             "deserialize": function(ba) {
+                this.clear()
                 var length = ba.pop_front();
                 
                 for (var i = 0; i < length; ++i) {

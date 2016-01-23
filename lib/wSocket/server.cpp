@@ -76,7 +76,9 @@ void W::Server::onSocketDisconnected() {
     Socket* socket = static_cast<Socket*>(sender());
     std::map<uint64_t, Socket*>::const_iterator it = connections.find(socket->getId());
     p_map::const_iterator itn = peers.find(socket->getRemoteName());
-    connections.erase(it);
+    if (it != connections.end()) {
+        connections.erase(it);
+    }
     if (itn != peers.end())
     {
         peers.erase(itn);

@@ -9,6 +9,8 @@
     defineArray.push("lib/wType/uint64");
     defineArray.push("lib/wType/vocabulary");
     defineArray.push("lib/wType/address");
+    defineArray.push("lib/wType/boolean");
+    defineArray.push("lib/wType/event");
     
     define(moduleName, defineArray, function bytearray_module() {
         var Object = require("lib/wType/object");
@@ -16,14 +18,21 @@
         var Uint64 = require("lib/wType/uint64");
         var Vocabulary = require("lib/wType/vocabulary");
         var Address = require("lib/wType/address");
+        var Boolean = require("lib/wType/boolean");
+        var Event = require("lib/wType/event");
         
         var ByteArray = Object.inherit({
             "className": "ByteArray",
             "constructor": function(arr) {
                 Object.fn.constructor.call(this);
                 
-                if ((arr !== undefined) && !(uint8arrr instanceof Array)) {
+                if ((arr !== undefined) && !(arr instanceof Array) && !(arr instanceof Uint8Array)) {
                     throw new Error("Wrong argument to construct ByteArray");
+                }
+                
+                if (arr instanceof Uint8Array) {
+                    var raw = arr;
+                    arr = Array.from(raw);
                 }
                 
                 this._data = arr || [];
@@ -52,8 +61,14 @@
                     case Object.objectType.Address:
                         Type = Address;
                         break;
+                    case Object.objectType.Boolean:
+                        Type = Boolean;
+                        break;
+                    case Object.objectType.Event:
+                        Type = Event;
+                        break;
                     default:
-                        throw new Error("Unsupported data type founf during deserialization");
+                        throw new Error("Unsupported data type found during deserialization");
                 }
                 
                 var obj = new Type();
@@ -65,9 +80,7 @@
                 return this._data.length;
             },
             "push_back": function(int) {
-                if ((int | 0) !== int) {
-                    throw new Error("Wrong argument to push into the ByteArray");
-                }
+                
                 var hh = (int >> 24) & 0xff;
                 var hl = (int >> 16) & 0xff;
                 var lh = (int >> 8) & 0xff;
@@ -91,6 +104,11 @@
                 ret = ret | temp[3];
                 
                 return ret;
+            },
+            "toArrayBuffer": function() {
+                var uarr = new Uint8Array(this._data);
+                
+                return uarr.buffer;
             }
         });
         

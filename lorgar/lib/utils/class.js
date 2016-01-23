@@ -14,8 +14,7 @@
             };
             
             Base.prototype = this.prototype;
-            var fn = subclass.fn = new Base();
-            subclass.prototype = fn;
+            var fn = new Base();
             
             for (var key in proto) {
                 if (proto.hasOwnProperty(key)) {
@@ -29,6 +28,7 @@
             }
             
             fn.constructor = subclass;
+            subclass.prototype = subclass.fn = fn;
             
             return subclass;
         }

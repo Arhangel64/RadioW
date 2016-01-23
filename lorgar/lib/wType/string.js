@@ -92,6 +92,7 @@
                 return clone;
             },
             "deserialize": function(ba) {
+                this.clear();
                 var size = ba.pop_front();
                 
                 for (var i = 0; i < size; ++i) {

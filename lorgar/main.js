@@ -42,5 +42,7 @@
         
         var some = new Some();
         window.some = some;
+        
+        window.RBTree = RBTree;
     });
 })();

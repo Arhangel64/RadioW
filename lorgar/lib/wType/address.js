@@ -27,6 +27,8 @@
                 if (!(other instanceof Address)) {
                     throw new Error("Can compare Address only with Address");
                 }
+                var hopMe;
+                var hopOt;
                 
                 for (var i = 0; i < this._data.length; ++i) {
                     hopMe = this._data[i];
@@ -46,6 +48,8 @@
                 if (!(other instanceof Address)) {
                     throw new Error("Can compare Address only with Address");
                 }
+                var hopMe;
+                var hopOt;
                 
                 for (var i = 0; i < this._data.length; ++i) {
                     hopMe = this._data[i];
@@ -69,6 +73,10 @@
                 if (this._data.length !== other._data.length) {
                     return false;
                 }
+                
+                var hopMe;
+                var hopOt;
+                
                 for (var i = 0; i < this._data.length; ++i) {
                     hopMe = this._data[i];
                     hopOt = other._data[i];

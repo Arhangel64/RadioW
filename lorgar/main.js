@@ -5,44 +5,56 @@
     }
     
     var defineArray = [];
-    
-    defineArray.push("lib/utils/subscribable");
     defineArray.push("lib/wType/string");
-    defineArray.push("lib/wType/vocabulary");
     defineArray.push("lib/wType/address");
-    defineArray.push("lib/wType/boolean");
-    defineArray.push("lib/wType/event");
-    
     defineArray.push("lib/wSocket/socket");
+    defineArray.push("lib/wContainers/abstractmap")
     
     require(defineArray, function main_module() {
-        var Subscribable = require("lib/utils/subscribable");
         var String = require("lib/wType/string");
-        var Vocabulary = require("lib/wType/vocabulary");
         var Address = require("lib/wType/address");
-        var Boolean = require("lib/wType/boolean");
-        var Event = require("lib/wType/event");
+        var AbstractMap = require("lib/wContainers/abstractmap");
         
         var Socket = require("lib/wSocket/socket");
         
-        var Some = Subscribable.inherit({
-            "className": "Some",
-            "constructor": function() {
-                Subscribable.fn.constructor.call(this);
-                
-                this._socket = new Socket("Lorgar");
-                this._socket.on("connected", function() {
-                    console.log("Yaaaahooo!");
-                });
-            },
-            "launch": function() {
-                this._socket.open("localhost", 8080);
-            }
-        });
+        var Map = AbstractMap.template(Address, String);
         
-        var some = new Some();
-        window.some = some;
+        var map = window.map = new Map();
         
-        window.RBTree = RBTree;
+        var noEl = map.find(new Address(["addr1", "hop1"]));
+        if (noEl !== map.end()) {
+            console.log("error: problem with end!");
+        }
+        
+        map.insert(new Address(["addr1", "hop1"]), new String("hello"));
+        map.insert(new Address(["addr2", "hop2"]), new String("world"));
+        
+        if (map.size() !== 2) {
+            console.log("error: problem with insertion!");
+        }
+        
+        var itr = map.find(new Address(["addr1", "hop1"]));
+        
+        if (itr === map.end()) {
+            console.log("error: problem with finding!");
+        }
+        
+        console.log(itr.data().second.toString());
+        itr.next();
+        console.log(itr.data().second.toString());
+        
+        map.erase(itr);
+        
+        itr = map.find(new Address(["addr2", "hop2"]));
+        
+        if (itr !== map.end()) {
+            console.log("error: problem with erasing!");
+        }
+        
+        map.clear();
+        
+        if (map.size() > 0) {
+            console.log("error: problem with clearing!");
+        }
     });
 })();

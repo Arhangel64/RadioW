@@ -3,24 +3,21 @@
 
 #include <map>
 
-#include <QtCore/QObject>
-
 #include <wType/string.h>
 #include <wType/address.h>
 #include <wType/event.h>
 
-#include <wDispatcher/handler.h>
+#include "handler.h"
+#include "defaulthandler.h"
+
+#include <wContainer/order.h>
 
 namespace W 
 {
-    class Handler;
-    
-    class Dispatcher: public QObject
+    class Dispatcher
     {
-        Q_OBJECT
-        
     public:
-        Dispatcher(QObject* parent = 0);
+        Dispatcher();
         ~Dispatcher();
 
         void pass(const W::Event& ev) const;
@@ -28,10 +25,16 @@ namespace W
         void registerHandler(W::Handler* dp);
         void unregisterHandler(W::Handler* dp);
         
+        void registerDefaultHandler(W::DefaultHandler* dh);
+        void unregisterDefaultHandler(W::DefaultHandler* dh);
+        
     protected:
-        typedef std::map<W::Address, W::Handler*> n_map;
+        typedef std::map<W::Address, W::Order<W::Handler*>> n_map;
+        typedef W::Order<W::DefaultHandler*> d_order;
 
         n_map nodes;
+        d_order defaultHandlers;
+        
     };
 }
 

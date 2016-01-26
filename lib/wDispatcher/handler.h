@@ -1,7 +1,6 @@
 #ifndef HANDLER_H
 #define HANDLER_H
 
-#include "QtCore/QObject"
 #include "wType/address.h"
 #include "wType/event.h"
 
@@ -10,18 +9,16 @@ namespace W
     template<typename InstanceType, typename MethodType>
     class ImplHandle;
     
-    class Handler: public QObject
+    class Handler
     {
-        Q_OBJECT
-        
     public:
-        Handler(const Address& p_rel_addr, QObject* parent = 0);
+        Handler(const Address& p_rel_addr);
         ~Handler();
         
         template<typename InstanceType, typename MethodType>
-        static Handler* create(const Address& addr, InstanceType* inst, MethodType mth, QObject* parent = 0)
+        static Handler* create(const Address& addr, InstanceType* inst, MethodType mth)
         {
-            return new ImplHandle<InstanceType, MethodType>(addr, inst, mth, parent);
+            return new ImplHandle<InstanceType, MethodType>(addr, inst, mth);
         }
         
         const W::Address& getAddress() const;
@@ -36,8 +33,8 @@ namespace W
         class ImplHandle: public Handler
         {
         public:
-            ImplHandle(const Address& p_rel_addr, InstanceType *p_inst, MethodType p_mth, QObject* parent = 0):
-                Handler(p_rel_addr, parent),
+            ImplHandle(const Address& p_rel_addr, InstanceType *p_inst, MethodType p_mth):
+                Handler(p_rel_addr),
                 inst(p_inst),
                 mth(p_mth)
             {}

@@ -7,6 +7,8 @@
 #include <wType/address.h>
 #include <wType/event.h>
 
+#include <QtCore/QObject>
+
 #include "handler.h"
 #include "defaulthandler.h"
 
@@ -14,19 +16,23 @@
 
 namespace W 
 {
-    class Dispatcher
+    class Dispatcher: 
+        public QObject
     {
+        Q_OBJECT
+        
     public:
         Dispatcher();
         ~Dispatcher();
-
-        void pass(const W::Event& ev) const;
         
         void registerHandler(W::Handler* dp);
         void unregisterHandler(W::Handler* dp);
         
         void registerDefaultHandler(W::DefaultHandler* dh);
         void unregisterDefaultHandler(W::DefaultHandler* dh);
+        
+    public slots:
+        void pass(const W::Event& ev) const;
         
     protected:
         typedef std::map<W::Address, W::Order<W::Handler*>> n_map;

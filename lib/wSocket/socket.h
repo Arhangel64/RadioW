@@ -37,7 +37,7 @@ namespace W
         void open(const String& addr, const Uint64& port);
         void close();
         
-        Uint64 getId();
+        Uint64 getId() const;
         String getRemoteName() const;
         String getName() const;
         

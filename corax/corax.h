@@ -8,6 +8,15 @@
 
 #include <wType/string.h>
 #include <wType/uint64.h>
+#include <wType/event.h>
+#include <wType/address.h>
+#include <wType/vocabulary.h>
+
+#include <wDispatcher/dispatcher.h>
+#include <wDispatcher/logger.h>
+#include <wDispatcher/handler.h>
+
+#include <utils/exception.h>
 
 class Corax: public QObject
 {
@@ -15,12 +24,37 @@ class Corax: public QObject
     
 public:
     Corax(QObject *parent = 0);
+    ~Corax();
+    
+    static Corax* corax;
     
 private:
     W::Server *server;
+    W::Logger *logger;
+    
+    W::Handler* h_test;
+    
+public:
+    W::Dispatcher *dispatcher;
+    
+public:
+    void test(const W::Event& ev);
     
 public slots:
     void onNewConnection(const W::Socket& socket);
+    void onSocketDisconnected();
+    void start();
+    void stop();
+    
+private:
+    class SingletonError: 
+        public Utils::Exception
+    {
+    public:
+        SingletonError():Exception(){}
+        
+        std::string getMessage() const{return "Corax is a singleton, there was an attempt to construct it at the second time";}
+    };
 };
 
 #endif // CORAX_H

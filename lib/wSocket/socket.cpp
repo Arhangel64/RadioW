@@ -65,7 +65,7 @@ void W::Socket::send(const W::Event& ev) const
     delete ba;
 }
 
-W::Uint64 W::Socket::getId()
+W::Uint64 W::Socket::getId() const
 {
     return id;
 }

@@ -43,6 +43,17 @@ void W::Server::stop()
     }
 }
 
+const W::Socket& W::Server::getPeer(uint64_t p_id) const
+{
+    std::map<uint64_t, Socket*>::const_iterator itr = connections.find(p_id);
+    if (itr == connections.end()) 
+    {
+        throw 2;
+    }
+    
+    return *(itr->second);
+}
+
 void W::Server::onNewConnection()
 {
     QWebSocket *webSocket = server->nextPendingConnection();

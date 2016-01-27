@@ -79,10 +79,8 @@ public:
         TestObject *test_object = new TestObject(W::Address({u"client", u"123", u"some_hop", u"main"}), root_dp);
         
         QObject::connect(test_object, SIGNAL(success()), &app, SLOT(quit()));
-        
-        QTimer *timer = new QTimer(&app);
-        QObject::connect(timer, SIGNAL(timeout()), test_object, SLOT(launch()));
-        timer->start(0);
+
+        QTimer::singleShot(0, test_object, SLOT(launch()));
         
         app.exec();
         

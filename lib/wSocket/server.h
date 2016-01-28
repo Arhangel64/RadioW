@@ -27,7 +27,7 @@ namespace W
         void listen(uint16_t port);
         void stop();
         
-        const Socket& getPeer(uint64_t p_id) const;
+        const Socket& getConnection(uint64_t p_id) const;
         
     private:
         typedef std::map<String, std::map<uint64_t, Socket*>> p_map;

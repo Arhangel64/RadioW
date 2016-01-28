@@ -43,7 +43,7 @@ void W::Server::stop()
     }
 }
 
-const W::Socket& W::Server::getPeer(uint64_t p_id) const
+const W::Socket& W::Server::getConnection(uint64_t p_id) const
 {
     std::map<uint64_t, Socket*>::const_iterator itr = connections.find(p_id);
     if (itr == connections.end()) 

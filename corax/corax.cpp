@@ -76,5 +76,5 @@ void Corax::test(const W::Event& ev)
     nvc->insert(u"source", h_test->getAddress());
     
     W::Event nev(static_cast<const W::Address&>(nvc->at(u"source")), nvc);
-    server->getPeer(ev.getSenderId()).send(nev);
+    server->getConnection(ev.getSenderId()).send(nev);
 }

@@ -1,16 +1,16 @@
 "use strict";
 (function abstractmap_js() {
-    var moduleName = "lib/wContainers/abstractmap";
+    var moduleName = "lib/wContainer/abstractmap";
     
     var defineArray = [];
     defineArray.push("lib/utils/class");
     defineArray.push("lib/js_bintrees/rbtree");
-    defineArray.push("lib/wContainers/abstractpair");
+    defineArray.push("lib/wContainer/abstractpair");
     
     define(moduleName, defineArray,function abstractmap_module() {
         var Class = require("lib/utils/class");
         var RBTree = require("lib/js_bintrees/rbtree");
-        var AbstractPair = require("lib/wContainers/abstractpair");
+        var AbstractPair = require("lib/wContainer/abstractpair");
         
         var AbstractMap = Class.inherit({
             "className": "AbstractMap",

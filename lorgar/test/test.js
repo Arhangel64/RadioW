@@ -6,13 +6,13 @@
     defineArray.push("lib/utils/class");
     defineArray.push("lib/wType/string");
     defineArray.push("lib/wType/address");
-    defineArray.push("lib/wContainers/abstractmap")
+    defineArray.push("lib/wContainer/abstractmap")
     
     define(moduleName, defineArray, function test_module() {
         var Class = require("lib/utils/class");
         var String = require("lib/wType/string");
         var Address = require("lib/wType/address");
-        var AbstractMap = require("lib/wContainers/abstractmap");
+        var AbstractMap = require("lib/wContainer/abstractmap");
         
         var Test = Class.inherit({
             "className": "Test",

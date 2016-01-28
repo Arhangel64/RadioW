@@ -6,13 +6,13 @@
     defineArray.push("lib/utils/class");
     defineArray.push("lib/wDispatcher/handler");
     defineArray.push("lib/wType/address");
-    defineArray.push("lib/wContainers/abstractmap");
+    defineArray.push("lib/wContainer/abstractmap");
     
     define(moduleName, defineArray, function dispatcher_module() {
         var Class = require("lib/utils/class");
         var Handler = require("lib/wDispatcher/handler");
         var Address = require("lib/wType/address");
-        var AbstractMap = require("lib/wContainers/abstractmap");
+        var AbstractMap = require("lib/wContainer/abstractmap");
         var HandlerMap = AbstractMap.template(Address, Array);
         
         var Dispatcher = Class.inherit({

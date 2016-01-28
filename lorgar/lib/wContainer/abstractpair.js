@@ -1,6 +1,6 @@
 "use strict";
 (function abstractpair_js() {
-    var moduleName = "lib/wContainers/abstractpair";
+    var moduleName = "lib/wContainer/abstractpair";
     
     var defineArray = [];
     defineArray.push("lib/utils/class");

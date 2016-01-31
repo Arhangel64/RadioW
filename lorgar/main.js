@@ -10,6 +10,9 @@
     require(defineArray, function main_module() {
         var Test = require("test/test");
         
-        (new Test()).testMap();
+        var test = new Test();
+        
+        test.testMap();
+        test.testList();
     });
 })();

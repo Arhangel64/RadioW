@@ -40,6 +40,9 @@
                 
                 return this._data === other._data;
             },
+            "+=": function(str) {
+                this._data += str.toString();
+            },
             "clear": function() {
                 this._data = "";
             },

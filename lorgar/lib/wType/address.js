@@ -38,11 +38,14 @@
                         return false;
                     }
                     
-                    if ( !(hopMe["<"](hopOt)) ) {
+                    if (hopMe["<"](hopOt)) {
+                        return true;
+                    }
+                    if (hopMe[">"](hopOt)) {
                         return false;
                     }
                 }
-                return true;
+                return false;
             },
             ">": function(other) {
                 if (!(other instanceof Address)) {
@@ -59,11 +62,14 @@
                         return true;
                     }
                     
-                    if ( !(hopMe[">"](hopOt)) ) {
-                        return false
+                    if (hopMe[">"](hopOt)) {
+                        return true;
+                    }
+                    if (hopMe["<"](hopOt)) {
+                        return false;
                     }
                 }
-                return true
+                return false;
             },
             "==": function(other) {
                 if (!(other instanceof Address)) {

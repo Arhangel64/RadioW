@@ -14,7 +14,7 @@
         
         var AbstractMap = Class.inherit({
             "className": "AbstractMap",
-            "constructor": function() {
+            "constructor": function(owning) {
                 Class.fn.constructor.call(this);
                 
                 var check = new this.constructor.dataType(new this.constructor.dataType.firstType(), new this.constructor.dataType.secondType());
@@ -23,6 +23,7 @@
                     throw new Error("An attempt to instantiate a map without declared member type");
                 }
                 
+                this._owning = owning !== false;
                 this._data = new RBTree(function (a, b) {
                     if (a[">"](b)) {
                         return 1;
@@ -48,9 +49,11 @@
                 return this.end();
             },
             "clear": function() {
-                this._data.each(function(data) {
-                    data.destructor();
-                });
+                if (this._owning) {
+                    this._data.each(function(data) {
+                        data.destructor();
+                    });
+                }
                 
                 this._data.clear();
             },
@@ -61,8 +64,12 @@
                 return new Iterator(this._data.iterator());
             },
             "erase": function(itr) {
-                if (!this._data.remove(itr["*"]())) {
+                var pair = itr["*"]();
+                if (!this._data.remove(pair)) {
                     throw new Error("An attempt to remove non-existing map element");
+                }
+                if (this._owning) {
+                    pair.destructor();
                 }
             },
             "find": function(key) {
@@ -77,7 +84,9 @@
             "insert": function(key, value) {
                 var pair = new this.constructor.dataType(key, value);
                 
-                return this._data.insert(pair);
+                if (!this._data.insert(pair)) {
+                    throw new Error("An attempt to insert already existing element into a map");
+                }
             },
             "r_each": function(funct) {
                 this._data.reach(funct);

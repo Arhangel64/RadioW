@@ -8,6 +8,7 @@
     defineArray.push("lib/wType/address");
     defineArray.push("lib/wContainer/abstractmap")
     defineArray.push("lib/wContainer/abstractlist")
+    defineArray.push("lib/wContainer/abstractorder")
     
     define(moduleName, defineArray, function test_module() {
         var Class = require("lib/utils/class");
@@ -15,6 +16,7 @@
         var Address = require("lib/wType/address");
         var AbstractMap = require("lib/wContainer/abstractmap");
         var AbstractList = require("lib/wContainer/abstractlist");
+        var AbstractOrder = require("lib/wContainer/abstractorder");
         
         var Test = Class.inherit({
             "className": "Test",
@@ -134,6 +136,58 @@
                 }
                 
                 list.destructor();
+            },
+            "testOrder": function() {
+                var Order = AbstractOrder.template(Address);
+                
+                var order = new Order();
+                
+                var addr1 = new Address(["hop1", "hop2"]);
+                order.push_back(addr1);
+                
+                if (order.size() !== 1) {
+                    console.log("error: problem with size");
+                }
+                
+                var begin = order.begin();
+                var itr = begin.clone();
+                
+                if (begin["*"]() !== addr1) {
+                    console.log("error: problem with iterator");
+                }
+                
+                itr["++"]();
+                if (!itr["=="](order.end())) {
+                    console.log("error: problem with iterator, end");
+                }
+                
+                if (!order.find(addr1)["=="](begin)) {
+                    console.log("error: problem with finding");
+                }
+                
+                order.erase(addr1);
+                console.log(addr1);
+                
+                if (!order.begin()["=="](order.end())) {
+                    console.log("error: problem with empty order");
+                }
+                order.push_back(new Address(["hop1", "hop2"]))
+                order.push_back(new Address(["hop1", "hop3"]))
+                order.push_back(new Address(["hop1", "hop4"]))
+                order.push_back(new Address(["hop1", "hop5"]))
+                order.push_back(new Address(["hop1", "hop6"]))
+                order.push_back(new Address(["hop1", "hop7"]))
+                
+                if (order.size() !== 6) {
+                    console.log("error: problem with size");
+                }
+                
+                itr = order.find(new Address(["hop1", "hop4"]));
+                var end = order.end();
+                
+                for (; !itr["=="](end); itr["++"]()) {
+                    console.log(itr["*"]().toString());
+                }
             }
         });
         

@@ -14,5 +14,6 @@
         
         test.testMap();
         test.testList();
+        test.testOrder();
     });
 })();

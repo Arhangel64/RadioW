@@ -75,6 +75,12 @@
                 
                 this._data = ba[">>"]();
             },
+            "getData": function() {
+                return this._data;
+            },
+            "getDestination": function() {
+                return this._destination;
+            },
             "isSystem": function() {
                 return this._system.valueOf();
             },

@@ -48,15 +48,23 @@ void W::Dispatcher::unregisterHandler(W::Handler* dp)
     n_map::iterator itr = nodes.find(dp->getAddress());
     if (itr != nodes.end())
     {
-        itr->second.erase(dp);
+        W::Order<W::Handler*>::const_iterator o_itr = itr->second.find(dp);
+        if (o_itr != itr->second.end()) {
+            itr->second.erase(dp);
         
-        if (itr->second.size() == 0) {
-            nodes.erase(itr);
+            if (itr->second.size() == 0) {
+                nodes.erase(itr);
+            }
         }
+        else
+        {
+            throw 5;//TODO exception;
+        }
+        
     }
     else
     {
-        //TODO exception;
+        throw 5;//TODO exception;
     }
 }
 

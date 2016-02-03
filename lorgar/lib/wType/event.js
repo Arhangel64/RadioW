@@ -98,6 +98,7 @@
                 if (!(id instanceof Uint64)) {
                     throw new Error("Can't set id, which is not Uint64");
                 }
+                this._senderId = id;
             },
             "toString": function() {
                 var str = "{";

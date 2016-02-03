@@ -56,6 +56,9 @@
                     this._socket.close();
                 }
             },
+            "getId": function() {
+                return this._id;
+            },
             "open": function(addr, port) {
                 var that = this;
                 
@@ -126,7 +129,7 @@
                             throw new Error("Unknown system command: " + cmd);
                     }
                 } else {
-                    trigger("message", ev);
+                    this.trigger("message", ev);
                 }
                 ev.destructor();
             },

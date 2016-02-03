@@ -93,8 +93,6 @@ void W::Socket::onSocketConnected()
 
 void W::Socket::onSocketDisconnected()
 {
-    id = W::Uint64(0);
-    remoteName = String(u"");
     state = disconnected_s;
     emit disconnected();
 }
@@ -153,7 +151,7 @@ void W::Socket::onBinaryMessageReceived(const QByteArray& ba)
 
 void W::Socket::setId(const W::Uint64& p_id)
 {
-    if (id == 0 && state == connecting_s)
+    if (state == connecting_s)
     {
         id = p_id;
     }
@@ -194,7 +192,7 @@ void W::Socket::setRemoteName()
 
 void W::Socket::setName(const W::String& p_name)
 {
-    if (id != 0 && state == connecting_s)
+    if (state == connecting_s)
     {
         remoteName = p_name;
         state = connected_s;

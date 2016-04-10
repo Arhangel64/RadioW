@@ -5,6 +5,8 @@ add_subdirectory(config)
 add_subdirectory(lib)
 add_subdirectory(middleware)
 add_subdirectory(views)
+add_subdirectory(test)
+add_subdirectory(core)
 
 configure_file(package.json package.json)
 configure_file(app.js app.js)

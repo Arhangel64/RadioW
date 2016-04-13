@@ -1,6 +1,3 @@
-var Test = require("./test/test");
-new Test();
-
 var express = require("express");
 var morgan = require("morgan");
 var favicon = require("serve-favicon");
@@ -28,7 +25,7 @@ var server = app.listen(config.get("port"), "127.0.0.1", function () {
 
   var port = server.address().port;
 
- log.info("Magnus is listening on port " + port);
+ log.info("Webserver is listening on port " + port);
 
 });
 var magnus = new Magnus();

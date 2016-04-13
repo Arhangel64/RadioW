@@ -9,6 +9,7 @@ W::Server::Server(const W::String& name, QObject* parent):
     QObject(parent),
     lastId(0),
     connections(),
+    peers(),
     server(0),
     name(name)
 {
@@ -86,13 +87,19 @@ void W::Server::onSocketConnected() {
 void W::Server::onSocketDisconnected() {
     Socket* socket = static_cast<Socket*>(sender());
     std::map<uint64_t, Socket*>::const_iterator it = connections.find(socket->getId());
-    p_map::const_iterator itn = peers.find(socket->getRemoteName());
+    p_map::iterator itn = peers.find(socket->getRemoteName());
     if (it != connections.end()) {
         connections.erase(it);
     }
     if (itn != peers.end())
     {
-        peers.erase(itn);
+        std::map<uint64_t, Socket*>::const_iterator pIt = itn->second.find(socket->getId());
+        if (pIt != itn->second.end()) {
+            itn->second.erase(pIt);
+        }
+        if (itn->second.size() == 0) {
+            peers.erase(itn);
+        }
     }
     socket->deleteLater();
 }

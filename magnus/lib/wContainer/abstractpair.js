@@ -9,7 +9,7 @@ var AbstractPair = Class.inherit({
         if (!this.constructor.firstType || !this.constructor.secondType) {
             throw new Error("An attempt to instantiate a pair without declared member types");
         }
-        if (!(first instanceof this.constructor.firstType) || !(second instanceof this.constructor.secondType)) {
+        if (!(first instanceof this.constructor.firstType)) {
             throw new Error("An attempt to construct a pair from wrong arguments");
         }
         
@@ -18,8 +18,10 @@ var AbstractPair = Class.inherit({
     },
     "destructor": function() {
         this.first.destructor();
-        this.second.destructor();
-        
+        if (this.second) {
+            this.second.destructor();
+        }
+            
         Class.fn.destructor.call(this);
     },
     "<": function(other) {
@@ -46,7 +48,7 @@ AbstractPair.firstType = undefined;
 AbstractPair.secondType = undefined;
 
 AbstractPair.template = function(first, second) {
-    if (!(first instanceof Function) || !(first instanceof Function)) {
+    if (!(first instanceof Function) || !(second instanceof Function)) {
         throw new Error("An attempt to create template pair from wrong arguments");
     }
     if (

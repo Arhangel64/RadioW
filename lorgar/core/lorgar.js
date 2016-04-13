@@ -28,46 +28,71 @@
             "constructor": function() {
                 Class.fn.constructor.call(this);
                 
-                this.socket = new Socket("Lorgar");
+                
                 this.dispatcher = new Dispatcher();
                 this._h_test = new Handler(new Address(["lorgar", "test"]), this, this._test);
                 
                 this.dispatcher.registerHandler(this._h_test);
                 
-                this.socket.on("connected", this._socketConnected, this);
-                this.socket.on("disconnected", this._socketDisconnected, this);
-                this.socket.on("error", this._socketError, this);
+                this.coraxSocket = new Socket("Lorgar");
+                this.coraxSocket.on("connected", this._coraxSocketConnected, this);
+                this.coraxSocket.on("disconnected", this._coraxSocketDisconnected, this);
+                this.coraxSocket.on("error", this._coraxSocketError, this);
+                this.coraxSocket.on("message", this.dispatcher.pass, this.dispatcher);
                 
-                this.socket.on("message", this.dispatcher.pass, this.dispatcher);
+                this.magnusSocket = new Socket("Lorgar");
+                this.magnusSocket.on("connected", this._magnusSocketConnected, this);
+                this.magnusSocket.on("disconnected", this._magnusSocketDisconnected, this);
+                this.magnusSocket.on("error", this._magnusSocketError, this);
+                this.magnusSocket.on("message", this.dispatcher.pass, this.dispatcher);
                 
-                this.socket.open("localhost", 8080);
+                this.coraxSocket.open("localhost", 8080);
+                this.magnusSocket.open("localhost", 8081);
             },
             "destructor": function() {
-                this.socket.close();
+                this.coraxSocket.close();
                 this.dispatcher.unregisterHandler(this._h_test);
                 
                 this._h_test.destructor();
                 this.dispatcher.destructor();
-                this.socket.destructor();
+                this.coraxSocket.destructor();
                 
                 Class.fn.destructor.call(this);
             },
-            "_socketConnected": function() {
+            "_coraxSocketConnected": function() {
                 var address = new Address(["corax", "test"]);
                 var vc = new Vocabulary();
                 vc.insert("msg", new String("Hello, I'm Lorgar"));
                 vc.insert("source", new Address(["lorgar", "test"]));
                 
                 var ev = new Event(address, vc);
-                ev.setSenderId(this.socket.getId());
+                ev.setSenderId(this.coraxSocket.getId());
                 
-                this.socket.send(ev);
+                this.coraxSocket.send(ev);
             },
-            "_socketDisconnected": function() {
-                console.log("socket disconnected");
+            "_coraxSocketDisconnected": function() {
+                console.log("corax socket disconnected");
             },
-            "_socketError": function(e) {
-                console.log("socket error: ");
+            "_coraxSocketError": function(e) {
+                console.log("corax socket error: ");
+                console.log(e);
+            },
+            "_magnusSocketConnected": function() {
+                var address = new Address(["magnus", "test"]);
+                var vc = new Vocabulary();
+                vc.insert("msg", new String("Hello, I'm Lorgar"));
+                vc.insert("source", new Address(["lorgar", "test"]));
+                
+                var ev = new Event(address, vc);
+                ev.setSenderId(this.magnusSocket.getId());
+                
+                this.magnusSocket.send(ev);
+            },
+            "_magnusSocketDisconnected": function() {
+                console.log("magnus socket disconnected");
+            },
+            "_magnusSocketError": function(e) {
+                console.log("magnus socket error: ");
                 console.log(e);
             },
             "_test": function(e) {

@@ -43,7 +43,7 @@
                 });
             },
             "one": function(name) {
-                CSubscribable.fn.on.apply(this, arguments);
+                Subscribable.fn.on.apply(this, arguments);
                 this._events[name][this._events[name].length - 1].once = true;
             },
             "off": function(name, handler) {

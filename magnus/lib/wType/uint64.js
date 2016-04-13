@@ -41,6 +41,13 @@ var Uint64 = Object.inherit({
         }
         return (this._h == other._h) && (this._l == other._l);
     },
+    "++": function() {
+        ++this._l;
+        if (this._l === 4294967296) {
+            this._l = 0;
+            ++this._h;
+        }
+    },
     "clone": function() {
         var clone = new Uint64();
         clone._l = this._l;

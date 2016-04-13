@@ -53,7 +53,7 @@
         AbstractPair.secondType = undefined;
         
         AbstractPair.template = function(first, second) {
-            if (!(first instanceof Function) || !(first instanceof Function)) {
+            if (!(first instanceof Function) || !(second instanceof Function)) {
                 throw new Error("An attempt to create template pair from wrong arguments");
             }
             if (

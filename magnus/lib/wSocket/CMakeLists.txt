@@ -1,3 +1,4 @@
 cmake_minimum_required(VERSION 2.8.12)
 
-configure_file(wSocket.js wSocket.js)
+configure_file(socket.js socket.js)
+configure_file(server.js server.js)

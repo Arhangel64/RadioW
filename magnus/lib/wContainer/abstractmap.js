@@ -8,12 +8,6 @@ var AbstractMap = Class.inherit({
     "constructor": function(owning) {
         Class.fn.constructor.call(this);
         
-        var check = new this.constructor.dataType(new this.constructor.dataType.firstType(), new this.constructor.dataType.secondType());
-        
-        if (!(check instanceof AbstractPair)) {
-            throw new Error("An attempt to instantiate a map without declared member type");
-        }
-        
         this._owning = owning !== false;
         this._data = new RBTree(function (a, b) {
             if (a[">"](b)) {
@@ -64,7 +58,7 @@ var AbstractMap = Class.inherit({
         }
     },
     "find": function(key) {
-        var pair = new this.constructor.dataType(key, new this.constructor.dataType.secondType());
+        var pair = new this.constructor.dataType(key);
         
         var iter = this._data.findIter(pair);
         if (iter === null) {

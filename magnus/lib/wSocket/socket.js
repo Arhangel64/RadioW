@@ -11,7 +11,7 @@ var Address = require("../wType/address");
 
 var Socket = Subscribable.inherit({
     "className": "Socket",
-    "constructor": function(name) {
+    "constructor": function(name, socket, id) {
         Subscribable.fn.constructor.call(this);
         
         this._state = DISCONNECTED;
@@ -25,10 +25,24 @@ var Socket = Subscribable.inherit({
         this._name = name instanceof String ? name : new String(name);
         this._remoteName = new String();
         this._id = new Uint64(0);
-        this._socket;
+        this._serverCreated = false;
         
         this.on("connected", this.onConnected);
         this.on("disconnected", this.onDisconnected);
+        
+        if (socket) {
+            this._serverCreated = true;
+            this._state = CONNECTING;
+            this._socket = socket;
+            this._id.destructor();
+            this._id = id.clone();
+            
+            this._socket.on("close", this._proxy.onClose);
+            this._socket.on("error", this._proxy.onError);
+            this._socket.on("message", this._proxy.onMessage);
+            
+            this._setRemoteId();
+        }
     },
     "destructor": function() {
         this.close();
@@ -49,6 +63,9 @@ var Socket = Subscribable.inherit({
     },
     "getId": function() {
         return this._id;
+    },
+    "getRemoteName": function() {
+        return this._remoteName;
     },
     "_initProxy": function() {
         this._proxy = {
@@ -83,6 +100,9 @@ var Socket = Subscribable.inherit({
                 case "setName":
                     this._setName(ev._data.at("name"));
                     this.trigger("connected");
+                    if (this._serverCreated) {
+                        this._setRemoteName();
+                    }
                     break;
                 default:
                     throw new Error("Unknown system command: " + cmd);
@@ -149,6 +169,17 @@ var Socket = Subscribable.inherit({
         var vc = new Vocabulary();
         vc.insert("command", new String("setName"));
         vc.insert("name", this._name.clone());
+        
+        var ev = new Event(new Address(), vc, true);
+        ev.setSenderId(this._id.clone());
+        this.send(ev);
+        
+        ev.destructor();
+    },
+    "_setRemoteId": function() {
+        var vc = new Vocabulary();
+        vc.insert("command", new String("setId"));
+        vc.insert("id", this._id.clone());
         
         var ev = new Event(new Address(), vc, true);
         ev.setSenderId(this._id.clone());

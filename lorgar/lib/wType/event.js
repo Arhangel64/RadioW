@@ -81,6 +81,9 @@
             "getDestination": function() {
                 return this._destination;
             },
+            "getSenderId": function() {
+                return this._senderId;
+            },
             "isSystem": function() {
                 return this._system.valueOf();
             },

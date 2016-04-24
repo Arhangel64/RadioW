@@ -41,8 +41,8 @@ var Server = Subscribable.inherit({
             this._listening = false;
             this._server.stop();
             this._lastId = new Uint64(0);
-            //this._connections.clear();
-            //this._peers.clear();
+            this._connections.clear();
+            this._peers.clear();
             delete this._server;
         }
     },
@@ -71,9 +71,11 @@ var Server = Subscribable.inherit({
         var cItr = this.srv._connections.find(this.soc.getId());
         if (!cItr["=="](this.srv._connections.end())) {
             var pair = cItr["*"]();
+            console.log("erase1")
             this.srv._connections.erase(cItr);
             //pair.first.destructor();
         }
+        console.log(this.soc.getRemoteName());
         var nItr = this.srv._peers.find(this.soc.getRemoteName());
         if (!nItr["=="](this.srv._peers.end())) {
             var nPair = nItr["*"]();
@@ -88,7 +90,7 @@ var Server = Subscribable.inherit({
                 nPair.destructor();
             }
         }
-        setInterval(function() {this.soc.destructor();}, 1);
+        setTimeout(Server.removeLater.bind(this), 1);
     };
     Server.onSocketConnected = function() {
         var name = this.soc.getRemoteName();
@@ -106,5 +108,8 @@ var Server = Subscribable.inherit({
     };
     Server.ConnectionsMap = AbstractMap.template(Uint64, Socket);
     Server.PeersMap = AbstractMap.template(String, Server.ConnectionsMap);
+    Server.removeLater = function() {
+        this.soc.destructor();
+    }
 
 module.exports = Server;

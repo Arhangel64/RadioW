@@ -46,7 +46,7 @@ var Magnus = Subscribable.inherit({
         socket.one("disconnected", Magnus.onSocketDisconnected, {mgn: this, soc: socket});
     },
     "_test": function(e) {
-        console.log(e);
+        console.log(e.toString());
         
         var data = e.getData();
         var lt = new Address(["lorgar", "test"]);

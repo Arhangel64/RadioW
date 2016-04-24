@@ -78,8 +78,8 @@ AbstractOrder.template = function(data) {
     
     var Order = AbstractOrder.inherit({
         "className": "Order",
-        "constructor": function() {
-            AbstractOrder.fn.constructor.call(this);
+        "constructor": function(owning) {
+            AbstractOrder.fn.constructor.call(this, owning);
         }
     });
     

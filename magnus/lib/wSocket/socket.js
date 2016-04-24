@@ -140,14 +140,6 @@ var Socket = Subscribable.inherit({
     },
     "onDisconnected": function(ev) {
         this._state = DISCONNECTED;
-        
-        this._id.destructor();
-        this._id = new Uint64(0);
-        
-        this._remoteName.destructor();
-        this._remoteName = new String();
-        
-        console.log(ev);
     },
     "_setId": function(id) {
         if ((this._state === CONNECTING) && (this._id.valueOf() === 0)) {

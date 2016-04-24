@@ -12,7 +12,11 @@ app.set('view engine', 'jade');
 app.set('views', __dirname + '/views');
 
 app.use(favicon(__dirname + "/public/favicon.ico"));
-app.use(morgan('dev'));
+
+var httpLog = config.get("httpLog");
+if (httpLog) {
+    app.use(morgan('dev'));
+}
 
 app.use(require("./middleware/reply"));
 

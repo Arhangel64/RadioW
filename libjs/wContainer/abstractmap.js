@@ -119,8 +119,8 @@ AbstractMap.template = function(first, second) {
     
     var Map = AbstractMap.inherit({
         "className": "Map",
-        "constructor": function() {
-            AbstractMap.fn.constructor.call(this);
+        "constructor": function(owning) {
+            AbstractMap.fn.constructor.call(this, owning);
         }
     });
     

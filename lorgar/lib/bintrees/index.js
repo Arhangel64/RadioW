@@ -1,7 +1,7 @@
 "use strict";
 (function rbtree_js() {
     
-    var moduleName = "lib/js_bintrees/rbtree";
+    var moduleName = "lib/bintrees/index";
     
     var defineArray = [];
     
@@ -471,6 +471,8 @@
 
             module.exports = RBTree;
         };
-        return require('__main__');
+        return {
+            RBTree: require('__main__')
+        };
     });
 })();

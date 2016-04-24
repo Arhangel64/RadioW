@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8.12)
 
-configure_file(abstractpair.js abstractpair.js)
-configure_file(abstractmap.js abstractmap.js)
-configure_file(abstractlist.js abstractlist.js)
-configure_file(abstractorder.js abstractorder.js)
+add_jslib(wContainer/abstractmap.js lib/wContainer/abstractmap ${LORGAR_DIR} browser)
+add_jslib(wContainer/abstractlist.js lib/wContainer/abstractlist ${LORGAR_DIR} browser)
+add_jslib(wContainer/abstractorder.js lib/wContainer/abstractorder ${LORGAR_DIR} browser)
+add_jslib(wContainer/abstractpair.js lib/wContainer/abstractpair ${LORGAR_DIR} browser)

@@ -13,10 +13,7 @@
         var Lorgar = require("core/lorgar");
         
         var test = new Test();
-        
-        test.testMap();
-        test.testList();
-        test.testOrder();
+        test.run();
         
         window.lorgar = new Lorgar();
     });

@@ -36,4 +36,3 @@ add_subdirectory(magnus ${MAGNUS_DIR})
 add_subdirectory(lorgar ${LORGAR_DIR})
 
 add_subdirectory(test)
-

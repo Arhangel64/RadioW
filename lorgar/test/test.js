@@ -29,38 +29,42 @@
                 
                 var noEl = map.find(new Address(["addr1", "hop1"]));
                 if (!noEl["=="](map.end())) {
-                    console.log("error: problem with end!");
+                    throw new Error("problem with end!");
                 }
                 
                 map.insert(new Address(["addr1", "hop1"]), new String("hello"));
                 map.insert(new Address(["addr2", "hop2"]), new String("world"));
                 
                 if (map.size() !== 2) {
-                    console.log("error: problem with insertion!");
+                    throw new Error("problem with insertion!");
                 }
                 
                 var itr = map.find(new Address(["addr1", "hop1"]));
                 
                 if (itr["=="](map.end())) {
-                    console.log("error: problem with finding!");
+                    throw new Error("problem with finding!");
                 }
                 
-                console.log(itr["*"]().second.toString());
+                if (itr["*"]().second.toString() !== "hello") {
+                    throw new Error("wrong element found");
+                }
                 itr["++"]();
-                console.log(itr["*"]().second.toString());
+                if (itr["*"]().second.toString() !== "world") {
+                    throw new Error("iterator dereferenced into wrong element after incrementetion");
+                }
                 
                 map.erase(itr);
                 
                 itr = map.find(new Address(["addr2", "hop2"]));
                 
                 if (!itr["=="](map.end())) {
-                    console.log("error: problem with erasing!");
+                    throw new Error("problem with erasing!");
                 }
                 
                 map.clear();
                 
                 if (map.size() > 0) {
-                    console.log("error: problem with clearing!");
+                    throw new Error("problem with clearing!");
                 }
                 map.destructor();
             },
@@ -70,13 +74,13 @@
                 var list = new List();
                 
                 if (!list.begin()["=="](list.end())) {
-                    console.log("error: problem with empty list");
+                   throw new Error("problem with empty list");
                 }
                 
                 list.push_back(new String("h"));
                 
                 if (list.size() !== 1) {
-                    console.log("error: problem with size");
+                    throw new Error("problem with size");
                 }
                 var beg = list.begin();
                 var end = list.end();
@@ -85,16 +89,16 @@
                 end["--"]();
                 
                 if (!beg["=="](list.end())) {
-                    console.log("error: problem with iterator incrementation");
+                    throw new Error("problem with iterator incrementation");
                 }
                 if (!end["=="](list.begin())) {
-                    console.log("error: problem with iterator decrementation");
+                    throw new Error("problem with iterator decrementation");
                 }
                 
                 list.pop_back();
                 
                 if (!list.begin()["=="](list.end())) {
-                    console.log("error: problem with empty list");
+                    throw new Error("problem with empty list");
                 }
                 
                 list.push_back(new String("h"));
@@ -127,12 +131,14 @@
                     str["+="](beg["*"]());
                 }
                 
-                console.log(str.toString());
+                if (str.toString() !== "hello, world!") {
+                    throw new Error("Error push back and erasing");
+                }
                 
                 list.clear();
                 
                 if (!list.begin()["=="](list.end())) {
-                    console.log("error: problem with empty list");
+                    throw new Error("problem with empty list");
                 }
                 
                 list.destructor();
@@ -146,30 +152,32 @@
                 order.push_back(addr1);
                 
                 if (order.size() !== 1) {
-                    console.log("error: problem with size");
+                    throw new Error("problem with size");
                 }
                 
                 var begin = order.begin();
                 var itr = begin.clone();
                 
                 if (begin["*"]() !== addr1) {
-                    console.log("error: problem with iterator");
+                    throw new Error("problem with iterator");
                 }
                 
                 itr["++"]();
                 if (!itr["=="](order.end())) {
-                    console.log("error: problem with iterator, end");
+                    throw new Error("problem with iterator, end");
                 }
                 
                 if (!order.find(addr1)["=="](begin)) {
-                    console.log("error: problem with finding");
+                    throw new Error("problem with finding");
                 }
                 
                 order.erase(addr1);
-                console.log(addr1);
+                if (addr1.toString() !== new Address(["hop1", "hop2"]).toString()) {
+                    throw new Error("key have been destroyed afrer eresing element");
+                }
                 
                 if (!order.begin()["=="](order.end())) {
-                    console.log("error: problem with empty order");
+                    throw new Error("error: problem with empty order");
                 }
                 order.push_back(new Address(["hop1", "hop2"]))
                 order.push_back(new Address(["hop1", "hop3"]))
@@ -179,15 +187,40 @@
                 order.push_back(new Address(["hop1", "hop7"]))
                 
                 if (order.size() !== 6) {
-                    console.log("error: problem with size");
+                    throw new Error("problem with size");
                 }
                 
                 itr = order.find(new Address(["hop1", "hop4"]));
                 var end = order.end();
+                var arr = [
+                    new Address(["hop1", "hop4"]),
+                    new Address(["hop1", "hop5"]),
+                    new Address(["hop1", "hop6"]),
+                    new Address(["hop1", "hop7"])
+                ]
+                var i = 0;
                 
                 for (; !itr["=="](end); itr["++"]()) {
-                    console.log(itr["*"]().toString());
+                    if (!itr["*"]()["=="](arr[i])) {
+                        throw new Error("problem with finding element in the middle and iteration to the end");
+                    }
+                    ++i;
                 }
+                
+                order.destructor();
+            },
+            "run": function() {
+                console.log("Starting tests");
+                try {
+                    this.testList();
+                    this.testMap();
+                    this.testOrder();
+                } catch(e) {
+                    console.error("Testing failed!"):
+                    console.error(e.message);
+                    return;
+                }
+                console.log("Testing complete");
             }
         });
         

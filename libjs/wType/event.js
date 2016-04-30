@@ -96,12 +96,12 @@ var Event = Object.inherit({
     "toString": function() {
         var str = "{";
         
-        str += "\nsystem: " + this._system.toString();
-        str += "\ndestination: " + this._destination.toString();
-        str += "\nsender: " + this._senderId.toString();
-        str += "\ndata: " + this._data.toString();
+        str += "system: " + this._system.toString();
+        str += " destination: " + this._destination.toString();
+        str += " sender: " + this._senderId.toString();
+        str += " data: " + this._data.toString();
         
-        str += "\n}";
+        str += "}";
         
         return str;
     }

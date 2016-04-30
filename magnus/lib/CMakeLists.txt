@@ -5,6 +5,7 @@ add_subdirectory(utils)
 add_subdirectory(wDispatcher)
 add_subdirectory(wType)
 add_subdirectory(wContainer)
+add_subdirectory(wTest)
 
 configure_file(log.js log.js)
 configure_file(httpError.js httpError.js)

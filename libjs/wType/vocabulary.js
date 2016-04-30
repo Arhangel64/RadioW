@@ -7,7 +7,7 @@ var Vocabulary = Object.inherit({
     "constructor": function() {
         Object.fn.constructor.call(this);
         
-        this._data = GLOBAL.Object.create(null);
+        this._data = global.Object.create(null);
         this._length = 0;
     },
     "destructor": function() {
@@ -23,7 +23,7 @@ var Vocabulary = Object.inherit({
             this._data[key].destructor();
         }
         
-        this._data = GLOBAL.Object.create(null);
+        this._data = global.Object.create(null);
         this._length = 0;
     },
     "clone": function() {

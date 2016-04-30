@@ -32,5 +32,5 @@ var server = app.listen(config.get("port"), "127.0.0.1", function () {
  log.info("Webserver is listening on port " + port);
 
 });
-var magnus = new Magnus();
+var magnus = new Magnus(config);
 

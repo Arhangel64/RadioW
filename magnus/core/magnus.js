@@ -8,11 +8,20 @@ var Event = require("../lib/wType/event");
 var Vocabulary = require("../lib/wType/vocabulary");
 var Dispatcher = require("../lib/wDispatcher/dispatcher");
 var Handler = require("../lib/wDispatcher/handler");
+var log = require("../lib/log")(module);
 
 var Magnus = Subscribable.inherit({
     "className": "Magnus",
-    "constructor": function() {
+    "constructor": function(config) {
         Subscribable.fn.constructor.call(this);
+        this._cfg = config;
+        
+        if (this._cfg.get("testing")) {
+            var Test = require("../test/test");
+            var test = new Test()
+            test.run();
+            test.destructor();
+        }
         
         this.dispatcher = new Dispatcher();
         this._h_test = new Handler(new Address(["magnus", "test"]), this, this._test);
@@ -27,7 +36,7 @@ var Magnus = Subscribable.inherit({
         this.coraxSocket.on("message", this.dispatcher.pass, this.dispatcher);
         this.coraxSocket.open("localhost", 8080);
         
-        console.log("Magnus is listening on port 8081");
+        log.info("Magnus is listening on port 8081");
     },
     "_onCoraxConnected": function() {
         var address = new Address(["corax", "test"]);
@@ -46,7 +55,7 @@ var Magnus = Subscribable.inherit({
         socket.one("disconnected", Magnus.onSocketDisconnected, {mgn: this, soc: socket});
     },
     "_test": function(e) {
-        console.log(e.toString());
+        log.info(e.toString());
         
         var data = e.getData();
         var lt = new Address(["lorgar", "test"]);
@@ -69,7 +78,7 @@ var Magnus = Subscribable.inherit({
 });
 
 Magnus.onSocketDisconnected = function() {
-    console.log("Connection closed, id: " + this.soc.getId().toString());
+    log.info("Connection closed, id: " + this.soc.getId().toString());
 }
 
 module.exports = Magnus;

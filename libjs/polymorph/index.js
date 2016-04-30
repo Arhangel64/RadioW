@@ -26,7 +26,7 @@ fs.readFile(path, function(err, buffer) {
         file = file.replace(/module.exports[\s]*=/g, "return");
         var lines = file.split("\n");
         
-        output =    "(function (GLOBAL){ \n" +
+        output =    "(function (global){ \n" +
                     "  var moduleName = \""+moduleName+"\"\n";
                     
         var add = dr.resolve(lines);

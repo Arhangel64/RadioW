@@ -52,7 +52,7 @@ var String = Object.inherit({
             var h = ba.pop();
             var l = ba.pop();
             
-            this._data += GLOBAL.String.fromCharCode((h << 4) | l);
+            this._data += global.String.fromCharCode((h << 4) | l);
         }
     },
     "serialize": function(ba) {

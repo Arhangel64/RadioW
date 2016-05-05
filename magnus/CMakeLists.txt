@@ -7,6 +7,7 @@ add_subdirectory(middleware)
 add_subdirectory(views)
 add_subdirectory(test)
 add_subdirectory(core)
+add_subdirectory(models)
 
 configure_file(package.json package.json)
 configure_file(app.js app.js)

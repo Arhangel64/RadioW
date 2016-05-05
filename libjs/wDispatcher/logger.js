@@ -1,5 +1,5 @@
 "use strict";
-var DefaultHandler = require("../defaulthandler");
+var DefaultHandler = require("./defaulthandler");
         
 var Logger = DefaultHandler.inherit({
     "className": "Logger",
@@ -13,4 +13,4 @@ var Logger = DefaultHandler.inherit({
     }
 });
 
-return Logger;
+module.exports = Logger;

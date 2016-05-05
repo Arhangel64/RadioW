@@ -8,35 +8,49 @@ var Event = require("../lib/wType/event");
 var Vocabulary = require("../lib/wType/vocabulary");
 var Dispatcher = require("../lib/wDispatcher/dispatcher");
 var Handler = require("../lib/wDispatcher/handler");
+var Logger = require("../lib/wDispatcher/logger");
 var log = require("../lib/log")(module);
+
+var ModelString = require("../models/string");
 
 var Magnus = Subscribable.inherit({
     "className": "Magnus",
     "constructor": function(config) {
         Subscribable.fn.constructor.call(this);
+        
         this._cfg = config;
         
-        if (this._cfg.get("testing")) {
-            var Test = require("../test/test");
-            var test = new Test()
-            test.run();
-            test.destructor();
-        }
+        this._initDispatcher();
+        this._initServer();
+        this._initModels();
         
-        this.dispatcher = new Dispatcher();
-        this._h_test = new Handler(new Address(["magnus", "test"]), this, this._test);
-        this.dispatcher.registerHandler(this._h_test);
-        
-        this.server = new Server("Magnus");
-        this.server.on("newConnection", this._onNewConnection, this);
-        this.server.listen(8081);
-        
+        var port = this._cfg.get("webSocketServerPort");
+        this.server.listen(port);
+        global.magnus = this;
+        log.info("Magnus is listening on port " + port);
+    },
+    "connectCorax": function() {
+        this.coraxSocket.open("localhost", 8080);
+    },
+    "_initCoraxSocket": function() {
         this.coraxSocket = new Socket("Magnus");
         this.coraxSocket.on("connected", this._onCoraxConnected, this);
         this.coraxSocket.on("message", this.dispatcher.pass, this.dispatcher);
-        this.coraxSocket.open("localhost", 8080);
-        
-        log.info("Magnus is listening on port 8081");
+    },
+    "_initDispatcher": function() {
+        this.dispatcher = new Dispatcher();
+        this._h_test = new Handler(new Address(["magnus", "test"]), this, this._test);
+        this._logger = new Logger();
+        this.dispatcher.registerHandler(this._h_test);
+        this.dispatcher.registerDefaultHandler(this._logger);
+    },
+    "_initModels": function() {
+        this._version = new ModelString(new Address(["magnus", "version"]), this._cfg.get("version"));
+        this._version.register(this.dispatcher);
+    },
+    "_initServer": function() {
+        this.server = new Server("Magnus");
+        this.server.on("newConnection", this._onNewConnection, this);
     },
     "_onCoraxConnected": function() {
         var address = new Address(["corax", "test"]);
@@ -53,6 +67,8 @@ var Magnus = Subscribable.inherit({
     "_onNewConnection": function(socket) {
         socket.on("message", this.dispatcher.pass, this.dispatcher);
         socket.one("disconnected", Magnus.onSocketDisconnected, {mgn: this, soc: socket});
+        
+        log.info("New connection, id: " + socket.getId().toString());
     },
     "_test": function(e) {
         log.info(e.toString());

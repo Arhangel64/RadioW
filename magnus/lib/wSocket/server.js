@@ -71,11 +71,9 @@ var Server = Subscribable.inherit({
         var cItr = this.srv._connections.find(this.soc.getId());
         if (!cItr["=="](this.srv._connections.end())) {
             var pair = cItr["*"]();
-            console.log("erase1")
             this.srv._connections.erase(cItr);
             //pair.first.destructor();
         }
-        console.log(this.soc.getRemoteName());
         var nItr = this.srv._peers.find(this.soc.getRemoteName());
         if (!nItr["=="](this.srv._peers.end())) {
             var nPair = nItr["*"]();

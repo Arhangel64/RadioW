@@ -28,26 +28,51 @@ var AbstractPair = Class.inherit({
         if (!(other instanceof this.constructor)) {
             throw new Error("Can't compare pairs with different content types");
         }
-        return this.first["<"](other.first);
+        if (this.constructor.complete) {
+            if (this.first["<"](other.first)) {
+                return true;
+            } else if(this.first["=="](other.first)) {
+                this.second["<"](other.second);
+            } else {
+                return false;
+            }
+        } else {
+            return this.first["<"](other.first);
+        }
     },
     ">": function(other) {
         if (!(other instanceof this.constructor)) {
             throw new Error("Can't compare pairs with different content types");
         }
-        return this.first[">"](other.first);
+        if (this.constructor.complete) {
+            if (this.first[">"](other.first)) {
+                return true;
+            } else if(this.first["=="](other.first)) {
+                this.second[">"](other.second);
+            } else {
+                return false;
+            }
+        } else {
+            return this.first[">"](other.first);
+        }
     },
     "==": function(other) {
         if (!(other instanceof this.constructor)) {
             throw new Error("Can't compare pairs with different content types");
         }
-        return this.first["=="](other.first);
+        if (this.constructor.complete) {
+            return this.first["=="](other.first) && this.second["=="](other.second);
+        } else {
+            return this.first["=="](other.first);
+        }
     }
 });
 
 AbstractPair.firstType = undefined;
 AbstractPair.secondType = undefined;
+AbstractPair.complete = false;
 
-AbstractPair.template = function(first, second) {
+AbstractPair.template = function(first, second, complete) {
     if (!(first instanceof Function) || !(second instanceof Function)) {
         throw new Error("An attempt to create template pair from wrong arguments");
     }
@@ -59,6 +84,17 @@ AbstractPair.template = function(first, second) {
     {
         throw new Error("Not acceptable first type");
     }
+    if (
+            complete &&
+            (
+                !(second.prototype["<"] instanceof Function) ||
+                !(second.prototype[">"] instanceof Function) ||
+                !(second.prototype["=="] instanceof Function)
+            )
+        )
+    {
+        throw new Error("Not acceptable second type");
+    }
     var Pair = AbstractPair.inherit({
         "className": "Pair",
         "constructor": function(first, second) {
@@ -67,6 +103,7 @@ AbstractPair.template = function(first, second) {
     });
     Pair.firstType = first;
     Pair.secondType = second;
+    Pair.complete = complete === true;
     
     return Pair;
 };

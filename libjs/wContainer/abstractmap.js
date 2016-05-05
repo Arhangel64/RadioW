@@ -78,6 +78,16 @@ var AbstractMap = Class.inherit({
     },
     "size": function() {
         return this._data.size;
+    },
+    "lowerBound": function(key) {
+        var pair = new this.constructor.dataType(key);
+        
+        return new Iterator(this._data.lowerBound(pair));
+    },
+    "upperBound": function(key) {
+        var pair = new this.constructor.dataType(key);
+        
+        return new Iterator(this._data.upperBound(pair));
     }
 });
 

@@ -6,6 +6,13 @@ var Magnus = require("./core/magnus");
 var config = require("./config");
 var log = require("./lib/log")(module);
 
+if (config.get("testing")) {
+    var Test = require("./test/test");
+    var test = new Test()
+    test.run();
+    test.destructor();
+}
+
 var app = express();
 
 app.set('view engine', 'jade');
@@ -25,7 +32,7 @@ app.use(express.static('public'));
 app.use(require("./middleware/notFound"));
 app.use(require("./middleware/errorHandler"));
 
-var server = app.listen(config.get("port"), "127.0.0.1", function () {
+var server = app.listen(config.get("webServerPort"), "127.0.0.1", function () {
 
   var port = server.address().port;
 

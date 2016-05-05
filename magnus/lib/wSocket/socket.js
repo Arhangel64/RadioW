@@ -76,7 +76,7 @@ var Socket = Subscribable.inherit({
         };
     },
     "_onClose": function(ev) {
-        this.trigger("disconnected", ev);
+        this.trigger("disconnected", ev, this);
     },
     "_onError": function(err) {
         this.trigger("error", err);

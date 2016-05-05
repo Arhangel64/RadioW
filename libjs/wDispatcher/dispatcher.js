@@ -49,7 +49,7 @@ var Dispatcher = Class.inherit({
             throw new Error("Can't unregister hander");
         }
     },
-    "registerDefautHandler": function(dh) {
+    "registerDefaultHandler": function(dh) {
         this._defautHandlers.push_back(dh);
     },
     "unregisterDefaultHandler": function(dh) {

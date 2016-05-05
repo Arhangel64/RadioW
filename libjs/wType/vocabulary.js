@@ -81,7 +81,7 @@ var Vocabulary = Object.inherit({
             } else {
                 str += ", ";
             }
-            str += key;
+            str += key + ": ";
             str += this._data[key].toString();
             
         }

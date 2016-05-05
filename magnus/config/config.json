@@ -1,5 +1,6 @@
 {
-    "port": 3000,
+    "webServerPort": 3000,
+    "webSocketServerPort": 8081,
     "version": "0.0.1",
     "build": "debug",
     "httpLog": false,

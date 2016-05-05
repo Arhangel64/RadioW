@@ -40,14 +40,20 @@ var Subscribable = Class.inherit({
         Subscribable.fn.on.apply(this, arguments);
         this._events[name][this._events[name].length - 1].once = true;
     },
-    "off": function(name, handler) {
+    "off": function(name, handler, context) {
 
         if (typeof name === "string" && this._events[name]) {
             if (handler instanceof Function) {
                 var handlers = this._events[name];
                 for (var i = handlers.length - 1; i >= 0 ; --i) {
                     if (handlers[i].handler === handler) {
-                        handlers.splice(i, 1);
+                        if (context) {
+                            if (handlers[i].context === context) {
+                                handlers.splice(i, 1);
+                            }
+                        } else {
+                            handlers.splice(i, 1);
+                        }
                     }
                 }
             } else {

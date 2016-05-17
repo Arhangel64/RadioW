@@ -16,6 +16,9 @@
     
     defineArray.push("models/string");
     
+    defineArray.push("views/view");
+    defineArray.push("views/string");
+    
     define(moduleName, defineArray, function lorgar_module() {
         var Class = require("lib/utils/class");
         var Socket = require("lib/wSocket/socket");
@@ -29,6 +32,9 @@
         var String = require("lib/wType/string");
         
         var ModelString = require("models/string");
+        
+        var View = require("views/view");
+        var ViewString = require("views/string");
         
         var Lorgar = Class.inherit({
             "className": "Lorgar",
@@ -102,11 +108,13 @@
                 this.magnusSocket.on("message", this.dispatcher.pass, this.dispatcher);
             },
             "_initModels": function() {
+                this._body = new View(null, document.body);
+                var vs = new ViewString();
+                this._body.append(vs);
+                
                 this._version = new ModelString(new Address(["magnus", "version"]));
                 this._version.register(this.dispatcher, this.magnusSocket);
-                this._version.on("got", function(str) {
-                    console.info("magnus version is " + str);
-                });
+                this._version.addView(vs);
             },
             "_magnusSocketConnected": function() {
                 this._version.subscribe();

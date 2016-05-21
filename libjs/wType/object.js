@@ -41,7 +41,8 @@ Object.objectType = {
     "Uint64"    :   2,
     "Address"   :   3,
     "Boolean"   :   4,
-    "Event"     :   5
+    "Event"     :   5,
+    "Vector"    :   6
 };
 
 Object.push32int = function(int, ba) {

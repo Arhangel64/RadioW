@@ -41,7 +41,7 @@ module.exports = Class.inherit({
     },
     destructor: function() {
         for (var i = 0; i < this._uncyclic.length; ++i) {
-            this.uncyclic[i].call();
+            this._uncyclic[i].call();
         }
 
         for (var key in this) {

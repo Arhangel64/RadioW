@@ -6,6 +6,7 @@ var Vocabulary = require("./vocabulary");
 var Address = require("./address");
 var Boolean = require("./boolean");
 var Event = require("./event");
+var Vector = require("./vector");
 
 var ByteArray = Object.inherit({
     "className": "ByteArray",
@@ -53,6 +54,8 @@ var ByteArray = Object.inherit({
             case Object.objectType.Event:
                 Type = Event;
                 break;
+            case Object.object.Vector:
+                Type = Vector;
             default:
                 throw new Error("Unsupported data type found during deserialization: " + type);
         }

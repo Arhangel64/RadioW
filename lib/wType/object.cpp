@@ -6,6 +6,7 @@
 #include "address.h"
 #include "boolean.h"
 #include "event.h"
+#include "vector.h"
 #include <arpa/inet.h>
 //#include <stdint.h>
 
@@ -72,6 +73,10 @@ W::Object* W::Object::fromByteArray(ByteArray& in)
             
         case event:
             answer = new Event();
+            break;
+            
+        case vector:
+            answer = new Vector();
             break;
     }
     

@@ -18,7 +18,8 @@ namespace W {
             uint64,
             address,
             boolean,
-            event
+            event,
+            vector
         };
         
         typedef uint32_t size_type;

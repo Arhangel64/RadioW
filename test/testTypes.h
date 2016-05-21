@@ -12,6 +12,7 @@
 #include <wType/address.h>
 #include <wType/boolean.h>
 #include <wType/event.h>
+#include <wType/vector.h>
 
 class TestTypes : public CxxTest::TestSuite
 {
@@ -87,6 +88,34 @@ public:
         TS_ASSERT_EQUALS(vc.size(), dvc->size());
         W::String val2 = static_cast<const W::String&>(dvc->at(key1));
         TS_ASSERT_EQUALS(val2, val1);
+        
+        delete deserialized;
+    }
+    void testVectorSerialization() 
+    {
+        W::String str1(u"foo");
+        W::String str2(u"bar");
+        
+        W::Vector vec;
+        W::ByteArray bytes;
+        
+        vec.push(str1);
+        vec.push(str2);
+        vec.push(str2);
+        vec.push(str2);
+        vec.push(str1);
+        
+        TS_ASSERT_EQUALS(vec.size(), 5);
+        TS_TRACE(vec.toString());
+        
+        bytes << vec;
+        W::Object* deserialized = W::Object::fromByteArray(bytes);
+        W::Vector* dvec = static_cast<W::Vector*>(deserialized);
+        
+        TS_ASSERT_EQUALS(vec.size(), dvec->size());
+        W::String str22 = static_cast<const W::String&>(dvec->at(3));
+        
+        TS_ASSERT_EQUALS(str2, str22);
         
         delete deserialized;
     }

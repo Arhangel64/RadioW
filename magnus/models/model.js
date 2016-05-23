@@ -17,6 +17,7 @@ var Model = Subscribable.inherit({
         
         this._subscribers = new SMap(false);
         this._handlers = [];
+        this._models = [];
         this._address = address;
         this._subscribersCount = 0;
         
@@ -24,6 +25,7 @@ var Model = Subscribable.inherit({
         this.addHandler("unsubscribe");
     },
     "destructor": function() {
+        var i;
         this.unregister();
         
         var itr = this._subscribers.begin();
@@ -32,13 +34,17 @@ var Model = Subscribable.inherit({
         for (;!itr["=="](end); itr["++"]()) {
             var obj = itr["*"]().second;
             obj.order.destructor();
-            obj.socket.ff("disconnected", this._onSocketDisconnected, this);
+            obj.socket.off("disconnected", this._onSocketDisconnected, this);
         }
         
         this._subscribers.destructor();
         
-        for (var j = 0; j < this._handlers.length; ++j) {
-            this._handlers[j].destructor();
+        for (i = 0; i < this,_models.length; ++i) {
+            this._models[i].destructor();
+        }
+        
+        for (i = 0; i < this._handlers.length; ++i) {
+            this._handlers[i].destructor();
         }
         
         Subscribable.fn.destructor.call(this);
@@ -55,7 +61,15 @@ var Model = Subscribable.inherit({
             this._dp.registerHandler(handler);
         }
     },
-    "broadcast": function(handler, vc) {
+    "addModel": function(model) {
+        if (!(model instanceof Model)) {
+            throw new Error("An attempt to add not a model into " + this.className);
+        }
+        if (this._dp) {
+            model.register(this._dp, this._socket);
+        }
+    },
+    "broadcast": function(vc, handler) {
         var itr = this._subscribers.begin();
         var end = this._subscribers.end();
         vc.insert("source", this._address.clone());
@@ -67,19 +81,29 @@ var Model = Subscribable.inherit({
             var oEnd = order.end();
             for (;!oItr["=="](oEnd); oItr["++"]()) {
                 var addr = oItr["*"]()["+"](new Address([handler]));
-                var ev = new Event(addr, vc);
+                var ev = new Event(addr, vc.clone());
                 ev.setSenderId(obj.socket.getId());
                 obj.socket.send(ev);
+                ev.destructor();
             }
         }
+        vc.destructor();
+    },
+    "getAddress": function() {
+        return this._address.clone();
     },
     "register": function(dp) {
         if (this._dp) {
             throw new Error("Model is already registered in dispatcher");
         }
         this._dp = dp;
+        var i;
         
-        for (var i = 0; i < this._handlers.length; ++i) {
+        for (i = 0; i < this._models.length; ++i) {
+            this._models[i].register(dp);
+        }
+        
+        for (i = 0; i < this._handlers.length; ++i) {
             dp.registerHandler(this._handlers[i]);
         }
     },
@@ -104,7 +128,7 @@ var Model = Subscribable.inherit({
         if (itr["=="](this._subscribers.end())) {
             ord = new Model.addressOrder(true);
             var socket = global.magnus.server.getConnection(id);
-            socket.on("disconnected", this._onSocketDisconnected, this);
+            socket.one("disconnected", this._onSocketDisconnected, this);
             this._subscribers.insert(id.clone(), {order: ord, socket: socket});
         } else {
             ord = itr["*"]().second.order;
@@ -132,8 +156,6 @@ var Model = Subscribable.inherit({
         var id = socket.getId();
         var itr = this._subscribers.find(id);
         
-        socket.off("disconnected", this._onSocketDisconnected, this);
-        
         if (itr["=="](this._subscribers.end())) {
             log.warn(   "id: " + id.toString() + ", " +
                         "after socket disconnected trying to remove subscriptions from model " +
@@ -148,7 +170,13 @@ var Model = Subscribable.inherit({
     },
     "unregister": function() {
         if (this._dp) {
-            for (var i = 0; i < this._handlers.length; ++i) {
+            var i;
+            
+            for (i = 0; i < this._models.length; ++i) {
+                this._models[i].unregister();
+            }
+            
+            for (i = 0; i < this._handlers.length; ++i) {
                 this._dp.unregisterHandler(this._handlers[i]);
             }
             delete this._dp;

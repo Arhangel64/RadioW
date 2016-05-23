@@ -31,17 +31,23 @@
                 
                 this._views = [];
                 this._handlers = [];
+                this._models = [];
             },
             "destructor": function() {
+                var i;
                 this._unsubscribe();
                 this._unregister();
                 
-                for (var i = 0; i < this._views.length; ++i) {
+                for (i = 0; i < this._models.length; ++i) {
+                    this._models[i].destructor();
+                }
+                
+                for (i = 0; i < this._views.length; ++i) {
                     this._views.destructor();
                 }
                 
-                for (var j = 0; j < this._handlers.length; ++j) {
-                    this._handlers[j].destructor();
+                for (i = 0; i < this._handlers.length; ++i) {
+                    this._handlers[i].destructor();
                 }
                 
                 Subscribable.fn.destructor.call(this);
@@ -58,17 +64,30 @@
                     this._dp.registerHandler(handler);
                 }
             },
+            "addModel": function(model) {
+                if (!(model instanceof Model)) {
+                    throw new Error("An attempt to add not a model into " + this.className);
+                }
+                if (this._dp) {
+                    model.register(this._dp, this._socket);
+                }
+            },
             "addView": function(view) {
                 this._views.push(view);
             },
             "register": function(dp, socket) {
+                var i;
                 if (this._dp) {
                     throw new Error("Model is already registered in dispatcher");
                 }
                 this._dp = dp;
                 this._socket = socket;
                 
-                for (var i = 0; i < this._handlers.length; ++i) {
+                for (i = 0; i < this._models.length; ++i) {
+                    this._models.register(this._dp, this._socket);
+                }
+                
+                for (i = 0; i < this._handlers.length; ++i) {
                     dp.registerHandler(this._handlers[i]);
                 }
             },
@@ -93,7 +112,11 @@
             },
             "unregister": function() {
                 if (this._dp) {
-                    for (var i = 0; i < this._handlers.length; ++i) {
+                    var i;
+                    for (i = 0; i < this._models.length; ++i) {
+                        this._models.unregister();
+                    }
+                    for (i = 0; i < this._handlers.length; ++i) {
                         this._dp.unregisterHandler(this._handlers[i]);
                     }
                     delete this._dp;

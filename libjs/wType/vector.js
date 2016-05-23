@@ -49,14 +49,14 @@ var Vector = Object.inherit({
         this._data.push(value);
     },
     "serialize": function(ba) {
-        Object.push32int(this.data._length, ba);
+        Object.push32int(this._data.length, ba);
         
         for (var i = 0; i < this._data.length; ++i) {
             ba["<<"](this._data[i]);
         }
     },
     "size": function() {
-        return this.data._length;
+        return this._data.length;
     },
     "toString": function() {
         var str = "[";

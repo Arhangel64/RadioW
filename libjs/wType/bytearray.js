@@ -54,8 +54,9 @@ var ByteArray = Object.inherit({
             case Object.objectType.Event:
                 Type = Event;
                 break;
-            case Object.object.Vector:
+            case Object.objectType.Vector:
                 Type = Vector;
+                break;
             default:
                 throw new Error("Unsupported data type found during deserialization: " + type);
         }

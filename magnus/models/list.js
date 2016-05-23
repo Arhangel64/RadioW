@@ -1,16 +1,16 @@
 "use strict";
 
 var Model = require("./model");
-var String = require("../lib/wType/string");
-var Address = require("../lib/wType/address");
+var Vector = require("../lib/wType/vector");
 var Vocabulary = require("../lib/wType/vocabulary");
+var Object = require("../lib/wType/object")
 
-var ModelString = Model.inherit({
-    "className": "String",
-    "constructor": function(address, string) {
+var List = Model.inherit({
+    "className": "List",
+    "constructor": function(address) {
         Model.fn.constructor.call(this, address);
         
-        this._data = new String(string);
+        this._data = new Vector();
         
         this.addHandler("get");
     },
@@ -29,7 +29,18 @@ var ModelString = Model.inherit({
         
         vc.insert("data", this._data.clone());
         this.response(vc, "get", ev);
+    },
+    "push": function(obj) {
+        if (!(obj instanceof Object)) {
+            throw new Error("An attempt to push into list unserializable value");
+        }
+        this._data.push(obj);
+        
+        var vc = new Vocabulary();
+        vc.insert("data", obj.clone());
+        
+        this.broadcast(vc, "push");
     }
 });
 
-module.exports = ModelString;
+module.exports = List;

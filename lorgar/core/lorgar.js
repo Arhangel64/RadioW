@@ -14,10 +14,9 @@
     defineArray.push("lib/wType/vocabulary");
     defineArray.push("lib/wType/string");
     
-    defineArray.push("models/string");
+    defineArray.push("models/globalControls");
     
     defineArray.push("views/view");
-    defineArray.push("views/string");
     
     define(moduleName, defineArray, function lorgar_module() {
         var Class = require("lib/utils/class");
@@ -31,10 +30,9 @@
         var Vocabulary = require("lib/wType/vocabulary");
         var String = require("lib/wType/string");
         
-        var ModelString = require("models/string");
+        var GlobalControls = require("models/globalControls");
         
         var View = require("views/view");
-        var ViewString = require("views/string");
         
         var Lorgar = Class.inherit({
             "className": "Lorgar",
@@ -50,6 +48,9 @@
                 //this.connectCorax();
             },
             "destructor": function() {
+                this._gc.destructor();
+                this._body.destructor();
+                
                 this.coraxSocket.close();
                 this.dispatcher.unregisterHandler(this._h_test);
                 this.dispatcher.unregisterDefaultHandler(this._logger);
@@ -109,15 +110,12 @@
             },
             "_initModels": function() {
                 this._body = new View(null, document.body);
-                var vs = new ViewString();
-                this._body.append(vs);
                 
-                this._version = new ModelString(new Address(["magnus", "version"]));
-                this._version.register(this.dispatcher, this.magnusSocket);
-                this._version.addView(vs);
+                this._gc = new GlobalControls(new Address(["magnus", "gc"]), this._body);
+                this._gc.register(this.dispatcher, this.magnusSocket);
             },
             "_magnusSocketConnected": function() {
-                this._version.subscribe();
+                this._gc.subscribe();
             },
             "_magnusSocketDisconnected": function() {
                 console.log("magnus socket disconnected");

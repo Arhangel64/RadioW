@@ -11,7 +11,7 @@ var Handler = require("../lib/wDispatcher/handler");
 var Logger = require("../lib/wDispatcher/logger");
 var log = require("../lib/log")(module);
 
-var ModelString = require("../models/string");
+var GlobalControls = require("../models/globalControls");
 
 var Magnus = Subscribable.inherit({
     "className": "Magnus",
@@ -39,14 +39,12 @@ var Magnus = Subscribable.inherit({
     },
     "_initDispatcher": function() {
         this.dispatcher = new Dispatcher();
-        this._h_test = new Handler(new Address(["magnus", "test"]), this, this._test);
         this._logger = new Logger();
-        this.dispatcher.registerHandler(this._h_test);
         this.dispatcher.registerDefaultHandler(this._logger);
     },
     "_initModels": function() {
-        this._version = new ModelString(new Address(["magnus", "version"]), this._cfg.get("version"));
-        this._version.register(this.dispatcher);
+        this._gc = new GlobalControls(new Address(["magnus", "gc"]));
+        this._gc.register(this.dispatcher);
     },
     "_initServer": function() {
         this.server = new Server("Magnus");
@@ -69,27 +67,6 @@ var Magnus = Subscribable.inherit({
         socket.one("disconnected", Magnus.onSocketDisconnected, {mgn: this, soc: socket});
         
         log.info("New connection, id: " + socket.getId().toString());
-    },
-    "_test": function(e) {
-        log.info(e.toString());
-        
-        var data = e.getData();
-        var lt = new Address(["lorgar", "test"]);
-        var src = data.at("source");
-        
-        if (src["=="](lt)) {
-            var socket = this.server.getConnection(e.getSenderId());
-            
-            var address = lt.clone();
-            var vc = new Vocabulary();
-            vc.insert("msg", new String("Hello, I'm Magnus"));
-            vc.insert("source", new Address(["magnus", "test"]));
-        
-            var ev = new Event(address, vc);
-            ev.setSenderId(socket.getId().clone());
-            socket.send(ev);
-            ev.destructor()
-        }
     }
 });
 

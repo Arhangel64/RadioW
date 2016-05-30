@@ -13,7 +13,12 @@
             "constructor": function(options, element) {
                 Subscribable.fn.constructor.call(this);
                 
-                var base = {};
+                var base = {
+                    minWidth: 0,
+                    minHeight: 0,
+                    maxWidth: Infinity,
+                    maxHeight: Infinity
+                };
                 W.extend(base, options);
                 
                 this._o = base;
@@ -22,36 +27,48 @@
                 } else {
                     this._e = document.createElement("div");
                 }
-                this._c = [];
                 this._p = undefined;
+                this._w = undefined;
+                this._h = undefined;
+                
+                this._initElement();
             },
             "destructor": function() {
                 this.remove()
                 
-                var c = this._c.slice();
-                for (var i = 0; i < c.length; ++i) {
-                    c[i].destructor();
-                }
-                
                 Subscribable.fn.destructor.call(this);
             },
-            "append": function(child) {
-                this._c.push(child);
-                this._e.appendChild(child._e);
-                child._p = this;
+            "constrainHeight": function(h) {
+                h = Math.max(h, this._o.minHeight);
+                h = Math.min(h, this._o.maxHeight);
+            },
+            "constrainWidth": function(w) {
+                w = Math.max(w, this._o.minWidth);
+                w = Math.min(w, this._o.maxWidth);
             },
             "data": function(data) {
                 
+            },
+            "_initElement": function() {
+                this._e.style.position = "absolute";
+                this._e.style.top = "0";
+                this._e.style.left = "0";
+                this._e.style.boxSizing = "border-box";
             },
             "remove": function() {
                 if (this._p) {
                     this._p.removeChild(this);
                 }
             },
-            "removeChild": function(child) {
-                this._e.removeChild(child._e);
-                this._c.splice(this._c.indexOf(child), 1);
-                child._p = undefined;
+            "setSize": function(w, h) {
+                this._w = this.constrainWidth(w);
+                this._h = this.constrainHeight(h);
+                
+                this._e.style.width = this._w + "px";
+                this._e.style.height = this._h + "px";
+            },
+            "trySize": function(w, h) {
+                return !(w < this._o.minWidth || h < this._o.minHeight || w > this._o.maxWidth || h > this._o.maxHeight)
             }
         });
         

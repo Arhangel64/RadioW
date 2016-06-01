@@ -16,7 +16,9 @@
     
     defineArray.push("models/globalControls");
     
+    defineArray.push("views/view");
     defineArray.push("views/layout");
+    defineArray.push("views/gridLayout");
     
     define(moduleName, defineArray, function lorgar_module() {
         var Class = require("lib/utils/class");
@@ -32,7 +34,9 @@
         
         var GlobalControls = require("models/globalControls");
         
+        var View = require("views/view");
         var Layout = require("views/layout");
+        var GridLayout = require("views/gridLayout");
         
         var Lorgar = Class.inherit({
             "className": "Lorgar",
@@ -112,8 +116,28 @@
                 this._body = new Layout();
                 document.body.innerHTML = "";
                 document.body.appendChild(this._body._e);
-                window.addEventListener("resize",this._onWindowUpdate.bind(this) ,false);
+                window.addEventListener("resize",this._onWindowResize.bind(this) ,false);
                 this._body.setSize(document.body.offsetWidth, document.body.offsetHeight);
+                
+                var mainGrid = new GridLayout();
+                this._body.append(mainGrid);
+                
+                var red = new View({
+                    maxWidth: 200
+                });
+                red._e.style.backgroundColor = "#aa0000";
+                
+                var blue = new View({
+                    minWidth: 200
+                });
+                blue._e.style.backgroundColor = "#0000aa";
+                
+                var green = new View();
+                green._e.style.backgroundColor = "#00aa00";
+                
+                mainGrid.append(red, 0, 0);
+                mainGrid.append(blue, 2, 1);
+                mainGrid.append(green, 1, 2);
                 
                 this._gc = new GlobalControls(new Address(["magnus", "gc"]), this._body);
                 this._gc.register(this.dispatcher, this.magnusSocket);
@@ -128,7 +152,7 @@
                 console.log("magnus socket error: ");
                 console.log(e);
             },
-            "_onWindowUpdate": function() {
+            "_onWindowResize": function() {
                 this._body.setSize(document.body.offsetWidth, document.body.offsetHeight);
             },
             "_test": function(e) {

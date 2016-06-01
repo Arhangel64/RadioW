@@ -17,21 +17,25 @@
                 W.extend(base, options);
                 Layout.fn.constructor.call(this, base);
                 
-                this._lay = [[]];
-                this._cols = [];
-                this._rows = [];
+                this._lay = [[false]];
+                this._cols = [{}];
+                this._rows = [{}];
             },
             "append": function(child, row, col) {
                 this._c.push(child);
                 this._e.appendChild(child._e);
                 child._p = this;
                 
-                while (this._lay.length - 1 !== row) {
+                while (this._lay.length <= row) {
                     this._lay.push([]);
+                    
                 }
-                while (this._lay[row].length - 1 !== col) {
-                    this._lay[row].push(false);
+                for (var i = 0; i < this._lay.length; ++i) {
+                    while (this._lay[i].length <= col) {
+                        this._lay[i].push(false);
+                    }
                 }
+                
                 this._lay[row][col] = child;
                 
                 this._recountLimits();
@@ -47,7 +51,7 @@
                 this._rows = [];
                 
                 for (var i = 0; i < this._lay.length; ++i) {
-                    for (var j = 0; j < this._lay[i].length) {
+                    for (var j = 0; j < this._lay[i].length; ++j) {
                         var e = this._lay[i][j];
                         while (!this._cols[j]) {
                             this._cols.push({});
@@ -58,13 +62,13 @@
                         if (e) {
                             var colMinW = this._cols[j].min || 0;
                             var rowMinH = this._rows[i].min || 0;
-                            var colMaxW = this._cols[j].max === undefined ? Infinity : this._cols[j].max;
-                            var rowMaxH = this._rows[i].max === undefined ? Infinity : this._rows[i].max;
+                            var colMaxW = this._cols[j].max || Infinity;
+                            var rowMaxH = this._rows[i].max || Infinity;
                             
-                            this._cols[j].min = Math.max(colMinW, e.options.minWidth);
-                            this._rows[i].min = Math.max(rowMinH, e.options.minHeight);
-                            this._cols[j].max = Math.min(colMaxW, e.options.maxWidth);
-                            this._rows[i].max = Math.min(rowMaxH, e.options.maxHeight);
+                            this._cols[j].min = Math.max(colMinW, e._o.minWidth);
+                            this._rows[i].min = Math.max(rowMinH, e._o.minHeight);
+                            this._cols[j].max = Math.min(colMaxW, e._o.maxWidth);
+                            this._rows[i].max = Math.min(rowMaxH, e._o.maxHeight);
                         } else {
                             this._cols[j].min = this._cols[j].min || 0;
                             this._rows[i].min = this._rows[i].min || 0;
@@ -79,6 +83,7 @@
                 var totalMaxH = 0;
                 var totalMinW = 0;
                 var totalMinH = 0;
+                var i;
                 
                 for (i = 0; i < this._cols.length; ++i) {
                     totalMaxW += this._cols[i].max;
@@ -114,7 +119,7 @@
                             var donationW = this._cols[i].max - this._cols[i].cur;
                             this._cols[i].don = donationW;
                             candidatesW.push(this._cols[i]);
-                            Math.min(minDotationW, donationW);
+                            minDotationW = Math.min(minDotationW, donationW);
                         }
                         
                     }
@@ -164,7 +169,7 @@
                             var donationH = this._rows[i].max - this._rows[i].cur;
                             this._rows[i].don = donationH;
                             candidatesH.push(this._rows[i]);
-                            Math.min(minDotationH, donationH);
+                            minDotationH = Math.min(minDotationH, donationH);
                         }
                         
                     }
@@ -193,8 +198,8 @@
                 var shiftH = 0;
                 
                 for (var i = 0; i < this._lay.length; ++i) {
-                    shiftH = 0;
-                    for (var j = 0; j < this._lay[i].length) {
+                    shiftW = 0;
+                    for (var j = 0; j < this._lay[i].length; ++j) {
                         var e = this._lay[i][j];
                         if (e) {
                             e.setSize(this._cols[j].cur, this._rows[i].cur);
@@ -210,7 +215,7 @@
                 Layout.fn.removeChild.call(this, child);
                 
                 for (var i = 0; i < this._lay.length; ++i) {
-                    for (var j = 0; j < this._lay[i].length) {
+                    for (var j = 0; j < this._lay[i].length; ++j) {
                         if (child === this._lay[i][j]) {
                             this._lay[i][j] = false;
                         }
@@ -228,7 +233,9 @@
                 this._e.style.width = this._w + "px";
                 this._e.style.height = this._h + "px";
                 
-                this.refreshLay();
+                if (this._c.length) {
+                    this.refreshLay();
+                }
             }
         });
         

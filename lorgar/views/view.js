@@ -41,10 +41,14 @@
             "constrainHeight": function(h) {
                 h = Math.max(h, this._o.minHeight);
                 h = Math.min(h, this._o.maxHeight);
+                
+                return h;
             },
             "constrainWidth": function(w) {
                 w = Math.max(w, this._o.minWidth);
                 w = Math.min(w, this._o.maxWidth);
+                
+                return w;
             },
             "data": function(data) {
                 

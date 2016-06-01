@@ -10,9 +10,10 @@
         
         var Layout = View.inherit({
             "className": "Layout",
-            "constructor": function(options, element) {
+            "constructor": function(options) {
                 var base = {};
                 W.extend(base, options);
+                var element = document.createElement("div");
                 View.fn.constructor.call(this, base, element);
                 
                 this._c = [];

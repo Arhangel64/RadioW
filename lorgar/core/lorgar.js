@@ -16,7 +16,7 @@
     
     defineArray.push("models/globalControls");
     
-    defineArray.push("views/view");
+    defineArray.push("views/layout");
     
     define(moduleName, defineArray, function lorgar_module() {
         var Class = require("lib/utils/class");
@@ -32,7 +32,7 @@
         
         var GlobalControls = require("models/globalControls");
         
-        var View = require("views/view");
+        var Layout = require("views/layout");
         
         var Lorgar = Class.inherit({
             "className": "Lorgar",
@@ -109,7 +109,11 @@
                 this.magnusSocket.on("message", this.dispatcher.pass, this.dispatcher);
             },
             "_initModels": function() {
-                this._body = new View(null, document.body);
+                this._body = new Layout();
+                document.body.innerHTML = "";
+                document.body.appendChild(this._body._e);
+                window.addEventListener("resize",this._onWindowUpdate.bind(this) ,false);
+                this._body.setSize(document.body.offsetWidth, document.body.offsetHeight);
                 
                 this._gc = new GlobalControls(new Address(["magnus", "gc"]), this._body);
                 this._gc.register(this.dispatcher, this.magnusSocket);
@@ -123,6 +127,9 @@
             "_magnusSocketError": function(e) {
                 console.log("magnus socket error: ");
                 console.log(e);
+            },
+            "_onWindowUpdate": function() {
+                this._body.setSize(document.body.offsetWidth, document.body.offsetHeight);
             },
             "_test": function(e) {
                 console.info(e.toString());

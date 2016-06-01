@@ -10,12 +10,12 @@
         
         var GridLayout = Layout.inherit({
             "className": "GridLayout",
-            "constructor": function(options, element) {
+            "constructor": function(options) {
                 var base = {
                     
                 };
                 W.extend(base, options);
-                Layout.fn.constructor.call(this, base, element);
+                Layout.fn.constructor.call(this, base);
                 
                 this._lay = [[]];
                 this._cols = [];
@@ -38,6 +38,9 @@
                 if (this._w !== undefined && this._h !== undefined) {
                     this.refreshLay();
                 }
+            },
+            "_cleanupLay": function() {
+                
             },
             "_recountLimits": function() {
                 this._cols = [];
@@ -186,7 +189,37 @@
                 this._positionElements();
             },
             "_positionElements": function() {
+                var shiftW = 0;
+                var shiftH = 0;
                 
+                for (var i = 0; i < this._lay.length; ++i) {
+                    shiftH = 0;
+                    for (var j = 0; j < this._lay[i].length) {
+                        var e = this._lay[i][j];
+                        if (e) {
+                            e.setSize(this._cols[j].cur, this._rows[i].cur);
+                            e._e.style.top = shiftH + "px"
+                            e._e.style.left = shiftW + "px"
+                        }
+                        shiftW += this._cols[j].cur;
+                    }
+                    shiftH += this._rows[i].cur;
+                }
+            },
+            "removeChild": function(child) {
+                Layout.fn.removeChild.call(this, child);
+                
+                for (var i = 0; i < this._lay.length; ++i) {
+                    for (var j = 0; j < this._lay[i].length) {
+                        if (child === this._lay[i][j]) {
+                            this._lay[i][j] = false;
+                        }
+                    }
+                }
+                
+                this._cleanupLay();
+                this._recountLimits();
+                this.refreshLay();
             },
             "setSize": function(w, h) {
                 this._w = this.constrainWidth(w);

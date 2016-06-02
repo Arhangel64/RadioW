@@ -122,22 +122,26 @@
                 var mainGrid = new GridLayout();
                 this._body.append(mainGrid);
                 
-                var red = new View({
-                    maxWidth: 200
-                });
+                var red = new View();
                 red._e.style.backgroundColor = "#aa0000";
                 
-                var blue = new View({
-                    minWidth: 200
-                });
+                var blue = new View();
                 blue._e.style.backgroundColor = "#0000aa";
                 
                 var green = new View();
                 green._e.style.backgroundColor = "#00aa00";
                 
-                mainGrid.append(red, 0, 0);
-                mainGrid.append(blue, 2, 1);
+                var yellow = new View();
+                yellow._e.style.backgroundColor = "#aaaa00";
+                
+                var cian = new View();
+                cian._e.style.backgroundColor = "#00aaaa";
+                
+                mainGrid.append(red, 1, 1);
+                mainGrid.append(blue, 0, 1);
                 mainGrid.append(green, 1, 2);
+                mainGrid.append(yellow, 2, 1);
+                mainGrid.append(cian, 1, 0);
                 
                 this._gc = new GlobalControls(new Address(["magnus", "gc"]), this._body);
                 this._gc.register(this.dispatcher, this.magnusSocket);

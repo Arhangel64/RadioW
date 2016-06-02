@@ -44,7 +44,33 @@
                 }
             },
             "_cleanupLay": function() {
-                
+                var i;
+                var rowsC = false;
+                var colsC = false;
+                while (!rowsC) {
+                    for (i = 0; i < this._lay[this._lay.length - 1].length; ++i) {
+                        if (this._lay[this._lay.length - 1][i]) {
+                            rowsC = true;
+                            break;
+                        }
+                    }
+                    if (!rowsC) {
+                        this._lay.pop()
+                    }
+                }
+                while (!colsC) {
+                    for (i = 0; i < this._lay.length; ++i) {
+                        if (this._lay[i][this._lay[i].length - 1]) {
+                            colsC = true;
+                            break;
+                        }
+                    }
+                    if (!colsC) {
+                        for (i = 0; i < this._lay.length; ++i) {
+                            this._lay[i].pop();
+                        }
+                    }
+                }
             },
             "_recountLimits": function() {
                 this._cols = [];
@@ -109,37 +135,31 @@
                         this._cols[i].cur = this._cols[i][keyW] * kW;
                     }
                 } else {
-                    var restW = this._w - totalMinW;
-                    var minDotationW = Infinity;
-                    var candidatesW = [];
-                    for (i = 0; i < this._cols.length; ++i) {
-                        this._cols[i].cur = this._cols[i].min;
-                        
-                        if (this._cols[i].cur < this._cols[i].max) {
-                            var donationW = this._cols[i].max - this._cols[i].cur;
-                            this._cols[i].don = donationW;
-                            candidatesW.push(this._cols[i]);
-                            minDotationW = Math.min(minDotationW, donationW);
-                        }
-                        
-                    }
+                    var restW = this._w;
+                    var cWMax = this._cols.slice();
+                    var cWMin = this._cols.slice();
                     
-                    candidatesW.sort(GridLayout._candidatesSort);
+                    cWMax.sort(GridLayout._candidatesSortMax);
+                    cWMin.sort(GridLayout._candidatesSortMin);
                     
                     while (restW) {
-                        var portionW = restW / candidatesW.length;
-                        if (portionW <= minDotationW) {
-                            for (i = 0; i < candidatesW.length; ++i) {
-                                candidatesW[i].cur += portionW;
-                                delete candidatesW[i].don
+                        var portionW = restW / cWMin.length;
+                        
+                        if (portionW < cWMin[0].min) {
+                            cWMin[0].cur = cWMin[0].min;
+                            restW -= cWMin[0].min;
+                            cWMax.splice(cWMax.indexOf(cWMin[0]), 1);
+                            cWMin.shift();
+                        } else if (portionW > cWMax[0].max) {
+                            cWMax[0].cur = cWMax[0].max;
+                            restW -= cWMax[0].max;
+                            cWMin.splice(cWMin.indexOf(cWMax[0]), 1);
+                            cWMax.shift();
+                        } else {
+                            for (i = 0; i < cWMin.length; ++i) {
+                                cWMin[i].cur = portionW;
                             }
                             restW = 0;
-                        } else {
-                            candidatesW[0].cur += minDotationW;
-                            delete candidatesW[0].don;
-                            candidatesW.shift();
-                            restW -=minDotationW;
-                            minDotationW = candidatesW[0].don;
                         }
                     }
                 }
@@ -159,35 +179,31 @@
                         this._rows[i].cur = this._rows[i][keyH] * kH;
                     }
                 } else {
-                    var restH = this._h - totalMinH;
-                    var minDotationH = Infinity;
-                    var candidatesH = [];
-                    for (i = 0; i < this._rows.length; ++i) {
-                        this._rows[i].cur = this._rows[i].min;
-                        
-                        if (this._rows[i].cur < this._rows[i].max) {
-                            var donationH = this._rows[i].max - this._rows[i].cur;
-                            this._rows[i].don = donationH;
-                            candidatesH.push(this._rows[i]);
-                            minDotationH = Math.min(minDotationH, donationH);
-                        }
-                        
-                    }
-                    candidatesH.sort(GridLayout._candidatesSort);
+                    var restH = this._h;
+                    var cHMax = this._rows.slice();
+                    var cHMin = this._rows.slice();
+                    
+                    cHMax.sort(GridLayout._candidatesSortMax);
+                    cHMin.sort(GridLayout._candidatesSortMin);
+                    
                     while (restH) {
-                        var portionH = restH / candidatesH.length;
-                        if (portionH <= minDotationH) {
-                            for (i = 0; i < candidatesH.length; ++i) {
-                                candidatesH[i].cur += portionH;
-                                delete candidatesH[i].don
+                        var portionH = restH / cHMin.length;
+                        
+                        if (portionH < cHMin[0].min) {
+                            cHMin[0].cur = cHMin[0].min;
+                            restH -= cHMin[0].min;
+                            cHMax.splice(cHMax.indexOf(cHMin[0]), 1);
+                            cHMin.shift();
+                        } else if (portionH > cHMax[0].max) {
+                            cHMax[0].cur = cHMax[0].max;
+                            restH -= cHMax[0].max;
+                            cHMin.splice(cHMin.indexOf(cHMax[0]), 1);
+                            cHMax.shift();
+                        } else {
+                            for (i = 0; i < cHMin.length; ++i) {
+                                cHMin[i].cur = portionH;
                             }
                             restH = 0;
-                        } else {
-                            candidatesH[0].cur += minDotationH;
-                            delete candidatesH[0].don;
-                            candidatesH.shift();
-                            restH -=minDotationH;
-                            minDotationH = candidatesH[0].don;
                         }
                     }
                 }
@@ -214,11 +230,18 @@
             "removeChild": function(child) {
                 Layout.fn.removeChild.call(this, child);
                 
+                var found = false;
+                
                 for (var i = 0; i < this._lay.length; ++i) {
                     for (var j = 0; j < this._lay[i].length; ++j) {
                         if (child === this._lay[i][j]) {
                             this._lay[i][j] = false;
+                            found = true;
+                            break;
                         }
+                    }
+                    if (found) {
+                        break;
                     }
                 }
                 
@@ -239,8 +262,11 @@
             }
         });
         
-        GridLayout._candidatesSort = function(a, b) {
-            return a.don - b.don;
+        GridLayout._candidatesSortMin = function(a, b) {
+            return b.min - a.min;
+        }
+        GridLayout._candidatesSortMax = function(a, b) {
+            return a.max - b.max;
         }
         
         return GridLayout;

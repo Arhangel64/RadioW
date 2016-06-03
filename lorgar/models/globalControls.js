@@ -14,10 +14,10 @@
         
         var GlobalControls = List.inherit({
             "className": "GlobalControls",
-            "constructor": function(address, body) {
+            "constructor": function(address, ml) {
                 List.fn.constructor.call(this, address);
                 
-                this._body = body;
+                this._layout = ml;
             },
             "_h_get": function(ev) {
                 List.fn._h_get.call(this, ev);
@@ -43,7 +43,7 @@
                         var vm = new ModelString(addr.clone());
                         this.addModel(vm)
                         var vv = new ViewString();
-                        this._body.append(vv)
+                        this._layout.append(vv, 2, 0);
                         vm.addView(vv);
                         vm.subscribe();
                         break;

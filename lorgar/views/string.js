@@ -10,8 +10,13 @@
         
         var ViewString = View.inherit({
             "className": "String",
-            "constructor": function() {
-                View.fn.constructor.call(this);
+            "constructor": function(options) {
+                var base = {
+                    maxHeight: 20
+                };
+                W.extend(base, options)
+                
+                View.fn.constructor.call(this, base);
             },
             "data": function(data) {
                 this._e.innerText = data;

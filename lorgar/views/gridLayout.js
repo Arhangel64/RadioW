@@ -17,7 +17,7 @@
                 W.extend(base, options);
                 Layout.fn.constructor.call(this, base);
                 
-                this._lay = [[false]];
+                this._lay = [[[]]];
                 this._cols = [{}];
                 this._rows = [{}];
             },
@@ -39,7 +39,7 @@
                 }
                 for (var i = 0; i < this._lay.length; ++i) {
                     while (this._lay[i].length < tCol) {
-                        this._lay[i].push(false);
+                        this._lay[i].push([]);
                     }
                 }
                 var obj = {
@@ -50,10 +50,7 @@
                 
                 for (i = row; i < tRow; ++i) {
                     for (var j = col; j < tCol; ++j) {
-                        if (this._lay[i][j]){
-                            throw new Error("An attempt to insert a child to not empty layout cell");
-                        }
-                        this._lay[i][j] = obj;
+                        this._lay[i][j].push(obj);
                     }
                 }
                 
@@ -68,7 +65,7 @@
                 var colsC = false;
                 while (!rowsC) {
                     for (i = 0; i < this._lay[this._lay.length - 1].length; ++i) {
-                        if (this._lay[this._lay.length - 1][i]) {
+                        if (this._lay[this._lay.length - 1][i].length) {
                             rowsC = true;
                             break;
                         }
@@ -79,7 +76,7 @@
                 }
                 while (!colsC) {
                     for (i = 0; i < this._lay.length; ++i) {
-                        if (this._lay[i][this._lay[i].length - 1]) {
+                        if (this._lay[i][this._lay[i].length - 1].length) {
                             colsC = true;
                             break;
                         }
@@ -96,15 +93,16 @@
                 this._rows = [];
                 
                 for (var i = 0; i < this._lay.length; ++i) {
+                    while (!this._rows[i]) {
+                        this._rows.push({});
+                    }
                     for (var j = 0; j < this._lay[i].length; ++j) {
-                        var e = this._lay[i][j];
                         while (!this._cols[j]) {
                             this._cols.push({});
                         }
-                        while (!this._rows[i]) {
-                            this._rows.push({});
-                        }
-                        if (e) {
+                        for (var k = 0; k < this._lay[i][j].length; ++k) {
+                            var e = this._lay[i][j][k];
+                            
                             var colMinW = this._cols[j].min || 0;
                             var rowMinH = this._rows[i].min || 0;
                             var colMaxW = this._cols[j].max || Infinity;
@@ -114,7 +112,8 @@
                             this._rows[i].min = Math.max(rowMinH, e.child._o.minHeight / e.rowspan);
                             this._cols[j].max = Math.min(colMaxW, e.child._o.maxWidth * e.colspan);
                             this._rows[i].max = Math.min(rowMaxH, e.child._o.maxHeight * e.rowspan);
-                        } else {
+                        }
+                        if (!this._lay[i][j].length) {
                             this._cols[j].min = this._cols[j].min || 0;
                             this._rows[i].min = this._rows[i].min || 0;
                             this._cols[j].max = this._cols[j].max || 0;
@@ -237,8 +236,8 @@
                 for (var i = 0; i < this._lay.length; ++i) {
                     shiftW = 0;
                     for (var j = 0; j < this._lay[i].length; ++j) {
-                        var e = this._lay[i][j];
-                        if (e) {
+                        for (var k = 0; k < this._lay[i][j].length; ++k) {
+                            var e = this._lay[i][j][k];
                             var child = e.child;
                             if (positioned.indexOf(child) === -1) {
                                 var tWidth = 0;
@@ -266,8 +265,10 @@
                 
                 for (var i = 0; i < this._lay.length; ++i) {
                     for (var j = 0; j < this._lay[i].length; ++j) {
-                        if (child === this._lay[i][j].child) {
-                            this._lay[i][j] = false;
+                        for (var k = 0; k < this._lay[i][j].length; ++k) {
+                            if (child === this._lay[i][j][k].child) {
+                                this._lay[i][j].splice(k, 1);
+                            }
                         }
                     }
                 }

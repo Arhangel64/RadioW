@@ -42,10 +42,6 @@
                     this._models[i].destructor();
                 }
                 
-                for (i = 0; i < this._views.length; ++i) {
-                    this._views.destructor();
-                }
-                
                 for (i = 0; i < this._handlers.length; ++i) {
                     this._handlers[i].destructor();
                 }

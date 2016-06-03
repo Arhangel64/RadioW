@@ -27,6 +27,9 @@ var GlobalControls = List.inherit({
     "_initModels": function() {
         var version = new ModelString(this._address["+"](new Address(["version"])), global.magnus._cfg.get("version"));
         this.addModel(version, "version");
+        
+        var navigationPanel = this._np = new List(this._address["+"](new Address(["navigationPanel"])));
+        this.addModel(navigationPanel, "navigationPanel");
     }
 });
 

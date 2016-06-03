@@ -137,11 +137,15 @@
                 var cian = new View();
                 cian._e.style.backgroundColor = "#00aaaa";
                 
-                mainGrid.append(red, 1, 1);
-                mainGrid.append(blue, 0, 1);
-                mainGrid.append(green, 1, 2);
-                mainGrid.append(yellow, 2, 1);
-                mainGrid.append(cian, 1, 0);
+                mainGrid.append(red, 1, 1, 1, 1);
+                mainGrid.append(blue, 0, 1, 1, 2);
+                mainGrid.append(green, 1, 2, 2, 1);
+                mainGrid.append(yellow, 2, 0, 1, 2);
+                mainGrid.append(cian, 0, 0, 2, 1);
+                
+                red.remove();
+                blue.remove();
+                green.remove();
                 
                 this._gc = new GlobalControls(new Address(["magnus", "gc"]), this._body);
                 this._gc.register(this.dispatcher, this.magnusSocket);

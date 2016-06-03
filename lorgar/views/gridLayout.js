@@ -21,22 +21,41 @@
                 this._cols = [{}];
                 this._rows = [{}];
             },
-            "append": function(child, row, col) {
+            "append": function(child, row, col, rowSpan, colSpan) {
+                child.remove();
                 this._c.push(child);
                 this._e.appendChild(child._e);
                 child._p = this;
                 
-                while (this._lay.length <= row) {
+                rowSpan = rowSpan || 1;
+                colSpan = colSpan || 1;
+                
+                var tRow = row  + rowSpan;
+                var tCol = col  + colSpan;
+                
+                while (this._lay.length < tRow) {
                     this._lay.push([]);
                     
                 }
                 for (var i = 0; i < this._lay.length; ++i) {
-                    while (this._lay[i].length <= col) {
+                    while (this._lay[i].length < tCol) {
                         this._lay[i].push(false);
                     }
                 }
+                var obj = {
+                    child: child,
+                    colspan: colSpan,
+                    rowspan: rowSpan
+                }
                 
-                this._lay[row][col] = child;
+                for (i = row; i < tRow; ++i) {
+                    for (var j = col; j < tCol; ++j) {
+                        if (this._lay[i][j]){
+                            throw new Error("An attempt to insert a child to not empty layout cell");
+                        }
+                        this._lay[i][j] = obj;
+                    }
+                }
                 
                 this._recountLimits();
                 if (this._w !== undefined && this._h !== undefined) {
@@ -91,10 +110,10 @@
                             var colMaxW = this._cols[j].max || Infinity;
                             var rowMaxH = this._rows[i].max || Infinity;
                             
-                            this._cols[j].min = Math.max(colMinW, e._o.minWidth);
-                            this._rows[i].min = Math.max(rowMinH, e._o.minHeight);
-                            this._cols[j].max = Math.min(colMaxW, e._o.maxWidth);
-                            this._rows[i].max = Math.min(rowMaxH, e._o.maxHeight);
+                            this._cols[j].min = Math.max(colMinW, e.child._o.minWidth / e.colspan);
+                            this._rows[i].min = Math.max(rowMinH, e.child._o.minHeight / e.rowspan);
+                            this._cols[j].max = Math.min(colMaxW, e.child._o.maxWidth * e.colspan);
+                            this._rows[i].max = Math.min(rowMaxH, e.child._o.maxHeight * e.rowspan);
                         } else {
                             this._cols[j].min = this._cols[j].min || 0;
                             this._rows[i].min = this._rows[i].min || 0;
@@ -213,14 +232,29 @@
                 var shiftW = 0;
                 var shiftH = 0;
                 
+                var positioned = [];
+                
                 for (var i = 0; i < this._lay.length; ++i) {
                     shiftW = 0;
                     for (var j = 0; j < this._lay[i].length; ++j) {
                         var e = this._lay[i][j];
                         if (e) {
-                            e.setSize(this._cols[j].cur, this._rows[i].cur);
-                            e._e.style.top = shiftH + "px"
-                            e._e.style.left = shiftW + "px"
+                            var child = e.child;
+                            if (positioned.indexOf(child) === -1) {
+                                var tWidth = 0;
+                                var tHeight = 0;
+                                var k;
+                                for (k = 0; k < e.colspan; ++k) {
+                                    tWidth += this._cols[j + k].cur;
+                                }
+                                for (k = 0; k < e.rowspan; ++k) {
+                                    tHeight += this._rows[i + k].cur;
+                                }
+                                child.setSize(tWidth, tHeight);
+                                child._e.style.top = shiftH + "px"
+                                child._e.style.left = shiftW + "px"
+                                positioned.push(child);
+                            }
                         }
                         shiftW += this._cols[j].cur;
                     }
@@ -230,18 +264,11 @@
             "removeChild": function(child) {
                 Layout.fn.removeChild.call(this, child);
                 
-                var found = false;
-                
                 for (var i = 0; i < this._lay.length; ++i) {
                     for (var j = 0; j < this._lay[i].length; ++j) {
-                        if (child === this._lay[i][j]) {
+                        if (child === this._lay[i][j].child) {
                             this._lay[i][j] = false;
-                            found = true;
-                            break;
                         }
-                    }
-                    if (found) {
-                        break;
                     }
                 }
                 

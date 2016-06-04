@@ -15,10 +15,12 @@
     defineArray.push("lib/wType/string");
     
     defineArray.push("models/globalControls");
+    defineArray.push("models/pageStorage");
     
     defineArray.push("views/view");
     defineArray.push("views/layout");
     defineArray.push("views/gridLayout");
+    defineArray.push("views/page");
     
     define(moduleName, defineArray, function lorgar_module() {
         var Class = require("lib/utils/class");
@@ -33,15 +35,19 @@
         var String = require("lib/wType/string");
         
         var GlobalControls = require("models/globalControls");
+        var PageStorage = require("models/pageStorage");
         
         var View = require("views/view");
         var Layout = require("views/layout");
         var GridLayout = require("views/gridLayout");
+        var Page = require("views/page");
         
         var Lorgar = Class.inherit({
             "className": "Lorgar",
             "constructor": function() {
                 Class.fn.constructor.call(this);
+                
+                this._currentPageModel = undefined;
                 
                 this._initDispatcher();
                 this._initMagnusSocket();
@@ -53,6 +59,10 @@
                 //this.connectCorax();
             },
             "destructor": function() {
+                if (this._currentPageModel) {
+                    this._currentPageModel.destructor();
+                }
+                
                 this._gc.destructor();
                 this._body.destructor();
                 
@@ -115,20 +125,34 @@
             },
             "_initModels": function() {
                 this._gc = new GlobalControls(new Address(["magnus", "gc"]), this._mainLayout);
+                this._ps = new PageStorage(new Address(["magnus", "ps"]));
+                
                 this._gc.register(this.dispatcher, this.magnusSocket);
+                this._ps.register(this.dispatcher, this.magnusSocket);
+            },
+            "_initPageModel": function(addr) {
+                console.log(addr.toString());
             },
             "_initViews": function() {
                 this._body = new Layout();
+                this._currentPage = new Page();
+                this._mainLayout = new GridLayout();
+                
                 document.body.innerHTML = "";
                 document.body.appendChild(this._body._e);
                 window.addEventListener("resize",this._onWindowResize.bind(this) ,false);
-                this._body.setSize(document.body.offsetWidth, document.body.offsetHeight);
                 
-                this._mainLayout = new GridLayout();
+                this._body.setSize(document.body.offsetWidth, document.body.offsetHeight);
                 this._body.append(this._mainLayout);
+                this._mainLayout.append(this._currentPage, 1, 0, 1, 1);
             },
             "_magnusSocketConnected": function() {
                 this._gc.subscribe();
+                
+                if (!this._currentPageModel) {
+                    this._ps.getPageAddress(location.pathname);
+                    this._ps.one("pageAddress", this._initPageModel, this);
+                }
             },
             "_magnusSocketDisconnected": function() {
                 console.log("magnus socket disconnected");

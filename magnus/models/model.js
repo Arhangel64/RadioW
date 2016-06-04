@@ -65,6 +65,7 @@ var Model = Subscribable.inherit({
         if (!(model instanceof Model)) {
             throw new Error("An attempt to add not a model into " + this.className);
         }
+        this._models.push(model);
         if (this._dp) {
             model.register(this._dp, this._socket);
         }

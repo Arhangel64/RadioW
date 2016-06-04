@@ -12,6 +12,7 @@ var Logger = require("../lib/wDispatcher/logger");
 var log = require("../lib/log")(module);
 
 var GlobalControls = require("../models/globalControls");
+var PageStorage = require("../models/pageStorage");
 
 var Magnus = Subscribable.inherit({
     "className": "Magnus",
@@ -44,7 +45,10 @@ var Magnus = Subscribable.inherit({
     },
     "_initModels": function() {
         this._gc = new GlobalControls(new Address(["magnus", "gc"]));
+        this._ps = new PageStorage(new Address(["magnus", "ps"]))
+        
         this._gc.register(this.dispatcher);
+        this._ps.register(this.dispatcher);
     },
     "_initServer": function() {
         this.server = new Server("Magnus");

@@ -42,22 +42,24 @@ var Subscribable = Class.inherit({
     },
     "off": function(name, handler, context) {
 
-        if (typeof name === "string" && this._events[name]) {
-            if (handler instanceof Function) {
-                var handlers = this._events[name];
-                for (var i = handlers.length - 1; i >= 0 ; --i) {
-                    if (handlers[i].handler === handler) {
-                        if (context) {
-                            if (handlers[i].context === context) {
+        if (typeof name === "string") {
+            if (this._events[name]) {
+                if (handler instanceof Function) {
+                    var handlers = this._events[name];
+                    for (var i = handlers.length - 1; i >= 0 ; --i) {
+                        if (handlers[i].handler === handler) {
+                            if (context) {
+                                if (handlers[i].context === context) {
+                                    handlers.splice(i, 1);
+                                }
+                            } else {
                                 handlers.splice(i, 1);
                             }
-                        } else {
-                            handlers.splice(i, 1);
                         }
                     }
+                } else {
+                    delete this._events[name];
                 }
-            } else {
-                delete this._events[name];
             }
         } else {
             this._events = {};

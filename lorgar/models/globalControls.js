@@ -5,12 +5,18 @@
     var defineArray = [];
     defineArray.push("models/list");
     defineArray.push("models/string");
+    defineArray.push("models/navigationPanel");
+    
     defineArray.push("views/string");
+    defineArray.push("views/navigationPanel");
     
     define(moduleName, defineArray, function globalControls_module() {
         var List = require("models/list");
         var ModelString = require("models/string");
+        var NavigationPanel = require("models/navigationPanel");
+        
         var ViewString = require("views/string");
+        var ViewNavigationPanel = require("views/navigationPanel");
         
         var GlobalControls = List.inherit({
             "className": "GlobalControls",
@@ -46,6 +52,14 @@
                         this._layout.append(vv, 2, 0);
                         vm.addView(vv);
                         vm.subscribe();
+                        break;
+                    case "navigationPanel":
+                        var npm = new NavigationPanel(addr.clone());
+                        this.addModel(npm);
+                        var vnp = new ViewNavigationPanel();
+                        this._layout.append(vnp, 0, 0);
+                        npm.addView(vnp)
+                        npm.subscribe();
                         break;
                     default:
                         console.warn("Unsupported global control: " + name + " (" + type + ")");

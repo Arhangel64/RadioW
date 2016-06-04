@@ -28,22 +28,12 @@
                 var data = ev.getData();
                 
                 this._data = data.at("data").clone();
-                
-                for (var i = 0; i < this._views.length; ++i) {
-                    this._views[i].data(this._data);
-                }
-                
-                this.trigger("got", this._data);
             },
             "_h_push": function(ev) {
                 var data = ev.getData();
                 
                 var element = data.at("data").clone();
                 this._data.push(element);
-                
-                for (var i = 0; i < this._views.length; ++i) {
-                    this._views[i].push(element);
-                }
             }
         });
         

@@ -12,7 +12,7 @@ var GlobalControls = List.inherit({
     "constructor": function(address) {
         List.fn.constructor.call(this, address);
         
-        setTimeout(this._initModels.bind(this), 1);
+        this._initModels()
     },
     "addModel": function(model, name) {
         List.fn.addModel.call(this, model);
@@ -30,6 +30,16 @@ var GlobalControls = List.inherit({
         
         var navigationPanel = this._np = new List(this._address["+"](new Address(["navigationPanel"])));
         this.addModel(navigationPanel, "navigationPanel");
+    },
+    "addNav": function(name, address) {
+        var vc = new Vocabulary();
+        
+        vc.insert("address", address);
+        vc.insert("text", new String(name));
+        
+        //var model = new ModelString(this._np._address["+"](new Address(["" + this._np._data.size()])));
+        //this._np.addModel(model);
+        this._np.push(vc);
     }
 });
 

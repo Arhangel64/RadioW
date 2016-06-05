@@ -13,21 +13,24 @@ var log = require("../lib/log")(module);
 
 var GlobalControls = require("../models/globalControls");
 var PageStorage = require("../models/pageStorage");
+var Page = require("../models/page");
+var ModelString = require("../models/string");
 
 var Magnus = Subscribable.inherit({
     "className": "Magnus",
     "constructor": function(config) {
         Subscribable.fn.constructor.call(this);
+        global.magnus = this;
         
         this._cfg = config;
         
         this._initDispatcher();
         this._initServer();
         this._initModels();
+        this._initPages();
         
         var port = this._cfg.get("webSocketServerPort");
         this.server.listen(port);
-        global.magnus = this;
         log.info("Magnus is listening on port " + port);
     },
     "connectCorax": function() {
@@ -49,6 +52,14 @@ var Magnus = Subscribable.inherit({
         
         this._gc.register(this.dispatcher);
         this._ps.register(this.dispatcher);
+    },
+    "_initPages": function() {
+        var root = new Page(new Address(["pages", "/"]));
+        var msg = new ModelString(root._address["+"](new Address(["message"])), "This is the root page");
+        root.addItem(msg, 0, 0, 1, 1);
+        this._ps.addPage(root, ["/", "/index.html"]);
+        
+        this._gc.addNav("home", root.getAddress());
     },
     "_initServer": function() {
         this.server = new Server("Magnus");

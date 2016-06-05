@@ -16,6 +16,7 @@
     
     defineArray.push("models/globalControls");
     defineArray.push("models/pageStorage");
+    defineArray.push("models/page");
     
     defineArray.push("views/view");
     defineArray.push("views/layout");
@@ -36,6 +37,7 @@
         
         var GlobalControls = require("models/globalControls");
         var PageStorage = require("models/pageStorage");
+        var PageModel = require("models/page");
         
         var View = require("views/view");
         var Layout = require("views/layout");
@@ -131,7 +133,14 @@
                 this._ps.register(this.dispatcher, this.magnusSocket);
             },
             "_initPageModel": function(addr) {
-                console.log(addr.toString());
+                if (this._currentPageModel) {
+                    this._currentPageModel.destructor();
+                }
+                this._currentPage.clear();
+                this._currentPageModel = new PageModel(addr);
+                this._currentPageModel.register(this.dispatcher, this.magnusSocket);
+                this._currentPageModel.addView(this._currentPage);
+                this._currentPageModel.subscribe();
             },
             "_initViews": function() {
                 this._body = new Layout();

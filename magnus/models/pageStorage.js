@@ -15,13 +15,20 @@ var PageStorage = Model.inherit({
         this._specialPages = {};
         
         this._initNotFoundPage();
+        this._initPages();
         this.addHandler("getPageAddress");
     },
-    "addPage": function(page, url) {
-        if (this._urls[url]) {
-            throw new Error("An attempt to add page with an existing url");
+    "addPage": function(page, urls) {
+        if (!(urls instanceof Array)) {
+            throw new Error("To add page you need to pass an array of urls");
         }
-        this._urls[url] = page;
+        for (var i = 0; i < urls.length; ++i) {
+            if (this._urls[urls[i]]) {
+                throw new Error("An attempt to add page with an existing url");
+            }
+            
+            this._urls[urls[i]] = page;
+        }
         this.addModel(page)
     },
     "_h_getPageAddress": function(ev) {
@@ -44,6 +51,9 @@ var PageStorage = Model.inherit({
         this.addModel(nf);
         var msg = new ModelString(nf._address["+"](new Address(["errorMessage"])), "Error: page not found");
         nf.addItem(msg, 0, 0, 1, 1);
+    },
+    "_initPages": function() {
+        var root = new Page(this._address["+"](new Address(["pages", "notFound"])));
     }
 });
 

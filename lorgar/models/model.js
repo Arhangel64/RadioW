@@ -64,8 +64,12 @@
                 if (!(model instanceof Model)) {
                     throw new Error("An attempt to add not a model into " + this.className);
                 }
+                this._models.push(model);
                 if (this._dp) {
                     model.register(this._dp, this._socket);
+                }
+                if (this._subscribed) {
+                    model.subscribe();
                 }
             },
             "addView": function(view) {
@@ -104,6 +108,10 @@
                     
                     var vc = new Vocabulary();
                     this.send("subscribe", vc);
+                    
+                    for (var i = 0; i < this._models.length; ++i) {
+                        this._models[i].subscribe();
+                    }
                 }
             },
             "unregister": function() {
@@ -125,6 +133,10 @@
                     
                     var vc = new Vocabulary();
                     this.send("unsubscribe", vc);
+                    
+                    for (var i = 0; i < this._models.length; ++i) {
+                        this._models[i].unsubscribe();
+                    }
                 }
             }
         });

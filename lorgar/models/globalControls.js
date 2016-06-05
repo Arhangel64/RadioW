@@ -47,19 +47,17 @@
                 switch (name) {
                     case "version":
                         var vm = new ModelString(addr.clone());
-                        this.addModel(vm)
+                        this.addModel(vm);
                         var vv = new ViewString();
                         this._layout.append(vv, 2, 0);
                         vm.addView(vv);
-                        vm.subscribe();
                         break;
                     case "navigationPanel":
                         var npm = new NavigationPanel(addr.clone());
                         this.addModel(npm);
                         var vnp = new ViewNavigationPanel();
                         this._layout.append(vnp, 0, 0);
-                        npm.addView(vnp)
-                        npm.subscribe();
+                        npm.addView(vnp);
                         break;
                     default:
                         console.warn("Unsupported global control: " + name + " (" + type + ")");

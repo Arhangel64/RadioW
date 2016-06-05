@@ -12,6 +12,16 @@
             "className": "NavigationPanel",
             "constructor": function(addr) {
                 List.fn.constructor.call(this, addr);
+            },
+            "_h_get": function(ev) {
+                List.fn._h_get.call(this, ev);
+                
+                
+            },
+            "_h_push": function(ev) {
+                List.fn._h_push.call(this, ev);
+                
+                
             }
         });
         

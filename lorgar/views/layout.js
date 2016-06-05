@@ -19,10 +19,7 @@
                 this._c = [];
             },
             "destructor": function() {
-                var c = this._c.slice();
-                for (var i = 0; i < c.length; ++i) {
-                    c[i].destructor();
-                }
+                this.clear();
                 
                 View.fn.destructor.call(this);
             },
@@ -32,6 +29,12 @@
                 child._p = this;
                 if (this._w !== undefined && this._h !== undefined) {
                     child.setSize(this._w, this._h);
+                }
+            },
+            "clear": function() {
+                while (this._c.length) {
+                    var c = this._c.pop();
+                    c.destructor();
                 }
             },
             "removeChild": function(child) {

@@ -88,6 +88,13 @@
                     }
                 }
             },
+            "clear": function() {
+                Layout.fn.clear.call(this);
+                
+                this._lay = [[[]]];
+                this._cols = [{}];
+                this._rows = [{}];
+            },
             "_recountLimits": function() {
                 this._cols = [];
                 this._rows = [];

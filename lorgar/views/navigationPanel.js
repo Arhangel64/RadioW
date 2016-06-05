@@ -12,8 +12,8 @@
             "className": "NavigationPanel",
             "constructor": function(options) {
                 var base = {
-                    minHeight: 100,
-                    maxHeight: 100
+                    minHeight: 50,
+                    maxHeight: 50
                 };
                 W.extend(base, options)
                 GridLayout.fn.constructor.call(this, base);

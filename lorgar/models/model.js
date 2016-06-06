@@ -71,6 +71,7 @@
                 if (this._subscribed) {
                     model.subscribe();
                 }
+                this.trigger("newModel", model);
             },
             "addView": function(view) {
                 this._views.push(view);

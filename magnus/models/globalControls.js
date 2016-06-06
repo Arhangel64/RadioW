@@ -3,6 +3,7 @@
 var List = require("./list");
 var Model = require("./model");
 var ModelString = require("./string");
+var ModelLink = require("./link");
 var Vocabulary = require("../lib/wType/vocabulary");
 var Address = require("../lib/wType/address");
 var String = require("../lib/wType/string");
@@ -34,11 +35,10 @@ var GlobalControls = List.inherit({
     "addNav": function(name, address) {
         var vc = new Vocabulary();
         
-        vc.insert("address", address);
-        vc.insert("text", new String(name));
+        var model = new ModelLink(this._np._address["+"](new Address(["" + this._np._data.size()])), name, address);
+        this._np.addModel(model);
         
-        //var model = new ModelString(this._np._address["+"](new Address(["" + this._np._data.size()])));
-        //this._np.addModel(model);
+        vc.insert("address", model.getAddress());
         this._np.push(vc);
     }
 });

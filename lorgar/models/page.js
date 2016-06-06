@@ -20,64 +20,80 @@
             "className": "Page",
             "constructor": function(addr) {
                 List.fn.constructor.call(this, addr);
+                
+                this.on("clear", this._onClear, this);
+                this.on("newElement", this._onNewElement, this);
+                this.on("newModel", this._onNewModel, this)
             },
             "addView": function(view) {
                 List.fn.addView.call(this, view);
                 
-                if (this._data) {
-                    var size = this._data.size();
-                    for (var i = 0; i < size; ++i) {
-                        var vc = this._data.at(i);
-                        this._addItem(vc, view);
+                for (var i = 0; i < this._models.length; ++i) {
+                    var vc = this._data.at(i);
+                    
+                    var col = vc.at("col").valueOf();
+                    var row = vc.at("row").valueOf();
+                    var colspan = vc.at("colspan").valueOf();
+                    var rowspan = vc.at("rowspan").valueOf();
+                    var type = vc.at("type").valueOf();
+                    
+                    if (!collection[type]) {
+                        throw new Error("Unsupported view element on the page");
                     }
+                    var Element = collection[type].view;
+                    var Element = new Element();
+                    this._models[i].addView(view)
+                    view.append(view, row, col, rowspan, colspan);
                 }
             },
-            "_addItem": function(vc, myView) {
-                var col = vc.at("col").valueOf();
-                var row = vc.at("row").valueOf();
-                var colspan = vc.at("colspan").valueOf();
-                var rowspan = vc.at("rowspan").valueOf();
+            "_onClear": function() {
+                for (var i = 0; i < this._models.length; ++i) {
+                    this._models[i].destructor();
+                }
+                for (i = 0; i < this._views.length; ++i) {
+                    this._views[i].clear();
+                }
+            },
+            "_onNewElement": function(vc) {
                 var type = vc.at("type").valueOf();
                 var address = vc.at("address").clone();
-                var View;
-                var model;
-                var view;
                 
-                switch (type) {
-                    case "String":
-                        model = new ModelString(address);
-                        View = ViewString;
-                        
-                        break;
-                    default:
-                        console.warn("Unsupported view element on the page");
+                
+                if (!collection[type]) {
+                    throw new Error("Unsupported view element on the page");
                 }
-                
-                
-                if (!myView) {
-                    for (var i = 0; i < this._views.length; ++i) {
-                        view = new View()
-                        this._views[i].append(view, row, col, rowspan, colspan);
-                        model.addView(view);
-                    }
-                } else {
-                    view = new View()
-                    myView.append(view, row, col, rowspan, colspan);
-                    model.addView(view);
-                }
-                
+                var Model = collection[type].model;
+                var model = new Model(address);
                 this.addModel(model);
             },
-            "_h_get": function(ev) {
-                List.fn._h_get.call(this, ev);
+            "_onNewModel": function(model) {
+                if (this._views.length) {
+                    var index = this._models.indexOf(model)
+                    var vc = this._data.at(index);
                 
-                var size = this._data.size();
-                for (var i = 0; i < size; ++i) {
-                    var vc = this._data.at(i);
-                    this._addItem(vc);
+                    var col = vc.at("col").valueOf();
+                    var row = vc.at("row").valueOf();
+                    var colspan = vc.at("colspan").valueOf();
+                    var rowspan = vc.at("rowspan").valueOf();
+                    var type = vc.at("type").valueOf();
+                    
+                    if (!collection[type]) {
+                        throw new Error("Unsupported view element on the page");
+                    }
+                    var View = collection[type].view;
+                
+                    for (var i = 0; i < this._views.length; ++i) {
+                        var view = new View();
+                        model.addView(view)
+                        this._views[i].append(view, row, col, rowspan, colspan);
+                    }
                 }
             }
         });
+        
+        var collection = {
+            "String": {model: ModelString, view: ViewString}
+        };
         
         return Page;
     });

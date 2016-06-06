@@ -1,33 +1,35 @@
 "use strict";
-(function string_js() {
-    var moduleName = "models/string";
+(function link_js() {
+    var moduleName = "models/link";
     
     var defineArray = [];
     defineArray.push("models/model");
     
-    define(moduleName, defineArray, function string_module() {
+    define(moduleName, defineArray, function link_module() {
         var Model = require("models/model");
         
-        var ModelString = Model.inherit({
-            "className": "String",
+        var Link = Model.inherit({
+            "className": "Link",
             "constructor": function(addr) {
                 Model.fn.constructor.call(this, addr);
                 
-                this._data = "";
+                this._targetAddress = undefined;
+                this._text = undefined;
                 
                 this.addHandler("get");
             },
             "_h_get": function(ev) {
                 var data = ev.getData();
                 
-                this._data = data.at("data").toString();
+                this._text = data.at("text").toString();
+                this._targetAddress = data.at("targetAddress").clone();
                 
                 for (var i = 0; i < this._views.length; ++i) {
-                    this._views[i].data(this._data);
+                    this._views[i].data(this._text);
                 }
             }
         });
         
-        return ModelString;
+        return Link;
     });
 })();

@@ -26,14 +26,20 @@
             },
             "_h_get": function(ev) {
                 var data = ev.getData();
+                this.trigger("clear");
                 
                 this._data = data.at("data").clone();
+                var size = this._data.size();
+                for (var i = 0; i < size; ++i) {
+                    this.trigger("newElement", this._data.at(i).clone());
+                }
             },
             "_h_push": function(ev) {
                 var data = ev.getData();
                 
                 var element = data.at("data").clone();
                 this._data.push(element);
+                this.trigger("newElement", element.clone());
             }
         });
         

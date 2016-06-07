@@ -80,6 +80,11 @@
                 
                 Class.fn.destructor.call(this);
             },
+            "changePage": function(addr) {
+                setTimeout((function() {
+                    this._initPageModel(addr);
+                }).bind(this), 1)
+            },
             "connectCorax": function() {
                 this.coraxSocket.open("localhost", 8080);
             },

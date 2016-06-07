@@ -35,8 +35,8 @@
             },
             "destructor": function() {
                 var i;
-                this._unsubscribe();
-                this._unregister();
+                this.unsubscribe();
+                this.unregister();
                 
                 for (i = 0; i < this._models.length; ++i) {
                     this._models[i].destructor();
@@ -119,7 +119,7 @@
                 if (this._dp) {
                     var i;
                     for (i = 0; i < this._models.length; ++i) {
-                        this._models.unregister();
+                        this._models[i].unregister();
                     }
                     for (i = 0; i < this._handlers.length; ++i) {
                         this._dp.unregisterHandler(this._handlers[i]);

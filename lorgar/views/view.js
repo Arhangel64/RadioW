@@ -38,6 +38,13 @@
                 
                 Subscribable.fn.destructor.call(this);
             },
+            "addClass": function(className) {
+                var arr = this._e.className.split(" ");
+                if (arr.indexOf(className) === -1) {
+                    arr.push(className);
+                    this._e.className = arr.join(" ");
+                }
+            },
             "constrainHeight": function(h) {
                 h = Math.max(h, this._o.minHeight);
                 h = Math.min(h, this._o.maxHeight);
@@ -62,6 +69,19 @@
             "remove": function() {
                 if (this._p) {
                     this._p.removeChild(this);
+                }
+            },
+            "removeClass": function(className) {
+                var arr = this._e.className.split(" ");
+                var index = arr.indexOf(className)
+                var toJoin = false;
+                while (index !== -1) {
+                    arr.splice(index, 1);
+                    index = arr.indexOf(className)
+                    toJoin = true;
+                }
+                if (toJoin) {
+                    this._e.className = arr.join(" ");
                 }
             },
             "setSize": function(w, h) {

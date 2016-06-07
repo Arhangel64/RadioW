@@ -204,7 +204,7 @@ var Model = Subscribable.inherit({
                     );
             return
         }
-        ord.erase(oItr);
+        ord.erase(oItr["*"]());
         if (ord.size() === 0) {
             var socket = itr["*"]().second.socket;
             socket.off("disconnected", this._onSocketDisconnected, this);

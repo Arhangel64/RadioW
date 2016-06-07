@@ -60,6 +60,13 @@ var Magnus = Subscribable.inherit({
         this._ps.addPage(root, ["/", "/index.html"]);
         
         this._gc.addNav("home", root.getAddress());
+        
+        var test = new Page(new Address(["pages", "/test"]));
+        msg = new ModelString(test._address["+"](new Address(["message"])), "This is a test page");
+        test.addItem(msg, 0, 0, 1, 1);
+        this._ps.addPage(test, ["/test", "/test/", "/test.html"]);
+        
+        this._gc.addNav("test", test.getAddress());
     },
     "_initServer": function() {
         this.server = new Server("Magnus");

@@ -5,12 +5,12 @@
     var defineArray = [];
     defineArray.push("models/list");
     defineArray.push("models/link");
-    defineArray.push("views/string")
+    defineArray.push("views/nav")
     
     define(moduleName, defineArray, function navigationPanel_module() {
         var List = require("models/list");
         var ModelLink = require("models/link");
-        var ViewLink = require("views/string");
+        var ViewLink = require("views/nav");
         
         var NavigationPanel = List.inherit({
             "className": "NavigationPanel",

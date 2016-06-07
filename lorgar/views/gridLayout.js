@@ -72,6 +72,8 @@
                     }
                     if (!rowsC) {
                         this._lay.pop()
+                        rowsC = !this._lay.length;
+                        colsC = !this._lay.length;
                     }
                 }
                 while (!colsC) {

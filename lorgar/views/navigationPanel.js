@@ -18,7 +18,7 @@
                 W.extend(base, options)
                 GridLayout.fn.constructor.call(this, base);
                 
-                this._e.className += "primary";
+                this.addClass("primary");
             }
         });
         

@@ -21,11 +21,9 @@
                 this._cols = [{}];
                 this._rows = [{}];
             },
-            "append": function(child, row, col, rowSpan, colSpan) {
-                child.remove();
-                this._c.push(child);
-                this._e.appendChild(child._e);
-                child._p = this;
+            "append": function(child, row, col, rowSpan, colSpan, aligment) {
+                aligment = aligment || 5;
+                this._addChild(child, aligment);
                 
                 rowSpan = rowSpan || 1;
                 colSpan = colSpan || 1;
@@ -45,7 +43,8 @@
                 var obj = {
                     child: child,
                     colspan: colSpan,
-                    rowspan: rowSpan
+                    rowspan: rowSpan,
+                    a: aligment
                 }
                 
                 for (i = row; i < tRow; ++i) {
@@ -96,6 +95,10 @@
                 this._lay = [[[]]];
                 this._cols = [{}];
                 this._rows = [{}];
+            },
+            "_onChildChangeLimits": function() {
+                this._recountLimits();
+                this.refreshLay();
             },
             "_recountLimits": function() {
                 this._cols = [];
@@ -259,8 +262,48 @@
                                     tHeight += this._rows[i + k].cur;
                                 }
                                 child.setSize(tWidth, tHeight);
-                                child._e.style.top = shiftH + "px"
-                                child._e.style.left = shiftW + "px"
+                                child._e.style.bottom = "";
+                                child._e.style.right = "";
+                                
+                                switch (e.a) {
+                                    case Layout.Aligment.LeftTop:
+                                        child._e.style.top = shiftH + "px";
+                                        child._e.style.left = shiftW + "px";
+                                        break;
+                                    case Layout.Aligment.LeftCenter:
+                                        child._e.style.top = (shiftH + (tHeight - child._h) / 2) + "px";
+                                        child._e.style.left = shiftW + "px";
+                                        break;
+                                    case Layout.Aligment.LeftBottom:
+                                        child._e.style.top = (shiftH + (tHeight - child._h)) + "px";
+                                        child._e.style.left = shiftW + "px";
+                                        break;
+                                    case Layout.Aligment.CenterTop:
+                                        child._e.style.top = shiftH + "px";
+                                        child._e.style.left = (shiftW + (tWidth - child._w) / 2) + "px";
+                                        break;
+                                    case Layout.Aligment.CenterCenter:
+                                        child._e.style.top = (shiftH + (tHeight - child._h) / 2) + "px";
+                                        child._e.style.left = (shiftW + (tWidth - child._w) / 2) + "px";
+                                        break;
+                                    case Layout.Aligment.CenterBottom:
+                                        child._e.style.top = (shiftH + (tHeight - child._h)) + "px";
+                                        child._e.style.left = ((tWidth - child._w) / 2) + "px";
+                                        break;
+                                    case Layout.Aligment.RightTop:
+                                        child._e.style.top = shiftH + "px";
+                                        child._e.style.left = (shiftW + (tWidth - child._h)) + "px";
+                                        break;
+                                    case Layout.Aligment.RightCenter:
+                                        child._e.style.top = ((tHeight - child._h) / 2) + "px";
+                                        child._e.style.left = (shiftW + (tWidth - child._h)) + "px";
+                                        break;
+                                    case Layout.Aligment.RightBottom:
+                                        child._e.style.top = (shiftH + (tHeight - child._h)) + "px";
+                                        child._e.style.left = (shiftW + (tWidth - child._h)) + "px";
+                                        break;
+                                    
+                                }
                                 positioned.push(child);
                             }
                         }

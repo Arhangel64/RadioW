@@ -91,6 +91,26 @@
                 this._e.style.width = this._w + "px";
                 this._e.style.height = this._h + "px";
             },
+            "setMaxSize": function(w, h) {
+                this._o.maxWidth = w;
+                this._o.maxHeight = h;
+                
+                if (this._w !== undefined && this._h !== undefined) {
+                    this.setSize(this._w, this._h);
+                }
+                
+                this.trigger("changeLimits");
+            },
+            "setMinSize": function(w, h) {
+                this._o.minWidth = w;
+                this._o.minHeight = h;
+                
+                if (this._w !== undefined && this._h !== undefined) {
+                    this.setSize(this._w, this._h);
+                }
+                
+                this.trigger("changeLimits");
+            },
             "trySize": function(w, h) {
                 return !(w < this._o.minWidth || h < this._o.minHeight || w > this._o.maxWidth || h > this._o.maxHeight)
             }

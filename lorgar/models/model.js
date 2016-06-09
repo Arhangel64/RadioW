@@ -45,6 +45,7 @@
                 for (i = 0; i < this._handlers.length; ++i) {
                     this._handlers[i].destructor();
                 }
+                this._pairAddress.destructor();
                 
                 Subscribable.fn.destructor.call(this);
             },

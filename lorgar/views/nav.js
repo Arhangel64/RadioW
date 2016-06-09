@@ -19,8 +19,10 @@
                 
                 this._initProxy();
                 
-                this._label = new String();
-                this.append(this._label);
+                this._label = new String({
+                    maxHeight: 20
+                });
+                this.append(this._label, 5);
                 this.addClass("primary");
                 this.addClass("hoverable");
                 

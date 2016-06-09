@@ -12,7 +12,6 @@
             "className": "String",
             "constructor": function(options) {
                 var base = {
-                    maxHeight: 20
                 };
                 W.extend(base, options)
                 

@@ -48,7 +48,7 @@
                     case "version":
                         var vm = new ModelString(addr.clone());
                         this.addModel(vm);
-                        var vv = new ViewString();
+                        var vv = new ViewString({maxHeight: 20});
                         this._layout.append(vv, 2, 0);
                         vm.addView(vv);
                         break;

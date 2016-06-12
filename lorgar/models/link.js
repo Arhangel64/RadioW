@@ -48,7 +48,7 @@
                 }
             },
             "_onViewActivate": function() {
-                lorgar.changePage(this._targetAddress);
+                lorgar.changePage(this._targetAddress.clone());
             }
         });
         

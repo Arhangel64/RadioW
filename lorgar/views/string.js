@@ -12,10 +12,12 @@
             "className": "String",
             "constructor": function(options) {
                 var base = {
+                    "font-size": 16
                 };
                 W.extend(base, options)
-                
                 View.fn.constructor.call(this, base);
+                
+                this._e.style.fontSize = this._o["font-size"] + "px";
             },
             "data": function(data) {
                 this._e.innerText = data;

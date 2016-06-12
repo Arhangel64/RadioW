@@ -27,7 +27,7 @@
                 for (var i = 0; i < this._models.length; ++i) {
                     var link = new ViewLink();
                     this._models[i].addView(link)
-                    view.append(link, 0, view._c.length, 1, 1);
+                    view.push(link);
                 }
             },
             "_onClear": function() {
@@ -50,7 +50,7 @@
                     for (var i = 0; i < this._views.length; ++i) {
                         var view = new ViewLink();
                         model.addView(view)
-                        this._views[i].append(view, 0, this._views[i]._c.length, 1, 1);
+                        this._views[i].push(view);
                     }
                 }
             }

@@ -99,7 +99,7 @@
                     this.setSize(this._w, this._h);
                 }
                 
-                this.trigger("changeLimits");
+                this.trigger("changeLimits", this);
             },
             "setMinSize": function(w, h) {
                 this._o.minWidth = w;
@@ -109,7 +109,7 @@
                     this.setSize(this._w, this._h);
                 }
                 
-                this.trigger("changeLimits");
+                this.trigger("changeLimits", this);
             },
             "trySize": function(w, h) {
                 return !(w < this._o.minWidth || h < this._o.minHeight || w > this._o.maxWidth || h > this._o.maxHeight)

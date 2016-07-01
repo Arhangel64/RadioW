@@ -3,6 +3,8 @@ var morgan = require("morgan");
 var favicon = require("serve-favicon");
 var Magnus = require("./core/magnus");
 
+require("./lib/utils/globalMethods");
+
 var config = require("./config");
 var log = require("./lib/log")(module);
 

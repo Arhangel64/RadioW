@@ -6,6 +6,8 @@
     defineArray.push("models/list");
     defineArray.push("models/string");
     defineArray.push("models/navigationPanel");
+    defineArray.push("models/themeSelecter");
+    defineArray.push("models/theme");
     
     defineArray.push("views/string");
     defineArray.push("views/navigationPanel");
@@ -14,6 +16,8 @@
         var List = require("models/list");
         var ModelString = require("models/string");
         var NavigationPanel = require("models/navigationPanel");
+        var ModelThemeSelecter = require("models/themeSelecter");
+        var ModelTheme = require("models/theme");
         
         var ViewString = require("views/string");
         var ViewNavigationPanel = require("views/navigationPanel");
@@ -49,21 +53,36 @@
                         var vm = new ModelString(addr.clone());
                         this.addModel(vm);
                         var vv = new ViewString({maxHeight: 20});
-                        this._layout.append(vv, 2, 0);
+                        this._layout.append(vv, 2, 0, 1, 3);
                         vm.addView(vv);
                         break;
                     case "navigationPanel":
                         var npm = new NavigationPanel(addr.clone());
                         this.addModel(npm);
                         var vnp = new ViewNavigationPanel();
-                        this._layout.append(vnp, 0, 0);
+                        this._layout.append(vnp, 0, 0, 1, 3);
                         npm.addView(vnp);
+                        break;
+                    case "themes":
+                        var ts = new ModelThemeSelecter(addr.clone());
+                        this.addModel(ts);
+                        ts.on("selected", this._onThemeSelected, this);
                         break;
                     default:
                         console.warn("Unsupported global control: " + name + " (" + type + ")");
                 }
+            },
+            "_onThemeSelected": function(obj) {
+                var theme = new ModelTheme(obj.value.clone());
+                this.addModel(theme);
+                theme.on("ready", GlobalControls.onThemeReady, theme);
             }
         });
+        
+        GlobalControls.onThemeReady = function() {
+            lorgar.setTheme(this._data);
+            this.destructor();
+        };
         
         return GlobalControls;
     });

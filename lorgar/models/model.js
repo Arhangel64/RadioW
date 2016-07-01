@@ -32,20 +32,31 @@
                 this._views = [];
                 this._handlers = [];
                 this._models = [];
+                this._props = [];
+                
+                this.addHandler("properties");
             },
             "destructor": function() {
                 var i;
+                var j;
+                for (i = 0; i < this._views.length; ++i) {
+                    for (j = 0; j < this._props.length; ++j) {
+                        this._views[i].removeProperty(this._props[j]);
+                    }
+                }
+                this.remove();
                 this.unsubscribe();
                 this.unregister();
                 
-                for (i = 0; i < this._models.length; ++i) {
-                    this._models[i].destructor();
+                while (this._models.length) {
+                    this._models[this._models.length - 1].destructor();
                 }
                 
                 for (i = 0; i < this._handlers.length; ++i) {
                     this._handlers[i].destructor();
                 }
                 this._pairAddress.destructor();
+                this._address.destructor();
                 
                 Subscribable.fn.destructor.call(this);
             },
@@ -65,6 +76,10 @@
                 if (!(model instanceof Model)) {
                     throw new Error("An attempt to add not a model into " + this.className);
                 }
+                if (model._parent) {
+                    throw new Error("Inserting model already has parent");
+                } 
+                model._parent = this;
                 this._models.push(model);
                 if (this._dp) {
                     model.register(this._dp, this._socket);
@@ -76,6 +91,34 @@
             },
             "addView": function(view) {
                 this._views.push(view);
+                
+                for (var i = 0; i < this._props.length; ++i) {
+                    view.addProperty(this._props[i]);
+                }
+            },
+            "_h_properties": function(ev) {
+                var i;
+                var j;
+                for (i = 0; i < this._views.length; ++i) {
+                    for (j = 0; j < this._props.length; ++j) {
+                        this._views[i].removeProperty(this._props[j]);
+                    }
+                }
+                this._props = [];
+                var data = ev.getData();
+                var list = data.at("properties");
+                var size = list.size();
+                for (i = 0; i < size; ++i) {
+                    var vc = list.at(i);
+                    var pair = {p: vc.at("property").toString(), k: vc.at("key").toString()};
+                    this._props.push(pair);
+                }
+                for (i = 0; i < this._views.length; ++i) {
+                    for (j = 0; j < this._props.length; ++j) {
+                        this._views[i].addProperty(this._props[j]);
+                    }
+                }
+                
             },
             "register": function(dp, socket) {
                 var i;
@@ -91,6 +134,31 @@
                 
                 for (i = 0; i < this._handlers.length; ++i) {
                     dp.registerHandler(this._handlers[i]);
+                }
+            },
+            "remove": function() {
+                if (this._parent) {
+                    this._parent.removeModel(this);
+                }
+            },
+            "removeModel": function(model) {
+                if (!(model instanceof Model)) {
+                    throw new Error("An attempt to remove not a model from " + this.className);
+                }
+                var index = this._models.indexOf(model);
+                if (index !== -1) {
+                    if (this._subscribed) {
+                        model.unsubscribe();
+                    }
+                    if (this._dp) {
+                        model.unregister();
+                    }
+                    this._models.splice(index, 1);
+                    delete model._parent;
+                
+                    this.trigger("removedModel", model);
+                } else {
+                    throw new Error("An attempt to remove not not existing model from " + this.className);
                 }
             },
             "send": function(handler, vc) {

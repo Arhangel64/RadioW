@@ -16,6 +16,7 @@
                 this._data = undefined;
                 
                 this.addHandler("get");
+                this.addHandler("push");
             },
             "destructor": function() {
                 if (this._data) {

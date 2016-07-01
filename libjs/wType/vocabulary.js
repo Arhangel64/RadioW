@@ -49,6 +49,9 @@ var Vocabulary = Object.inherit({
             this._data[key.toString()] = value;
         }
     },
+    "getKeys": function() {
+        return global.Object.keys(this._data);
+    },
     "insert": function(key, value) {
         if (!(value instanceof Object)) {
             throw new Error("An attempt to insert not a W::Object into vocabulary");

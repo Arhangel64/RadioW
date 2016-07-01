@@ -50,6 +50,7 @@
                 Class.fn.constructor.call(this);
                 
                 this._currentPageModel = undefined;
+                this._currentTheme = {};
                 
                 this._initDispatcher();
                 this._initMagnusSocket();
@@ -150,7 +151,7 @@
             "_initViews": function() {
                 this._body = new Layout();
                 this._currentPage = new Page();
-                this._mainLayout = new GridLayout();
+                this._mainLayout = new GridLayout(this._currentTheme);
                 
                 document.body.innerHTML = "";
                 document.body.appendChild(this._body._e);
@@ -158,7 +159,15 @@
                 
                 this._body.setSize(document.body.offsetWidth, document.body.offsetHeight);
                 this._body.append(this._mainLayout);
-                this._mainLayout.append(this._currentPage, 1, 0, 1, 1);
+                var spacerL = new View({
+                    maxWidth: 50
+                });
+                var spacerR = new View({
+                    maxWidth: 50
+                });
+                this._mainLayout.append(spacerL, 1, 0, 1, 1);
+                this._mainLayout.append(this._currentPage, 1, 1, 1, 1);
+                this._mainLayout.append(spacerR, 1, 2, 1, 1);
             },
             "_magnusSocketConnected": function() {
                 this._gc.subscribe();
@@ -177,6 +186,10 @@
             },
             "_onWindowResize": function() {
                 this._body.setSize(document.body.offsetWidth, document.body.offsetHeight);
+            },
+            "setTheme": function(theme) {
+                this._currentTheme = theme;
+                this._mainLayout.applyTheme(theme);
             },
             "_test": function(e) {
                 console.info(e.toString());

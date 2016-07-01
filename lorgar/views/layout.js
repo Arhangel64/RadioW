@@ -24,6 +24,7 @@
                 View.fn.destructor.call(this);
             },
             "_addChild": function(child, aligment) {
+                child.applyTheme(this._currentTheme);
                 aligment = aligment || 1;
                 this._c.push({
                     c: child,
@@ -39,6 +40,13 @@
                 
                 if (this._w !== undefined && this._h !== undefined) {
                     child.setSize(this._w, this._h);
+                }
+            },
+            "applyTheme": function(theme) {
+                View.fn.applyTheme.call(this, theme);
+                
+                for (var i = 0; i < this._c.length; ++i) {
+                    this._c[i].c.applyTheme(theme);
                 }
             },
             "clear": function() {

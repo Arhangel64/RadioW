@@ -5,6 +5,9 @@ var AbstractOrder = require("../lib/wContainer/abstractorder");
 var Address = require("../lib/wType/address");
 var Uint64 = require("../lib/wType/uint64");
 var Event = require("../lib/wType/event");
+var Vector = require("../lib/wType/vector");
+var Vocabulary = require("../lib/wType/vocabulary");
+var String = require("../lib/wType/string");
 var Handler = require("../lib/wDispatcher/handler");
 var log = require("../lib/log")(module);
 
@@ -18,6 +21,7 @@ var Model = Subscribable.inherit({
         this._subscribers = new SMap(false);
         this._handlers = [];
         this._models = [];
+        this._props = new Vector();
         this._address = address;
         this._subscribersCount = 0;
         
@@ -46,6 +50,7 @@ var Model = Subscribable.inherit({
         for (i = 0; i < this._handlers.length; ++i) {
             this._handlers[i].destructor();
         }
+        this._props.destructor();
         
         Subscribable.fn.destructor.call(this);
     },
@@ -68,6 +73,19 @@ var Model = Subscribable.inherit({
         this._models.push(model);
         if (this._dp) {
             model.register(this._dp, this._socket);
+        }
+    },
+    "addProperty": function(property, key) {
+        var vc = new Vocabulary();
+        vc.insert("property", new String(property));
+        vc.insert("key", new String(key));
+        
+        this._props.push(vc);
+        
+        if (this._dp) {
+            var nvc = new Vocabulary();
+            nvc.insert("properties", this._props.clone());
+            this.broadcast(nvc, "properties");
         }
     },
     "broadcast": function(vc, handler) {
@@ -146,6 +164,11 @@ var Model = Subscribable.inherit({
         ord.push_back(source.clone());
         ++this._subscribersCount;
         log.info(this._address.toString() + " has now " + this._subscribersCount + " subscribers");
+        
+        var nvc = new Vocabulary();
+        nvc.insert("properties", this._props.clone());
+        
+        this.response(nvc, "properties", ev);
     },
     "_h_unsubscribe": function(ev) {
         var id = ev.getSenderId();

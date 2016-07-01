@@ -56,6 +56,7 @@ var Magnus = Subscribable.inherit({
     "_initPages": function() {
         var root = new Page(new Address(["pages", "/"]));
         var msg = new ModelString(root._address["+"](new Address(["message"])), "This is the root page");
+        msg.addProperty("fontFamily", "casualFont");
         root.addItem(msg, 0, 0, 1, 1);
         this._ps.addPage(root, ["/", "/index.html"]);
         
@@ -63,6 +64,7 @@ var Magnus = Subscribable.inherit({
         
         var test = new Page(new Address(["pages", "/test"]));
         msg = new ModelString(test._address["+"](new Address(["message"])), "This is a test page");
+        msg.addProperty("fontFamily", "casualFont");
         test.addItem(msg, 0, 0, 1, 1);
         this._ps.addPage(test, ["/test", "/test/", "/test.html"]);
         

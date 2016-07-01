@@ -27,9 +27,11 @@
                 } else {
                     this._e = document.createElement("div");
                 }
+                this._styleProperties = [];
                 this._p = undefined;
                 this._w = undefined;
                 this._h = undefined;
+                this._currentTheme = {};
                 
                 this._initElement();
             },
@@ -43,6 +45,22 @@
                 if (arr.indexOf(className) === -1) {
                     arr.push(className);
                     this._e.className = arr.join(" ");
+                }
+            },
+            "addProperty": function(pair) {
+                this._styleProperties.push(pair);
+                this._applyProp(pair);
+            },
+            "_applyProp": function(pair) {
+                var value = this._currentTheme[pair.k];
+                if (value) {
+                    this._e.style[pair.p] = value;
+                }
+            },
+            "applyTheme": function(theme) {
+                this._currentTheme = theme;
+                for (var i = 0; i < this._styleProperties.length; ++i) {
+                    this._applyProp(this._styleProperties[i]);
                 }
             },
             "constrainHeight": function(h) {
@@ -83,6 +101,15 @@
                 if (toJoin) {
                     this._e.className = arr.join(" ");
                 }
+            },
+            "removeProperty": function(pair) {
+                var index = this._styleProperties.indexOf(pair);
+                if (index !== -1) {
+                    this._styleProperties.splice(index, 1);
+                    this._e.style[pair.p] = "";
+                    this.applyTheme(this._currentTheme);
+                }
+                
             },
             "setSize": function(w, h) {
                 this._w = this.constrainWidth(w);

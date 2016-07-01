@@ -20,7 +20,6 @@
                 W.extend(base, options)
                 GridLayout.fn.constructor.call(this, base);
                 
-                this.addClass("primary");
                 this._spacer = new View();
             },
             "destructor": function() {

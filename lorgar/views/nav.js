@@ -22,11 +22,11 @@
                 
                 this._initProxy();
                 
-                this._label = new String({
-                    "font-size": this._o["font-size"]
-                });
+                this._data = "";
+                this._label = new String();
+                this._label.on("measuresChanged", this._onLabelMeasuresChanged, this);
+                
                 this.append(this._label, 5);
-                this.addClass("primary");
                 this.addClass("hoverable");
                 
                 this._initHandlers();
@@ -37,11 +37,8 @@
                 Layout.fn.destructor.call(this);
             },
             "data": function(data) {
+                this._data = data;
                 this._label.data(data);
-                var h = this._o["font-size"] + 2;
-                var w = this._o["font-size"] / 1.6 * data.length;
-                this.setMaxSize(w + (this._o.padding * 2), this._o.maxHeight);
-                this._label.setMaxSize(w, h);
             },
             "_initHandlers": function() {
                 this._e.addEventListener("click", this._proxy.onClick, false);
@@ -53,6 +50,15 @@
             },
             "_onClick": function(e) {
                 this.trigger("activate");
+            },
+            "_onLabelMeasuresChanged": function() {
+                var fs = this._label.getFontSize();
+                var fontFamily = "Liberation";
+                
+                var h = fs + 2;
+                var w = String.calculateSingleString(fontFamily, fs, this._data);
+                this.setMaxSize(w + (this._o.padding * 2), this._o.maxHeight);
+                this._label.setMaxSize(w, h);
             }
         });
         

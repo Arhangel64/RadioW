@@ -24,7 +24,6 @@
                 
                 this._data = "";
                 this._label = new String();
-                this._label.on("measuresChanged", this._onLabelMeasuresChanged, this);
                 
                 this.append(this._label, 5);
                 this.addClass("hoverable");
@@ -36,12 +35,40 @@
                 
                 Layout.fn.destructor.call(this);
             },
+            "_applyProp": function(pair) {
+                var counter = 0;
+                var value = this._currentTheme[pair.k];
+                if (value) {
+                    if (this._e.style[pair.p] !== value) {
+                        this._e.style[pair.p] = value;
+                        if (pair.p === "fontSize" || pair.p === "fontFamily") {
+                            return true
+                        }
+                    }
+                }
+                return false;
+            },
+            "applyTheme": function(theme) {
+                this._currentTheme = theme;
+                var counter = 0;;
+                
+                for (var i = 0; i < this._styleProperties.length; ++i) {
+                    if (this._applyProp(this._styleProperties[i])){
+                        ++counter;
+                    }
+                }
+                if (counter > 0) {
+                    this.trigger("measuresChanged");
+                }
+            },
             "data": function(data) {
                 this._data = data;
                 this._label.data(data);
+                this.trigger("measuresChanged");
             },
             "_initHandlers": function() {
                 this._e.addEventListener("click", this._proxy.onClick, false);
+                this.on("measuresChanged", this._onMeasuresChanged, this);
             },
             "_initProxy": function() {
                 this._proxy = {
@@ -51,9 +78,9 @@
             "_onClick": function(e) {
                 this.trigger("activate");
             },
-            "_onLabelMeasuresChanged": function() {
-                var fs = this._label.getFontSize();
-                var fontFamily = "Liberation";
+            "_onMeasuresChanged": function() {
+                var fs = parseFloat(this._e.style.fontSize) || 16;
+                var fontFamily = this._e.style.fontFamily || "Liberation";
                 
                 var h = fs + 2;
                 var w = String.calculateSingleString(fontFamily, fs, this._data);

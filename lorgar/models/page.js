@@ -35,6 +35,7 @@
                     var row = vc.at("row").valueOf();
                     var colspan = vc.at("colspan").valueOf();
                     var rowspan = vc.at("rowspan").valueOf();
+                    var aligment = vc.at("aligment").valueOf();
                     var type = vc.at("type").valueOf();
                     
                     if (!collection[type]) {
@@ -43,7 +44,7 @@
                     var Element = collection[type].view;
                     var Element = new Element();
                     this._models[i].addView(view)
-                    view.append(view, row, col, rowspan, colspan);
+                    view.append(view, row, col, rowspan, colspan, aligment);
                 }
             },
             "_onClear": function() {
@@ -75,6 +76,7 @@
                     var row = vc.at("row").valueOf();
                     var colspan = vc.at("colspan").valueOf();
                     var rowspan = vc.at("rowspan").valueOf();
+                    var aligment = vc.at("aligment").valueOf();
                     var type = vc.at("type").valueOf();
                     
                     if (!collection[type]) {
@@ -85,7 +87,7 @@
                     for (var i = 0; i < this._views.length; ++i) {
                         var view = new View();
                         model.addView(view)
-                        this._views[i].append(view, row, col, rowspan, colspan);
+                        this._views[i].append(view, row, col, rowspan, colspan, aligment);
                     }
                 }
             }

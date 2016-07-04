@@ -16,6 +16,8 @@ var PageStorage = require("../models/pageStorage");
 var Page = require("../models/page");
 var ModelString = require("../models/string");
 
+var MusicPage = require("../pages/music");
+
 var Magnus = Subscribable.inherit({
     "className": "Magnus",
     "constructor": function(config) {
@@ -59,8 +61,11 @@ var Magnus = Subscribable.inherit({
         msg.addProperty("fontFamily", "casualFont");
         root.addItem(msg, 0, 0, 1, 1);
         this._ps.addPage(root, ["/", "/index.html"]);
+        this._gc.addNav("Home", root.getAddress());
         
-        this._gc.addNav("home", root.getAddress());
+        var music = new MusicPage(new Address(["pages", "/music"]));
+        this._ps.addPage(music, ["/music", "/music/", "/music.html"]);
+        this._gc.addNav("Music", music.getAddress());
         
         var test = new Page(new Address(["pages", "/test"]));
         msg = new ModelString(test._address["+"](new Address(["message"])), "This is a test page");
@@ -68,7 +73,7 @@ var Magnus = Subscribable.inherit({
         test.addItem(msg, 0, 0, 1, 1);
         this._ps.addPage(test, ["/test", "/test/", "/test.html"]);
         
-        this._gc.addNav("test", test.getAddress());
+        this._gc.addNav("Testing...", test.getAddress());
     },
     "_initServer": function() {
         this.server = new Server("Magnus");

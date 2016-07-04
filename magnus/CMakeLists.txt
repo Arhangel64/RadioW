@@ -8,6 +8,7 @@ add_subdirectory(views)
 add_subdirectory(test)
 add_subdirectory(core)
 add_subdirectory(models)
+add_subdirectory(pages)
 
 configure_file(package.json package.json)
 configure_file(app.js app.js)

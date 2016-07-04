@@ -22,7 +22,7 @@ fs.readFile(path, function(err, buffer) {
     if (err) {
         throw err;
     }
-    console._stdout.write(String.fromCharCode(27) + "[1m;32m");
+    console._stdout.write(String.fromCharCode(27) + "[1;32m");
     console._stdout.write("polymorph: ");
     console._stdout.write(String.fromCharCode(27) + "[0m");
     console._stdout.write("parsing " + moduleName + " for " + env);

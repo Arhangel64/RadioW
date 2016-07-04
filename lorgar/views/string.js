@@ -22,19 +22,21 @@
                 if (value) {
                     if (this._e.style[pair.p] !== value) {
                         this._e.style[pair.p] = value;
-                        if (pair.p === "fontSize" || pair.p === "fontSamily") {
-                            counter++;
+                        if (pair.p === "fontSize" || pair.p === "fontFamily") {
+                            return true;
                         }
                     }
                 }
-                return counter;
+                return false;
             },
             "applyTheme": function(theme) {
                 this._currentTheme = theme;
-                var counter;
+                var counter = 0;
                 
                 for (var i = 0; i < this._styleProperties.length; ++i) {
-                    counter = this._applyProp(this._styleProperties[i]);
+                    if (this._applyProp(this._styleProperties[i])) {
+                        ++counter;
+                    }
                 }
                 if (counter > 0) {
                     this.trigger("measuresChanged");
@@ -58,18 +60,20 @@
         });
         
         ViewString.calculateSingleString = function(family, size, string) {
-            var fontStorage = ViewString[family];
+            var fontStorage = ViewString[family] || ViewString["Liberation"];
+            
             var width = 0;
             
             for (var i = 0; i < string.length; ++i) {
-                var l = fontStorage[string[i]] || 10;
-                width += (size * l / 16) + 1;
+                var letter = string[i];
+                var l = fontStorage[letter] || 10;
+                width += (size * (l) / 18);
             }
             
-            return width;
+            return Math.ceil(width);
         };
         
-        ViewString.Liberation = {  //Sans, measured on 16px size, not sure about the space, and not sure, how to calculate interval between letters
+        ViewString.Liberation = {  //Sans, measured on 18px size, not sure about the space, and not sure, how to calculate interval between letters
             " ": 5, //?
             "!": 5,
             "\"": 7,

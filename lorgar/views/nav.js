@@ -14,7 +14,6 @@
             "className": "Nav",
             "constructor": function(options) {
                 var base = {
-                    "font-size": 16,
                     "padding": 5
                 };
                 W.extend(base, options);
@@ -25,7 +24,7 @@
                 this._data = "";
                 this._label = new String();
                 
-                this.append(this._label, 5);
+                this.append(this._label, Layout.Aligment.CenterCenter);
                 this.addClass("hoverable");
                 
                 this._initHandlers();

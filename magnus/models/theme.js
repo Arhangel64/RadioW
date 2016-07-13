@@ -52,10 +52,12 @@ var Theme = Model.inherit({
 });
 
 Theme.default = {
+    mainColor: "#ffffff",
+    mainFontColor: "#222222",
     primaryColor: "#0000ff",
     primaryFontColor: "#ffffff",
-    secondaryColor: "#00ff00",
-    secondaryFontColor: "#ffffff",
+    secondaryColor: "#dddddd",
+    secondaryFontColor: "#222222",
     
     smallFont: "Liberation",
     smallFontSize: "12px",

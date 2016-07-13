@@ -4,17 +4,21 @@
     
     var defineArray = [];
     defineArray.push("models/list");
-    
     defineArray.push("models/string");
-    
+    defineArray.push("models/panesList");
     defineArray.push("views/string");
+    defineArray.push("views/panesList");
+    defineArray.push("lib/wType/vocabulary");
+    defineArray.push("lib/wType/address");
     
     define(moduleName, defineArray, function page_module() {
         var List = require("models/list");
-        
         var ModelString = require("models/string");
-        
+        var ModelPanesList = require("models/panesList");
         var ViewString = require("views/string");
+        var ViewPanesList = require("views/panesList");
+        var Vocabulary = require("lib/wType/vocabulary");
+        var Address = require("lib/wType/address");
         
         var Page = List.inherit({
             "className": "Page",
@@ -37,14 +41,15 @@
                     var rowspan = vc.at("rowspan").valueOf();
                     var aligment = vc.at("aligment").valueOf();
                     var type = vc.at("type").valueOf();
+                    var opts = Page.deserializeOptions(vc.at("viewOptions"));
                     
                     if (!collection[type]) {
                         throw new Error("Unsupported view element on the page");
                     }
                     var Element = collection[type].view;
-                    var Element = new Element();
-                    this._models[i].addView(view)
-                    view.append(view, row, col, rowspan, colspan, aligment);
+                    var elem = new Element(opts);
+                    this._models[i].addView(elem)
+                    view.append(elem, row, col, rowspan, colspan, aligment);
                 }
             },
             "_onClear": function() {
@@ -78,6 +83,7 @@
                     var rowspan = vc.at("rowspan").valueOf();
                     var aligment = vc.at("aligment").valueOf();
                     var type = vc.at("type").valueOf();
+                    var opts = Page.deserializeOptions(vc.at("viewOptions"));
                     
                     if (!collection[type]) {
                         throw new Error("Unsupported view element on the page");
@@ -85,7 +91,7 @@
                     var View = collection[type].view;
                 
                     for (var i = 0; i < this._views.length; ++i) {
-                        var view = new View();
+                        var view = new View(opts);
                         model.addView(view)
                         this._views[i].append(view, row, col, rowspan, colspan, aligment);
                     }
@@ -94,8 +100,30 @@
         });
         
         var collection = {
-            "String": {model: ModelString, view: ViewString}
+            "String": {model: ModelString, view: ViewString},
+            "PanesList": {model: ModelPanesList, view: ViewPanesList}
         };
+        
+        
+        Page.deserializeOptions = function(vc) {
+            var opts = Object.create(null);
+            var keys = vc.getKeys();
+            
+            for (var i = 0; i < keys.length; ++i) {
+                var value = vc.at(keys[i]);
+                
+                if (value instanceof Vocabulary) {
+                    value = this.deserializeOptions(value);
+                } else if(value instanceof Address) {
+                    value = value.clone();
+                } else {
+                    value = value.valueOf();
+                }
+                opts[key[i]] = value;
+            }
+            
+            return opts;
+        }
         
         return Page;
     });

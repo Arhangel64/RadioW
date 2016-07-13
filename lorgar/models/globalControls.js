@@ -52,7 +52,11 @@
                     case "version":
                         var vm = new ModelString(addr.clone());
                         this.addModel(vm);
-                        var vv = new ViewString({maxHeight: 20});
+                        var vv = new ViewString({maxHeight: 15});
+                        vv.addProperty({p: "backgroundColor", k:"secondaryColor"});
+                        vv.addProperty({p: "color", k:"secondaryFontColor"});
+                        vv.addProperty({p: "fontFamily", k:"smallFont"});
+                        vv.addProperty({p: "fontSize", k:"smallFontSize"});
                         this._layout.append(vv, 2, 0, 1, 3);
                         vm.addView(vv);
                         break;

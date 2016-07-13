@@ -16,7 +16,9 @@ var PageStorage = require("../models/pageStorage");
 var Page = require("../models/page");
 var ModelString = require("../models/string");
 
+var HomePage = require("../pages/home");
 var MusicPage = require("../pages/music");
+var TestPage = require("../pages/test");
 
 var Magnus = Subscribable.inherit({
     "className": "Magnus",
@@ -56,10 +58,7 @@ var Magnus = Subscribable.inherit({
         this._ps.register(this.dispatcher);
     },
     "_initPages": function() {
-        var root = new Page(new Address(["pages", "/"]));
-        var msg = new ModelString(root._address["+"](new Address(["message"])), "This is the root page");
-        msg.addProperty("fontFamily", "casualFont");
-        root.addItem(msg, 0, 0, 1, 1);
+        var root = new HomePage(new Address(["pages", "/"]));
         this._ps.addPage(root, ["/", "/index.html"]);
         this._gc.addNav("Home", root.getAddress());
         
@@ -67,13 +66,14 @@ var Magnus = Subscribable.inherit({
         this._ps.addPage(music, ["/music", "/music/", "/music.html"]);
         this._gc.addNav("Music", music.getAddress());
         
-        var test = new Page(new Address(["pages", "/test"]));
-        msg = new ModelString(test._address["+"](new Address(["message"])), "This is a test page");
-        msg.addProperty("fontFamily", "casualFont");
-        test.addItem(msg, 0, 0, 1, 1);
+        var test = new TestPage(new Address(["pages", "/test"]));
         this._ps.addPage(test, ["/test", "/test/", "/test.html"]);
-        
         this._gc.addNav("Testing...", test.getAddress());
+        
+        music.addBand("Avenged sevenfold");
+        music.addBand("Megadeth");
+        music.addBand("Iron Maiden");
+        music.addBand("As I Lay Dying");
     },
     "_initServer": function() {
         this.server = new Server("Magnus");

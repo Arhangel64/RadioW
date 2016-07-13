@@ -162,9 +162,11 @@
                 var spacerL = new View({
                     maxWidth: 50
                 });
+                spacerL.addProperty({p: "backgroundColor", k: "mainColor"});
                 var spacerR = new View({
                     maxWidth: 50
                 });
+                spacerR.addProperty({p: "backgroundColor", k: "mainColor"});
                 this._mainLayout.append(spacerL, 1, 0, 1, 1);
                 this._mainLayout.append(this._currentPage, 1, 1, 1, 1);
                 this._mainLayout.append(spacerR, 1, 2, 1, 1);

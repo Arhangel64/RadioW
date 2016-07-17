@@ -51,7 +51,7 @@
                     var index = this._models.indexOf(model)
                 
                     for (var i = 0; i < this._views.length; ++i) {
-                        var view = new ViewString();
+                        var view = new ViewString({singleLine: true});
                         model.addView(view)
                         this._views[i].append(view);
                     }

@@ -3,9 +3,11 @@
     var moduleName = "views/gridLayout";
     
     var defineArray = [];
+    defineArray.push("views/view");
     defineArray.push("views/layout");
     
     define(moduleName, defineArray, function gridLayout_module() {
+        var View = require("views/view");
         var Layout = require("views/layout");
         
         var GridLayout = Layout.inherit({
@@ -330,11 +332,7 @@
                 this.refreshLay();
             },
             "setSize": function(w, h) {
-                this._w = this.constrainWidth(w);
-                this._h = this.constrainHeight(h);
-                
-                this._e.style.width = this._w + "px";
-                this._e.style.height = this._h + "px";
+                View.fn.setSize.call(this, w, h);
                 
                 if (this._c.length) {
                     this.refreshLay();

@@ -12,9 +12,15 @@
             "className": "String",
             "constructor": function(options) {
                 var base = {
+                    singleLine: false,
+                    
                 };
                 W.extend(base, options)
                 View.fn.constructor.call(this, base);
+                
+                if (this._o.singleLine) {
+                    this.on("measuresChanged", this._onMeasuresChanged, this);
+                }
             },
             "_applyProp": function(pair) {
                 var counter = 0;
@@ -56,6 +62,21 @@
                 } else {
                     return parseInt(fs);
                 }
+            },
+            "_initElement": function() {
+                View.fn._initElement.call(this);
+                
+                if (this._o.singleLine) {
+                    this._e.style.whiteSpace = "nowrap";
+                }
+            },
+            "_onMeasuresChanged": function() {
+                var fs = parseFloat(this._e.style.fontSize) || 16;
+                var fontFamily = this._e.style.fontFamily || "Liberation";
+                
+                var h = fs + 2;
+                var w = ViewString.calculateSingleString(fontFamily, fs, this._e.innerText || "");
+                this.setConstSize(w, h);
             }
         });
         

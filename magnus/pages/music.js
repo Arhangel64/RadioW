@@ -23,6 +23,7 @@ var MusicPage = Page.inherit({
         var c = counter++;
         c += "";
         var bandName = new String(this._address["+"](new Address([c])), name);
+        bandName.addProperty("fontFamily", "casualFont");
         this._list.addItem(bandName);
     }
 });

@@ -13,7 +13,7 @@ namespace W
     {
     public:
         Handler(const Address& p_rel_addr);
-        ~Handler();
+        virtual ~Handler();
         
         template<typename InstanceType, typename MethodType>
         static Handler* create(const Address& addr, InstanceType* inst, MethodType mth)

@@ -2,6 +2,7 @@
 #define ROBOUTE_H
 
 #include <QtCore/QObject>
+#include <QMap>
 
 #include <wSocket/socket.h>
 
@@ -29,6 +30,8 @@ public:
     
 private:
     W::Logger *logger;
+    QMap<uint64_t, W::Vocabulary> elements;
+    uint64_t lastId;
     
 public:
     W::Dispatcher *dispatcher;
@@ -44,6 +47,7 @@ signals:
 public slots:
     void start();
     void stop();
+    void addElement(const QMap<QString, QString>& params);
     
 private:
     class SingletonError: 

@@ -10,6 +10,8 @@ Roboute* Roboute::roboute = 0;
 Roboute::Roboute(QObject *parent):
     QObject(parent),
     logger(new W::Logger()),
+    elements(),
+    lastId(0),
     dispatcher(new W::Dispatcher())
 {
     if (roboute != 0) 
@@ -48,4 +50,13 @@ void Roboute::debug(std::string str)
     QString dbg = str.c_str();
     dbg.append("\n");
     emit debugMessage(dbg);
+}
+
+void Roboute::addElement(const QMap<QString, QString>& params)
+{
+    W::Vocabulary vc;
+    vc.insert(W::String(u"id"), W::Uint64(++lastId));
+    vc.insert(W::String(u"name"), W::String(params["name"].toStdU16String()));
+    elements.insert(lastId, vc);
+    
 }

@@ -10,11 +10,13 @@ set(CMAKE_AUTOMOC ON)
 set(HEADERS 
     mainview.h
     detailedview.h
+    newappdialogue.h
 )
 
 set(SOURCES
     mainview.cpp
     detailedview.cpp
+    newappdialogue.cpp
 )
 
 add_library(robouteViews STATIC ${HEADERS} ${SOURCES})

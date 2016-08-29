@@ -1,3 +1,5 @@
+#include <QMenuBar>
+
 #include "mainwindow.h"
 #include <iostream>
 
@@ -5,8 +7,10 @@
 MainWindow::MainWindow():
     QMainWindow(),
     apps(new AppListModel(this)),
-    widget(new MainView(apps, this))
+    widget(new MainView(apps, this)),
+    newApp(0)
 {
+    createActions();
     setCentralWidget(widget);
     
     apps->push_back(0, "Roboute");
@@ -67,3 +71,37 @@ void MainWindow::unselectAll()
     widget->list->selectionModel()->clearSelection();
 }
 
+void MainWindow::createActions()
+{
+    QMenu *actionsMenu = menuBar()->addMenu(tr("Actions"));
+    
+    const QIcon newIcon = QIcon::fromTheme("document-new");
+    QAction *newAct = new QAction(newIcon, tr("New application"), this);
+    newAct->setShortcuts(QKeySequence::New);
+    newAct->setStatusTip(tr("Add new application"));
+    connect(newAct, &QAction::triggered, this, &MainWindow::newApplication);
+    actionsMenu->addAction(newAct);
+}
+
+void MainWindow::newApplication()
+{
+    newApp = new NewAppDialogue(this);
+    connect(newApp, SIGNAL(accepted()), SLOT(newAppAccepted()));
+    connect(newApp, SIGNAL(rejected()), SLOT(newAppRejected()));
+    newApp->setModal(true);
+    newApp->show();
+}
+
+void MainWindow::newAppAccepted()
+{
+    std::cout << "accepted" << std::endl;
+    delete newApp;
+    newApp = 0;
+}
+
+void MainWindow::newAppRejected()
+{
+    std::cout << "rejected" << std::endl;
+    delete newApp;
+    newApp = 0;
+}

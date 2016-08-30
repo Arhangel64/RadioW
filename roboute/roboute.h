@@ -4,8 +4,6 @@
 #include <QtCore/QObject>
 #include <QMap>
 
-#include <wSocket/socket.h>
-
 #include <wType/string.h>
 #include <wType/uint64.h>
 #include <wType/event.h>
@@ -17,6 +15,8 @@
 #include <wDispatcher/handler.h>
 
 #include <utils/exception.h>
+
+#include <models/service.h>
 
 class Roboute: public QObject
 {
@@ -30,8 +30,7 @@ public:
     
 private:
     W::Logger *logger;
-    QMap<uint64_t, W::Vocabulary> elements;
-    uint64_t lastId;
+    QMap<uint64_t, Service*> services;
     
 public:
     W::Dispatcher *dispatcher;
@@ -43,11 +42,12 @@ private:
     
 signals:
     void debugMessage(const QString& msg);
+    void newService(const Service& srv);
     
 public slots:
     void start();
     void stop();
-    void addElement(const QMap<QString, QString>& params);
+    void addService(const QMap<QString, QString>& params);
     
 private:
     class SingletonError: 

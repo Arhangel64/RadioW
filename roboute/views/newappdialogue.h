@@ -8,6 +8,7 @@
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QSpacerItem>
 #include <QtWidgets/QLineEdit>
+#include <QtCore/QMap>
 
 class NewAppDialogue : public QDialog
 {
@@ -15,9 +16,10 @@ class NewAppDialogue : public QDialog
 public:
     NewAppDialogue(QWidget* parent = 0);
     
-    void getData() const;
+    QMap<QString, QString> getData() const;
     
 private:
+    QLineEdit* name;
     QLineEdit* address;
     QLineEdit* port;
     

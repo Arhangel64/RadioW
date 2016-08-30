@@ -95,6 +95,7 @@ void MainWindow::newApplication()
 void MainWindow::newAppAccepted()
 {
     std::cout << "accepted" << std::endl;
+    emit addService(newApp->getData());
     delete newApp;
     newApp = 0;
 }
@@ -104,4 +105,9 @@ void MainWindow::newAppRejected()
     std::cout << "rejected" << std::endl;
     delete newApp;
     newApp = 0;
+}
+
+void MainWindow::newService(const Service& srv)
+{
+    apps->push_back(srv.id, srv.name);
 }

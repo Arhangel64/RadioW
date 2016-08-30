@@ -18,6 +18,8 @@ int main(int argc, char **argv) {
     MainWindow wnd;
     
     QObject::connect(roboute, SIGNAL(debugMessage(const QString&)), &wnd, SLOT(robouteMessage(const QString&)));
+    QObject::connect(roboute, SIGNAL(newService(const Service&)), &wnd, SLOT(newService(const Service&)));
+    QObject::connect(&wnd, SIGNAL(addService(const QMap<QString, QString>&)), roboute, SLOT(addService(const QMap<QString, QString>&)));
     
     QTimer::singleShot(0, roboute, SLOT(start()));
     QObject::connect(&app, SIGNAL(aboutToQuit()), roboute, SLOT(stop()));

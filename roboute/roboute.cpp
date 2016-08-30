@@ -10,8 +10,7 @@ Roboute* Roboute::roboute = 0;
 Roboute::Roboute(QObject *parent):
     QObject(parent),
     logger(new W::Logger()),
-    elements(),
-    lastId(0),
+    services(),
     dispatcher(new W::Dispatcher())
 {
     if (roboute != 0) 
@@ -25,6 +24,13 @@ Roboute::Roboute(QObject *parent):
 
 Roboute::~Roboute()
 {
+    QMap<uint64_t, Service*>::iterator beg = services.begin();
+    QMap<uint64_t, Service*>::iterator end = services.end();
+    
+    for (; beg != end; ++beg) {
+        delete *beg;
+    }
+    
     dispatcher->unregisterDefaultHandler(logger);
     
     delete logger;
@@ -52,11 +58,10 @@ void Roboute::debug(std::string str)
     emit debugMessage(dbg);
 }
 
-void Roboute::addElement(const QMap<QString, QString>& params)
+void Roboute::addService(const QMap<QString, QString>& params)
 {
-    W::Vocabulary vc;
-    vc.insert(W::String(u"id"), W::Uint64(++lastId));
-    vc.insert(W::String(u"name"), W::String(params["name"].toStdU16String()));
-    elements.insert(lastId, vc);
+    Service* srv = Service::create(params);
+    services.insert(srv->id, srv);
     
+    emit newService(*srv);
 }

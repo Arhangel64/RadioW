@@ -2,6 +2,7 @@
 
 NewAppDialogue::NewAppDialogue(QWidget* parent):
     QDialog(parent),
+    name(new QLineEdit(this)),
     address(new QLineEdit(this)),
     port(new QLineEdit(this))
 {
@@ -35,6 +36,18 @@ void NewAppDialogue::createButtons(QHBoxLayout* layout)
 
 void NewAppDialogue::createForm(QFormLayout* layout)
 {
+    layout->addRow(tr("Name"), name);
     layout->addRow(tr("Server address"), address);
     layout->addRow(tr("Service port"), port);
 }
+
+QMap<QString, QString> NewAppDialogue::getData() const
+{
+    QMap<QString, QString> map;
+    map.insert("name", name->text());
+    map.insert("address", address->text());
+    map.insert("port", port->text());
+    
+    return map;
+}
+

@@ -9,13 +9,17 @@ set(CMAKE_AUTOMOC ON)
 set(HEADERS 
     applistmodel.h
     appmodel.h
+    service.h
 )
 
 set(SOURCES
     applistmodel.cpp
     appmodel.cpp
+    service.cpp
 )
 
 add_library(robouteModels STATIC ${HEADERS} ${SOURCES})
 
 target_link_libraries(robouteModels Qt5::Core)
+target_link_libraries(robouteModels wType)
+target_link_libraries(robouteModels wSocket)

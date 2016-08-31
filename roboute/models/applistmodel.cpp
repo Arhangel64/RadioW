@@ -93,3 +93,23 @@ void AppListModel::clear()
     index.clear();
     endResetModel();
 }
+
+void AppListModel::setConnectable(uint64_t id, bool value)
+{
+    map[id]->setConnectable(value);
+}
+
+void AppListModel::setConnected(uint64_t id, bool value)
+{
+    map[id]->setConnected(value);
+}
+
+void AppListModel::setLaunchable(uint64_t id, bool value)
+{
+    map[id]->setLaunchable(value);
+}
+
+void AppListModel::setLaunched(uint64_t id, bool value)
+{
+    map[id]->setLaunched(value);
+}

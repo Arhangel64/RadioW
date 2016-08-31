@@ -20,6 +20,7 @@ private:
     AppListModel* apps;
     MainView* widget;
     NewAppDialogue* newApp;
+    quint64 detalizedId;
     
 private:
     void createActions();
@@ -30,6 +31,10 @@ private:
     
 signals:
     void addService(const QMap<QString, QString>&);
+    void connectService(uint64_t);
+    void disconnectService(uint64_t);
+    void launchService(uint64_t);
+    void stopService(uint64_t);
     
 public slots:
     void robouteMessage(const QString& msg);
@@ -42,6 +47,11 @@ private slots:
     void newApplication();
     void newAppAccepted();
     void newAppRejected();
+    
+    void onDetailsConnect();
+    void onDetailsDisconnect();
+    void onDetailsLaunch();
+    void onDetailsStop();
 };
 
 #endif // MAINWINDOW_H

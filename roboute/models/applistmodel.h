@@ -23,6 +23,10 @@ public:
     QVariant data(const QModelIndex &i, int role = Qt::DisplayRole) const;
     int rowCount(const QModelIndex &parent = QModelIndex()) const;
     bool insertRows(int row, int count, const QModelIndex &parent = QModelIndex());
+    void setConnectable(uint64_t id, bool value);
+    void setConnected(uint64_t id, bool value);
+    void setLaunchable(uint64_t id, bool value);
+    void setLaunched(uint64_t id, bool value);
     
 private:
     typedef QMap<uint64_t, AppModel*> Map;

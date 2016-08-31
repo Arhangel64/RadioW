@@ -4,7 +4,11 @@ AppModel::AppModel(uint64_t p_id, const QString& p_name):
     QObject(),
     id(p_id),
     name(p_name),
-    log()
+    log(),
+    connectable(false),
+    connected(false),
+    launchable(false),
+    launched(false)
 {
 }
 
@@ -33,3 +37,54 @@ QString* AppModel::getHistory() const
     return history;
 }
 
+bool AppModel::getConnectable() const
+{
+    return connectable;
+}
+
+bool AppModel::getConnected() const
+{
+    return connected;
+}
+
+bool AppModel::getLaunchable() const
+{
+    return launchable;
+}
+
+bool AppModel::getLaunched() const
+{
+    return launched;
+}
+
+void AppModel::setConnectable(bool value)
+{
+    if (value != connectable) {
+        connectable = value;
+        emit changedConnectable(connectable);
+    }
+}
+
+void AppModel::setConnected(bool value)
+{
+    if (value != connected) {
+        connected = value;
+        emit changedConnected(connected);
+    }
+}
+
+void AppModel::setLaunchable(bool value)
+{
+    if (value != launchable) {
+        launchable = value;
+        emit changedLaunchable(launchable);
+    }
+}
+
+void AppModel::setLaunched(bool value)
+{
+    if (value != launched) {
+        launched = value;
+        emit changedLaunchable(launched);
+    }
+}

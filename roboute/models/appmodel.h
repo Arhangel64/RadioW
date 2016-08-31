@@ -14,17 +14,35 @@ public:
     const QString& getName() const;
     void logMessage(const QString& msg);
     QString* getHistory() const;
+    bool getConnectable() const;
+    bool getConnected() const;
+    bool getLaunchable() const;
+    bool getLaunched() const;
     
 public:
     const uint64_t id;
     
 signals:
     void newLogMessage(const QString& msg);
+    void changedConnectable(bool value);
+    void changedConnected(bool value);
+    void changedLaunchable(bool value);
+    void changedLaunched(bool value);
+    
+public slots:
+    void setConnectable(bool value);
+    void setConnected(bool value);
+    void setLaunchable(bool value);
+    void setLaunched(bool value);
     
 private:
     typedef std::list<QString> List;
     QString name;
     List log;
+    bool connectable;
+    bool connected;
+    bool launchable;
+    bool launched;
     
 };
 

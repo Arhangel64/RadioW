@@ -68,8 +68,10 @@ void QSshSocket::run()
 {
     while(m_run)
     {
+        //qDebug("in run");
         if (m_session == NULL)
         {
+            //qDebug("session NULL");
             if (m_host != "")
             {
                 m_session = ssh_new();
@@ -167,9 +169,9 @@ void QSshSocket::run()
                         m_workingDirectory = m_nextWorkingDir;
                     }
                     m_nextWorkingDir = ".";
-                    workingDirectorySet(m_workingDirectory);
+                    emit workingDirectorySet(m_workingDirectory);
                 } else {
-                    commandExecuted( m_currentOperation.command, response);
+                    emit commandExecuted( m_currentOperation.command, response);
                 }
 
             }
@@ -296,18 +298,15 @@ void QSshSocket::run()
                 ssh_scp_close(scpSession);
                 ssh_scp_free(scpSession);
 
-                emit pushSuccessful(m_currentOperation.localPath,m_currentOperation.remotePath);
+                emit pushSuccessful(m_currentOperation.localPath, m_currentOperation.remotePath);
 
             }
-
 
             m_currentOperation.executed = true;
         } else {
             msleep(100);
         }
-
     }
-
 }
 void QSshSocket::disconnectFromHost()
 {

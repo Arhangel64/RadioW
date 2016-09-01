@@ -17,3 +17,4 @@ set(SOURCES
 add_library(qssh ${HEADERS} ${SOURCES})
 
 target_link_libraries(qssh Qt5::Core)
+target_link_libraries(qssh ssh)

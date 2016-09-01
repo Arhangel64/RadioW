@@ -32,7 +32,7 @@ public:
     explicit QSshSocket(QObject * parent = 0);
     ~QSshSocket();
 
-    void connectToHost(QString host, int port =22);
+    void connectToHost(QString host, int port = 22);
     void disconnectFromHost();
     void executeCommand(QString command);
 
@@ -73,14 +73,21 @@ private:
     struct SSHOperation
     {
         SSHOperationType type;
-        QString adminCommand,command, localPath, remotePath;
+        QString adminCommand;
+        QString command;
+        QString localPath; 
+        QString remotePath;
         bool executed;
     };
 
     int m_port;
     bool m_loggedIn ;
     QThread * m_thread;
-    QString m_workingDirectory,m_nextWorkingDir,m_user, m_host,m_password;
+    QString m_workingDirectory;
+    QString m_nextWorkingDir; 
+    QString m_user;
+    QString m_host; 
+    QString m_password;
     SSHOperation m_currentOperation;
     ssh_session m_session;
     bool m_connected,m_run;

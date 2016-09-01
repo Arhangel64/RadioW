@@ -24,6 +24,8 @@ MainWindow::MainWindow():
         as, SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)), 
         this, SLOT(selectionChanged(const QItemSelection&, const QItemSelection&))
     );
+    connect(widget->details, SIGNAL(connect()), this, SLOT(onDetailsConnect()));
+    connect(widget->details, SIGNAL(disconnect()), this, SLOT(onDetailsDisconnect()));
 }
 
 void MainWindow::selectionChanged(const QItemSelection &selected, const QItemSelection &deselected)
@@ -127,6 +129,7 @@ void MainWindow::newAppRejected()
 void MainWindow::newService(const Service& srv)
 {
     apps->push_back(srv.id, srv.name);
+    apps->setConnectable(srv.id, true);
 }
 
 void MainWindow::onDetailsConnect()

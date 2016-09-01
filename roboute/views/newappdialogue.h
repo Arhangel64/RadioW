@@ -22,6 +22,8 @@ private:
     QLineEdit* name;
     QLineEdit* address;
     QLineEdit* port;
+    QLineEdit* login;
+    QLineEdit* pass;
     
     
 private:

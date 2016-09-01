@@ -58,21 +58,34 @@ void Roboute::debug(std::string str)
     emit debugMessage(dbg);
 }
 
+void Roboute::debug(uint64_t id, const QString& msg)
+{
+    Service* srv = services[id];
+    QString dbg = srv->name + ": " + msg;
+    debug(dbg.toStdString());
+}
+
+
 void Roboute::addService(const QMap<QString, QString>& params)
 {
     Service* srv = Service::create(params);
     services.insert(srv->id, srv);
+    
+    connect(srv, SIGNAL(serviceMessage(const QString&)), this, SLOT(serviceMessage(const QString&)));
     
     emit newService(*srv);
 }
 
 void Roboute::connectService(uint64_t id)
 {
-    
+    Service* srv = services[id];
+    srv->connect();
 }
 
 void Roboute::disconnectService(uint64_t id)
 {
+    Service* srv = services[id];
+    srv->disconnect();
 }
 
 void Roboute::launchService(uint64_t id)
@@ -81,4 +94,10 @@ void Roboute::launchService(uint64_t id)
 
 void Roboute::stopService(uint64_t id)
 {
+}
+
+void Roboute::serviceMessage(const QString& msg)
+{
+    Service* srv = static_cast<Service*>(sender());
+    debug(srv->id, msg);
 }

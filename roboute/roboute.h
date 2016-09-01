@@ -39,6 +39,7 @@ public:
     
 private:
     void debug(std::string str);
+    void debug(uint64_t id, const QString& msg);
     
 signals:
     void debugMessage(const QString& msg);
@@ -59,6 +60,9 @@ public slots:
     void disconnectService(uint64_t id);
     void launchService(uint64_t id);
     void stopService(uint64_t id);
+    
+private slots:
+    void serviceMessage(const QString& msg);
     
 private:
     class SingletonError: 

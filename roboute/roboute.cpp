@@ -65,3 +65,20 @@ void Roboute::addService(const QMap<QString, QString>& params)
     
     emit newService(*srv);
 }
+
+void Roboute::connectService(uint64_t id)
+{
+    
+}
+
+void Roboute::disconnectService(uint64_t id)
+{
+}
+
+void Roboute::launchService(uint64_t id)
+{
+}
+
+void Roboute::stopService(uint64_t id)
+{
+}

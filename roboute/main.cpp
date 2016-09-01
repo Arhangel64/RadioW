@@ -15,15 +15,29 @@ int main(int argc, char **argv) {
     W::SignalCatcher sc(&app);
     
     Roboute* roboute = new Roboute(&app);
-    MainWindow wnd;
+    MainWindow* wnd = new MainWindow();;
     
-    QObject::connect(roboute, SIGNAL(debugMessage(const QString&)), &wnd, SLOT(robouteMessage(const QString&)));
-    QObject::connect(roboute, SIGNAL(newService(const Service&)), &wnd, SLOT(newService(const Service&)));
-    QObject::connect(&wnd, SIGNAL(addService(const QMap<QString, QString>&)), roboute, SLOT(addService(const QMap<QString, QString>&)));
+    QObject::connect(roboute, SIGNAL(debugMessage(const QString&)), wnd, SLOT(robouteMessage(const QString&)));
+    QObject::connect(roboute, SIGNAL(newService(const Service&)), wnd, SLOT(newService(const Service&)));
+    QObject::connect(roboute, SIGNAL(serviceConnected(uint64_t)), wnd, SLOT(serviceConnected(uint64_t)));
+    QObject::connect(roboute, SIGNAL(serviceDisconnected(uint64_t)), wnd, SLOT(serviceDisconnected(uint64_t)));
+    QObject::connect(roboute, SIGNAL(serviceConnectionFailed(uint64_t)), wnd, SLOT(serviceConnectionFailed(uint64_t)));
+    QObject::connect(roboute, SIGNAL(serviceLaunched(uint64_t)), wnd, SLOT(serviceLaunched(uint64_t)));
+    QObject::connect(roboute, SIGNAL(serviceStopped(uint64_t)), wnd, SLOT(serviceStopped(uint64_t)));
+    QObject::connect(roboute, SIGNAL(serviceLaunchingFailed(uint64_t)), wnd, SLOT(serviceLaunchingFailed(uint64_t)));
+    QObject::connect(roboute, SIGNAL(serviceStoppingFailed(uint64_t)), wnd, SLOT(serviceStoppingFailed(uint64_t)));
+    QObject::connect(wnd, SIGNAL(addService(const QMap<QString, QString>&)), roboute, SLOT(addService(const QMap<QString, QString>&)));
+    QObject::connect(wnd, SIGNAL(connectService(uint64_t)), roboute, SLOT(connectService(uint64_t)));
+    QObject::connect(wnd, SIGNAL(disconnectService(uint64_t)), roboute, SLOT(disconnectService(uint64_t)));
+    QObject::connect(wnd, SIGNAL(launchService(uint64_t)), roboute, SLOT(launchService(uint64_t)));
+    QObject::connect(wnd, SIGNAL(stopService(uint64_t)), roboute, SLOT(stopService(uint64_t)));
     
     QTimer::singleShot(0, roboute, SLOT(start()));
     QObject::connect(&app, SIGNAL(aboutToQuit()), roboute, SLOT(stop()));
 
-    wnd.show();
-    return app.exec();
+    wnd->show();
+    int result = app.exec();
+    delete wnd;
+    
+    return result;
 }

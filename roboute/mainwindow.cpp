@@ -148,3 +148,38 @@ void MainWindow::onDetailsStop()
 {
     emit stopService(detalizedId);
 }
+
+void MainWindow::serviceConnected(uint64_t id)
+{
+    apps->setConnected(id, true);
+}
+
+void MainWindow::serviceDisconnected(uint64_t id)
+{
+    apps->setConnected(id, false);
+}
+
+void MainWindow::serviceConnectionFailed(uint64_t id)
+{
+    apps->setConnected(id, false);
+}
+
+void MainWindow::serviceLaunched(uint64_t id)
+{
+    apps->setLaunched(id, true);
+}
+
+void MainWindow::serviceStopped(uint64_t id)
+{
+    apps->setLaunched(id, false);
+}
+
+void MainWindow::serviceLaunchingFailed(uint64_t id)
+{
+    apps->setLaunched(id, false);
+}
+
+void MainWindow::serviceStoppingFailed(uint64_t id)
+{
+    apps->setLaunched(id, true);
+}

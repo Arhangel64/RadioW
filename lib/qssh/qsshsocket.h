@@ -5,7 +5,6 @@
 #include <QtCore/QByteArray>
 #include <QtCore/QThread>
 #include <QtCore/QVector>
-#include <QtCore/QFile>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <QtCore/QDebug>
@@ -29,68 +28,32 @@ public:
         PasswordAuthenticationFailedError   //The credentials of a user on the remote host could not be authenticated
     };
 
-    explicit QSshSocket(QObject * parent = 0);
+    explicit QSshSocket(QString p_user, QObject* parent = 0);
     ~QSshSocket();
 
-    void connectToHost(QString host, int port = 22);
-    void disconnectFromHost();
+    void connect(QString host, int port = 22);
+    void disconnect();
     void executeCommand(QString command);
+    void login(QString password);
 
-    QString host();
     bool isLoggedIn();
     bool isConnected();
-    void login(QString user, QString password);
-    int port();
-    void pullFile(QString localPath, QString remotePath);
-    void pushFile(QString localPath, QString remotePath);
-    void setWorkingDirectory(QString path);
-    QString user();
 
 signals:
 
     void connected();
     void disconnected();
     void error(QSshSocket::SshError error);
-    void commandExecuted(QString command,QString response);
+    void commandExecuted(QString response);
     void loginSuccessful();
-    void pullSuccessful(QString localFile, QString remoteFile);
-    void pushSuccessful(QString localFile, QString remoteFile);
-    void workingDirectorySet(QString cwd);
 
 private slots:
-    void run();
 
 private:
-
-    enum SSHOperationType
-    {
-        Command,
-        WorkingDirectoryTest,
-        Pull,
-        Push
-    };
-
-    struct SSHOperation
-    {
-        SSHOperationType type;
-        QString adminCommand;
-        QString command;
-        QString localPath; 
-        QString remotePath;
-        bool executed;
-    };
-
-    int m_port;
-    bool m_loggedIn ;
-    QThread * m_thread;
-    QString m_workingDirectory;
-    QString m_nextWorkingDir; 
-    QString m_user;
-    QString m_host; 
-    QString m_password;
-    SSHOperation m_currentOperation;
-    ssh_session m_session;
-    bool m_connected,m_run;
+    bool loggedIn;
+    QString user;
+    ssh_session session;
+    bool m_connected;
 };
 
 

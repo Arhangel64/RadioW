@@ -21,7 +21,6 @@ public:
 private:
     W::Socket* socket;
     QSshSocket* dataSsh;
-    QSshSocket* controlSsh;
     static uint64_t lastId;
     QString login;
     QString password;
@@ -46,6 +45,7 @@ private slots:
     void onDataSshConnected();
     void onDataSshDisconnected();
     void onDataSshLogin();
+    void onDataSshData(QString command, QString data);
     void onDataSshError(QSshSocket::SshError err);
     
 };

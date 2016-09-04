@@ -12,8 +12,7 @@ Service::Service(
 ):
     QObject(),
     socket(new W::Socket(W::String(u"Roboute"))),
-    dataSsh(new QSshSocket(p_login)),
-    controlSsh(new QSshSocket(p_login)),
+    dataSsh(new QSshSocket()),
     login(p_login),
     password(p_password),
     name(p_name),
@@ -34,10 +33,6 @@ Service::~Service()
         dataSsh->disconnect();
     }
     dataSsh->deleteLater();
-    if (controlSsh->isConnected()) {
-        controlSsh->disconnect();
-    }
-    controlSsh->deleteLater();
 }
 
 Service* Service::create(const QMap<QString, QString>& params)
@@ -55,7 +50,7 @@ Service* Service::create(const QMap<QString, QString>& params)
 void Service::onDataSshConnected()
 {
     emit serviceMessage("socket connected");
-    dataSsh->login(password);
+    dataSsh->login(login, password);
 }
 
 void Service::onDataSshDisconnected()
@@ -102,7 +97,14 @@ void Service::onDataSshError(QSshSocket::SshError err)
 void Service::onDataSshLogin()
 {
     emit serviceMessage("data logged in");
+    dataSsh->executeCommand("pwd");
 }
+
+void Service::onDataSshData(QString command, QString data)
+{
+    emit serviceMessage(data);
+}
+
 
 void Service::connect()
 {

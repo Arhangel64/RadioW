@@ -23,6 +23,7 @@ Service::Service(
     QObject::connect(dataSsh, SIGNAL(connected()), this, SLOT(onDataSshConnected()));
     QObject::connect(dataSsh, SIGNAL(disconnected()), this, SLOT(onDataSshDisconnected()));
     QObject::connect(dataSsh, SIGNAL(loginSuccessful()), this, SLOT(onDataSshLogin()));
+    QObject::connect(dataSsh, SIGNAL(commandData(QString, QString)), this, SLOT(onDataSshData(QString, QString)));
     QObject::connect(dataSsh, SIGNAL(error(QSshSocket::SshError)), this, SLOT(onDataSshError(QSshSocket::SshError)));
 }
 

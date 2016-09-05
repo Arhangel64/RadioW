@@ -24,11 +24,11 @@ Roboute::Roboute(QObject *parent):
 
 Roboute::~Roboute()
 {
-    QMap<uint64_t, Service*>::iterator beg = services.begin();
-    QMap<uint64_t, Service*>::iterator end = services.end();
+    QMap<uint64_t, QPair<Service*, QThread*>>::iterator beg = services.begin();
+    QMap<uint64_t, QPair<Service*, QThread*>>::iterator end = services.end();
     
     for (; beg != end; ++beg) {
-        delete *beg;
+        delete beg->first;
     }
     
     dispatcher->unregisterDefaultHandler(logger);
@@ -48,6 +48,12 @@ void Roboute::start()
 void Roboute::stop()
 {
     debug("Stopping roboute...");
+    QMap<uint64_t, QPair<Service*, QThread*>>::iterator beg = services.begin();
+    QMap<uint64_t, QPair<Service*, QThread*>>::iterator end = services.end();
+    
+    for (; beg != end; ++beg) {
+        beg->second->quit();
+    }
 }
 
 void Roboute::debug(std::string str)
@@ -60,7 +66,7 @@ void Roboute::debug(std::string str)
 
 void Roboute::debug(uint64_t id, const QString& msg)
 {
-    Service* srv = services[id];
+    Service* srv = services[id].first;
     QString dbg = srv->name + ": " + msg;
     debug(dbg.toStdString());
 }
@@ -69,22 +75,26 @@ void Roboute::debug(uint64_t id, const QString& msg)
 void Roboute::addService(const QMap<QString, QString>& params)
 {
     Service* srv = Service::create(params);
-    services.insert(srv->id, srv);
+    QThread* thread = new QThread(this);
+    srv->moveToThread(thread);
+    QPair<Service*, QThread*> pair(srv, thread);
+    services.insert(srv->id, pair);
     
     connect(srv, SIGNAL(serviceMessage(const QString&)), this, SLOT(serviceMessage(const QString&)));
+    thread->start();
     
     emit newService(*srv);
 }
 
 void Roboute::connectService(uint64_t id)
 {
-    Service* srv = services[id];
+    Service* srv = services[id].first;
     srv->connect();
 }
 
 void Roboute::disconnectService(uint64_t id)
 {
-    Service* srv = services[id];
+    Service* srv = services[id].first;
     srv->disconnect();
 }
 

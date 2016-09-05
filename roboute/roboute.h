@@ -3,6 +3,7 @@
 
 #include <QtCore/QObject>
 #include <QMap>
+#include <QtCore/QThread>
 
 #include <wType/string.h>
 #include <wType/uint64.h>
@@ -29,8 +30,9 @@ public:
     static Roboute* roboute;
     
 private:
+    
     W::Logger *logger;
-    QMap<uint64_t, Service*> services;
+    QMap<uint64_t, QPair<Service*, QThread*> > services;
     
 public:
     W::Dispatcher *dispatcher;

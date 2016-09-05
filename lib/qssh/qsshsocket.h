@@ -10,11 +10,10 @@
 #include <QtCore/QSocketNotifier>
 
 #include <QtCore/QByteArray>
-#include <QtCore/QThread>
 #include <QtCore/QVector>
 #include <QtCore/QMap>
 
-class QSshSocket: public QThread
+class QSshSocket: public QObject
 {
     Q_OBJECT
 public:
@@ -59,9 +58,7 @@ private:
         qintptr id;
         QString command;
         ssh_channel channel;
-        bool executed;
-        QSocketNotifier* readNotifier;
-        QSocketNotifier* writeNotifier;
+        QSocketNotifier* notifier;
     };
     
     bool loggedIn;
@@ -74,7 +71,6 @@ private:
     
 private slots:
     void socketRead(int ptr);
-    void socketWrite(int ptr);
 };
 
 

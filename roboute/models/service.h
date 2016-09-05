@@ -2,7 +2,7 @@
 #define SERVICE_H
 
 #include <wSocket/socket.h>
-#include <qssh/qsshsocket.h>
+#include <wSsh/sshsocket.h>
 #include <wType/string.h>
 #include <QtCore/QString>
 #include <QtCore/QMap>
@@ -20,7 +20,7 @@ public:
     
 private:
     W::Socket* socket;
-    QSshSocket* dataSsh;
+    W::SshSocket* dataSsh;
     static uint64_t lastId;
     QString login;
     QString password;
@@ -42,11 +42,11 @@ public slots:
 private:
     
 private slots:
-    void onDataSshConnected();
-    void onDataSshDisconnected();
-    void onDataSshLogin();
-    void onDataSshData(QString command, QString data);
-    void onDataSshError(QSshSocket::SshError err);
+    void onSshOpened();
+    void onSshClosed();
+    void onSshAuthorized();
+    void onSshData(const QString& command, const QString& data);
+    void onSshError(W::SshSocket::Error errCode, const QString& msg);
     
 };
 

@@ -32,7 +32,7 @@ public:
 private:
     
     W::Logger *logger;
-    QMap<uint64_t, QPair<Service*, QThread*> > services;
+    QMap<uint64_t, Service*> services;
     
 public:
     W::Dispatcher *dispatcher;

@@ -13,13 +13,7 @@ QSshSocket::QSshSocket(QObject * parent)
 
 QSshSocket::~QSshSocket()
 {
-    QMap<qintptr, Command*>::iterator itr = commands.begin();
-    QMap<qintptr, Command*>::iterator end = commands.end();
     
-    while (itr != end) {
-        destroyCommand((*itr)->id);
-        itr = commands.begin();
-    }
     
     ssh_free(session);
 }
@@ -29,6 +23,13 @@ void QSshSocket::disconnect()
     if (m_connected) {
         loggedIn = false;
         m_connected = false;
+        QMap<qintptr, Command*>::iterator itr = commands.begin();
+        QMap<qintptr, Command*>::iterator end = commands.end();
+    
+        while (itr != end) {
+            destroyCommand((*itr)->id);
+            itr = commands.begin();
+        }
         ssh_disconnect(session);
         emit disconnected();
     }
@@ -81,7 +82,7 @@ void QSshSocket::executeCommand(QString command)
     if (success != SSH_OK) {
         ssh_channel_close(channel);
         ssh_channel_free(channel);
-        emit error(ScpWriteError);
+        emit error(WriteError);
     } else {
         qintptr fd = ssh_get_fd(session);
         QSocketNotifier* readNotifier = new QSocketNotifier(fd, QSocketNotifier::Read);
@@ -122,7 +123,7 @@ void QSshSocket::socketRead(int ptr)
     } while (newBytes > 0);
     
     if (newBytes < 0) {
-        emit error(ScpReadError);
+        emit error(ReadError);
         destroyCommand(ptr);
     } else {
         cmd->notifier->setEnabled(true);
@@ -134,10 +135,10 @@ void QSshSocket::socketRead(int ptr)
 void QSshSocket::destroyCommand(quintptr ptr)
 {
     Command* cmd = commands[ptr];
+    delete cmd->notifier;
     ssh_channel_send_eof(cmd->channel);
     ssh_channel_close(cmd->channel);
     ssh_channel_free(cmd->channel);
-    delete cmd->notifier;
     delete cmd;
     commands.erase(commands.find(ptr));
 }

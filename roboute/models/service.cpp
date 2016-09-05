@@ -12,7 +12,7 @@ Service::Service(
 ):
     QObject(),
     socket(new W::Socket(W::String(u"Roboute"))),
-    dataSsh(new QSshSocket()),
+    dataSsh(new W::SshSocket()),
     login(p_login),
     password(p_password),
     name(p_name),
@@ -20,20 +20,17 @@ Service::Service(
     port(p_port),
     id(p_id)
 {
-    QObject::connect(dataSsh, SIGNAL(connected()), this, SLOT(onDataSshConnected()));
-    QObject::connect(dataSsh, SIGNAL(disconnected()), this, SLOT(onDataSshDisconnected()));
-    QObject::connect(dataSsh, SIGNAL(loginSuccessful()), this, SLOT(onDataSshLogin()));
-    QObject::connect(dataSsh, SIGNAL(commandData(QString, QString)), this, SLOT(onDataSshData(QString, QString)));
-    QObject::connect(dataSsh, SIGNAL(error(QSshSocket::SshError)), this, SLOT(onDataSshError(QSshSocket::SshError)));
+    QObject::connect(dataSsh, SIGNAL(opened()), this, SLOT(onSshOpened()));
+    QObject::connect(dataSsh, SIGNAL(closed()), this, SLOT(onSshClosed()));
+    QObject::connect(dataSsh, SIGNAL(authorized()), this, SLOT(onSshAuthorized()));
+    QObject::connect(dataSsh, SIGNAL(data(const QString&, const QString&)), this, SLOT(onSshData(const QString&, const QString&)));
+    QObject::connect(dataSsh, SIGNAL(error(W::SshSocket::Error, const QString&)), this, SLOT(onSshError(W::SshSocket::Error, const QString&)));
 }
 
 Service::~Service()
 {
     delete socket;
-    if (dataSsh->isConnected()) {
-        dataSsh->disconnect();
-    }
-    dataSsh->deleteLater();
+    delete dataSsh;
 }
 
 Service* Service::create(const QMap<QString, QString>& params)
@@ -48,60 +45,29 @@ Service* Service::create(const QMap<QString, QString>& params)
     return srv;
 }
 
-void Service::onDataSshConnected()
+void Service::onSshOpened()
 {
     emit serviceMessage("socket connected");
-    dataSsh->login(login, password);
+    dataSsh->authorize(login, password);
 }
 
-void Service::onDataSshDisconnected()
+void Service::onSshClosed()
 {
     emit serviceMessage("socket disconnected");
 }
 
-void Service::onDataSshError(QSshSocket::SshError err)
+void Service::onSshError(W::SshSocket::Error errCode, const QString& msg)
 {
-    switch (err) {
-        case QSshSocket::SocketError:
-            emit serviceMessage("There was trouble creating a socket. This was most likely due to the lack of an internet connection.");
-            break;
-        case QSshSocket::SessionCreationError:
-            emit serviceMessage("The ssh session could not be created due to inability to find the remote host");
-            break;
-        case QSshSocket::ChannelCreationError:
-            emit serviceMessage("An ssh channel could not be created for the previous operation");
-            break;
-        case QSshSocket::ScpChannelCreationError:
-            emit serviceMessage("An scp channel could not be created for the previous file transfer operation");
-            break;
-        case QSshSocket::ScpPullRequestError:
-            emit serviceMessage("There was an error requesting a pull file transfer");
-            break;
-        case QSshSocket::ScpPushRequestError:
-            emit serviceMessage("There was an error requesting a push file transfer");
-            break;
-        case QSshSocket::ScpFileNotCreatedError:
-            emit serviceMessage("The destination file for the previous transfer does not exist");
-            break;
-        case QSshSocket::ScpReadError:
-            emit serviceMessage("There was an error reading a remote file. This could possibly be due to user permissions");
-            break;
-        case QSshSocket::ScpWriteError:
-            emit serviceMessage("There was an error writing to a remote file. This could possibly be due to user permissions");
-            break;
-        case QSshSocket::PasswordAuthenticationFailedError:
-            emit serviceMessage("The credentials of a user on the remote host could not be authenticated");
-            break;
-    }
+    emit serviceMessage(msg);
 }
 
-void Service::onDataSshLogin()
+void Service::onSshAuthorized()
 {
-    emit serviceMessage("data logged in");
-    dataSsh->executeCommand("pwd");
+    emit serviceMessage("authorized");
+    dataSsh->execute("pwd");
 }
 
-void Service::onDataSshData(QString command, QString data)
+void Service::onSshData(const QString& command, const QString& data)
 {
     emit serviceMessage(data);
 }
@@ -109,14 +75,10 @@ void Service::onDataSshData(QString command, QString data)
 
 void Service::connect()
 {
-    if (!dataSsh->isConnected()) {
-        dataSsh->connect(address);
-    }
+    dataSsh->open(address);
 }
 
 void Service::disconnect()
 {
-    if (dataSsh->isConnected()) {
-        dataSsh->disconnect();
-    }
+    dataSsh->close();
 }

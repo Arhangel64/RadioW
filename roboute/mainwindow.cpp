@@ -113,7 +113,6 @@ void MainWindow::newApplication()
 
 void MainWindow::newAppAccepted()
 {
-    std::cout << "accepted" << std::endl;
     emit addService(newApp->getData());
     delete newApp;
     newApp = 0;
@@ -121,7 +120,6 @@ void MainWindow::newAppAccepted()
 
 void MainWindow::newAppRejected()
 {
-    std::cout << "rejected" << std::endl;
     delete newApp;
     newApp = 0;
 }
@@ -152,13 +150,27 @@ void MainWindow::onDetailsStop()
     emit stopService(detalizedId);
 }
 
+void MainWindow::serviceConnecting(uint64_t id)
+{
+    apps->setConnectable(id, false);
+    apps->setConnected(id, false);
+}
+
 void MainWindow::serviceConnected(uint64_t id)
 {
+    apps->setConnectable(id, true);
+    apps->setConnected(id, true);
+}
+
+void MainWindow::serviceDisconnecting(uint64_t id)
+{
+    apps->setConnectable(id, false);
     apps->setConnected(id, true);
 }
 
 void MainWindow::serviceDisconnected(uint64_t id)
 {
+    apps->setConnectable(id, true);
     apps->setConnected(id, false);
 }
 
@@ -186,3 +198,9 @@ void MainWindow::serviceStoppingFailed(uint64_t id)
 {
     apps->setLaunched(id, true);
 }
+
+void MainWindow::serviceLog(uint64_t id, const QString& log)
+{
+    apps->logMessage(id, log);
+}
+

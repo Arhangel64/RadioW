@@ -40,6 +40,7 @@ signals:
     void error(QSshSocket::SshError error);
     void loginSuccessful();
     void commandData(QString command, QString data);
+    void endOfFile(QString command);
 
 public slots:
     void connect(QString host, int port = 22);
@@ -67,6 +68,9 @@ private:
 private slots:
     void socketRead(int ptr);
 };
+
+
+Q_DECLARE_METATYPE(QSshSocket::SshError)
 
 
 #endif // QSSHSOCKET_H

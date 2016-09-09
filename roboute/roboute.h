@@ -45,14 +45,17 @@ private:
     
 signals:
     void debugMessage(const QString& msg);
+    void log(uint64_t id,const QString& msg);
     void newService(const Service& srv);
-    void serviceConnected(uint64_t);
-    void serviceDisconnected(uint64_t);
-    void serviceConnectionFailed(uint64_t);
-    void serviceLaunched(uint64_t);
-    void serviceStopped(uint64_t);
-    void serviceLaunchingFailed(uint64_t);
-    void serviceStoppingFailed(uint64_t);
+    void serviceConnected(uint64_t id);
+    void serviceConnecting(uint64_t id);
+    void serviceDisconnecting(uint64_t id);
+    void serviceDisconnected(uint64_t id);
+    void serviceConnectionFailed(uint64_t id);
+    void serviceLaunched(uint64_t id);
+    void serviceStopped(uint64_t id);
+    void serviceLaunchingFailed(uint64_t id);
+    void serviceStoppingFailed(uint64_t id);
     
 public slots:
     void start();
@@ -64,7 +67,12 @@ public slots:
     void stopService(uint64_t id);
     
 private slots:
-    void serviceMessage(const QString& msg);
+    void onServiceMessage(const QString& msg);
+    void onServiceConnecting();
+    void onServiceConnected();
+    void onServiceDisconnecting();
+    void onServiceDisconnected();
+    void onServiceLog(const QString& msg);
     
 private:
     class SingletonError: 

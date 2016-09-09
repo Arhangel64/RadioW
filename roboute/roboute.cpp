@@ -77,7 +77,12 @@ void Roboute::addService(const QMap<QString, QString>& params)
     Service* srv = Service::create(params);
     services.insert(srv->id, srv);
     
-    connect(srv, SIGNAL(serviceMessage(const QString&)), this, SLOT(serviceMessage(const QString&)));
+    connect(srv, SIGNAL(serviceMessage(const QString&)), this, SLOT(onServiceMessage(const QString&)));
+    connect(srv, SIGNAL(connecting()), this, SLOT(onServiceConnecting()));
+    connect(srv, SIGNAL(connected()), this, SLOT(onServiceConnected()));
+    connect(srv, SIGNAL(disconnecting()), this, SLOT(onServiceDisconnecting()));
+    connect(srv, SIGNAL(disconnected()), this, SLOT(onServiceDisconnected()));
+    connect(srv, SIGNAL(log(const QString&)), this, SLOT(onServiceLog(const QString&)));
     
     emit newService(*srv);
 }
@@ -102,8 +107,39 @@ void Roboute::stopService(uint64_t id)
 {
 }
 
-void Roboute::serviceMessage(const QString& msg)
+void Roboute::onServiceMessage(const QString& msg)
 {
     Service* srv = static_cast<Service*>(sender());
     debug(srv->id, msg);
 }
+
+void Roboute::onServiceConnecting()
+{
+    Service* srv = static_cast<Service*>(sender());
+    emit serviceConnecting(srv->id);
+}
+
+void Roboute::onServiceConnected()
+{
+    Service* srv = static_cast<Service*>(sender());
+    emit serviceConnected(srv->id);
+}
+
+void Roboute::onServiceDisconnecting()
+{
+    Service* srv = static_cast<Service*>(sender());
+    emit serviceDisconnecting(srv->id);
+}
+
+void Roboute::onServiceDisconnected()
+{
+    Service* srv = static_cast<Service*>(sender());
+    emit serviceDisconnected(srv->id);
+}
+
+void Roboute::onServiceLog(const QString& msg)
+{
+    Service* srv = static_cast<Service*>(sender());
+    emit log(srv->id, msg);
+}
+

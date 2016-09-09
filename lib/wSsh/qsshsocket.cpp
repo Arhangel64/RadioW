@@ -9,12 +9,11 @@ QSshSocket::QSshSocket(QObject * parent)
 {
     int verbosity = SSH_LOG_PROTOCOL;
     ssh_options_set(session, SSH_OPTIONS_LOG_VERBOSITY, &verbosity);
+    qRegisterMetaType<QSshSocket::SshError>(); //not sure if it supposed to be here
 }
 
 QSshSocket::~QSshSocket()
 {
-    
-    
     ssh_free(session);
 }
 
@@ -77,8 +76,11 @@ void QSshSocket::executeCommand(QString command)
     if (ssh_channel_open_session(channel) != SSH_OK) {
         emit error(ChannelCreationError);
     }
+    int success;
+    do {
+        success = ssh_channel_request_exec(channel, command.toLatin1().data());
+    } while (success == SSH_AGAIN);
     
-    int success = ssh_channel_request_exec(channel, command.toLatin1().data());
     if (success != SSH_OK) {
         ssh_channel_close(channel);
         ssh_channel_free(channel);
@@ -110,20 +112,24 @@ void QSshSocket::socketRead(int ptr)
     cmd->notifier->setEnabled(false);
     
     QByteArray buffer;
-    buffer.resize(256);
+    buffer.resize(1048576);
 
     int totalBytes = 0;
     int newBytes = 0;
     do {
-        newBytes = ssh_channel_read(cmd->channel, &(buffer.data()[totalBytes]), buffer.size() - totalBytes, 0);
+        newBytes = ssh_channel_read_nonblocking(cmd->channel, &(buffer.data()[totalBytes]), buffer.size() - totalBytes, 0);
         
         if (newBytes > 0) {
             totalBytes += newBytes;
         }
+    
     } while (newBytes > 0);
     
-    if (newBytes < 0) {
+    if (newBytes == SSH_ERROR) {
         emit error(ReadError);
+        destroyCommand(ptr);
+    } else if (ssh_channel_is_eof(cmd->channel) != 0) {
+        emit endOfFile(cmd->command);
         destroyCommand(ptr);
     } else {
         cmd->notifier->setEnabled(true);

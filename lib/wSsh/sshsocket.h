@@ -34,6 +34,7 @@ namespace W {
         void authorized();
         void error(W::SshSocket::Error code, const QString& message);
         void data(const QString& command, const QString& data);
+        void finished(const QString& command);
         
     private:
         enum State {
@@ -55,6 +56,7 @@ namespace W {
         void onSocketLoggedIn();
         void onSocketError(QSshSocket::SshError p_error);
         void onSocketCommandData(QString command, QString p_data);
+        void onSocketEOF(QString command);
         
     };
 }

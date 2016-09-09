@@ -40,12 +40,15 @@ public slots:
     void robouteMessage(const QString& msg);
     void newService(const Service& srv);
     void serviceConnected(uint64_t id);
+    void serviceConnecting(uint64_t id);
     void serviceDisconnected(uint64_t id);
+    void serviceDisconnecting(uint64_t id);
     void serviceConnectionFailed(uint64_t id);
     void serviceLaunched(uint64_t id);
     void serviceStopped(uint64_t id);
     void serviceLaunchingFailed(uint64_t id);
     void serviceStoppingFailed(uint64_t id);
+    void serviceLog(uint64_t id, const QString& log);
     
 private slots:
     void selectionChanged(const QItemSelection &selected, const QItemSelection &deselected);

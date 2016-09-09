@@ -12,7 +12,7 @@ W::SshSocket::SshSocket(QObject* parent):
     connect(socket, SIGNAL(loginSuccessful()), this, SLOT(onSocketLoggedIn()));
     connect(socket, SIGNAL(error(QSshSocket::SshError)), this, SLOT(onSocketError(QSshSocket::SshError)));
     connect(socket, SIGNAL(commandData(QString, QString)), this, SLOT(onSocketCommandData(QString, QString)));
-    //connect(socket, SIGNAL(), this, SLOT());
+    connect(socket, SIGNAL(endOfFile(QString)), this, SLOT(onSocketEOF(QString)));
     
     socket->moveToThread(thread);
 }
@@ -157,7 +157,10 @@ void W::SshSocket::onSocketError(QSshSocket::SshError p_error)
     emit error(errCode, msg);
 }
 
-
+void W::SshSocket::onSocketEOF(QString command)
+{
+    emit finished(command);
+}
 
 
 

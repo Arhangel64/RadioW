@@ -19,13 +19,16 @@ int main(int argc, char **argv) {
     
     QObject::connect(roboute, SIGNAL(debugMessage(const QString&)), wnd, SLOT(robouteMessage(const QString&)));
     QObject::connect(roboute, SIGNAL(newService(const Service&)), wnd, SLOT(newService(const Service&)));
+    QObject::connect(roboute, SIGNAL(serviceConnecting(uint64_t)), wnd, SLOT(serviceConnecting(uint64_t)));
     QObject::connect(roboute, SIGNAL(serviceConnected(uint64_t)), wnd, SLOT(serviceConnected(uint64_t)));
+    QObject::connect(roboute, SIGNAL(serviceDisconnecting(uint64_t)), wnd, SLOT(serviceDisconnecting(uint64_t)));
     QObject::connect(roboute, SIGNAL(serviceDisconnected(uint64_t)), wnd, SLOT(serviceDisconnected(uint64_t)));
     QObject::connect(roboute, SIGNAL(serviceConnectionFailed(uint64_t)), wnd, SLOT(serviceConnectionFailed(uint64_t)));
     QObject::connect(roboute, SIGNAL(serviceLaunched(uint64_t)), wnd, SLOT(serviceLaunched(uint64_t)));
     QObject::connect(roboute, SIGNAL(serviceStopped(uint64_t)), wnd, SLOT(serviceStopped(uint64_t)));
     QObject::connect(roboute, SIGNAL(serviceLaunchingFailed(uint64_t)), wnd, SLOT(serviceLaunchingFailed(uint64_t)));
     QObject::connect(roboute, SIGNAL(serviceStoppingFailed(uint64_t)), wnd, SLOT(serviceStoppingFailed(uint64_t)));
+    QObject::connect(roboute, SIGNAL(log(uint64_t, const QString&)), wnd, SLOT(serviceLog(uint64_t, const QString&)));
     QObject::connect(wnd, SIGNAL(addService(const QMap<QString, QString>&)), roboute, SLOT(addService(const QMap<QString, QString>&)));
     QObject::connect(wnd, SIGNAL(connectService(uint64_t)), roboute, SLOT(connectService(uint64_t)));
     QObject::connect(wnd, SIGNAL(disconnectService(uint64_t)), roboute, SLOT(disconnectService(uint64_t)));

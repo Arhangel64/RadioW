@@ -4,6 +4,7 @@
 AppListModel::AppListModel(QObject* parent):
     QAbstractListModel(parent),
     index(),
+    helper(),
     map(),
     toInsert()
 {
@@ -22,6 +23,12 @@ void AppListModel::push_back(uint64_t id, const QString& name)
     
     toInsert.push_back(Pair(id, item));
     insertRows(rowCount(), 1);
+}
+
+void AppListModel::removeElement(uint64_t id)
+{
+    int index = *(helper.find(id));
+    removeRows(index, 1);
 }
 
 
@@ -62,10 +69,34 @@ bool AppListModel::insertRows(int row, int count, const QModelIndex& parent)
         List::iterator itr = toInsert.begin();
         Map::iterator mItr = map.insert(itr->first, itr->second);
         index.insert(target, mItr);
+        helper.insert(itr->first, row + i);
         toInsert.erase(itr);
     }
     
     endInsertRows();
+    return true;
+}
+
+bool AppListModel::removeRows(int row, int count, const QModelIndex& parent)
+{
+    if (row + count > index.size()) {
+        return false;
+    }
+    beginRemoveRows(parent, row, count);
+    Index::iterator itr;
+    Index::iterator beg = index.begin() + row;
+    Index::iterator end = beg + count;
+    for (itr = beg; itr != end; ++itr) {
+        Map::iterator mItr = *itr;
+        AppModel* app = *mItr;
+        IndexHelper::iterator hItr = helper.find(app->id);
+        delete app;
+        map.erase(mItr);
+        helper.erase(hItr);
+    }
+    index.erase(beg, end);
+    
+    endRemoveRows();
     return true;
 }
 

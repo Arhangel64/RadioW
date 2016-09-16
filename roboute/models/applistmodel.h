@@ -3,7 +3,9 @@
 
 #include <QtCore/QAbstractListModel>
 #include <QtCore/QMap>
-#include <vector>
+#include <QtCore/QVariant>
+
+#include <deque>
 #include <list>
 
 #include "appmodel.h"
@@ -17,12 +19,14 @@ public:
     ~AppListModel();
     
     void push_back(uint64_t id, const QString& name);
+    void removeElement(uint64_t id);
     const AppModel* getApp(uint64_t id);
     void clear();
     
     QVariant data(const QModelIndex &i, int role = Qt::DisplayRole) const;
     int rowCount(const QModelIndex &parent = QModelIndex()) const;
     bool insertRows(int row, int count, const QModelIndex &parent = QModelIndex());
+    bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex());
     void setConnectable(uint64_t id, bool value);
     void setConnected(uint64_t id, bool value);
     void setLaunchable(uint64_t id, bool value);
@@ -30,11 +34,13 @@ public:
     
 private:
     typedef QMap<uint64_t, AppModel*> Map;
-    typedef std::vector<Map::iterator> Index;
+    typedef QMap<uint64_t, uint64_t> IndexHelper;
+    typedef std::deque<Map::iterator> Index;
     typedef std::pair<uint64_t, AppModel*> Pair;
     typedef std::list<Pair> List;
     
     Index index;
+    IndexHelper helper;
     Map map;
     List toInsert;
     

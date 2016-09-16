@@ -5,8 +5,9 @@ DetailedView::DetailedView(QWidget* parent):
     layout(new QGridLayout(this)),
     topPanel(new QHBoxLayout()),
     logArea(new QPlainTextEdit(this)),
-    connectBtn(new QPushButton(QIcon::fromTheme("state-error"), "", this)),
+    connectBtn(new QPushButton(QIcon::fromTheme("state-ok"), "", this)),
     launchBtn(new QPushButton(QIcon::fromTheme("kt-start"), "", this)),
+    removeBtn(new QPushButton(QIcon::fromTheme("remove"), "", this)),
     connected(false),
     launched(false)
 {
@@ -20,12 +21,16 @@ DetailedView::DetailedView(QWidget* parent):
     connectBtn->setEnabled(false);
     launchBtn->setToolTip(tr("Launch"));
     launchBtn->setEnabled(false);
+    removeBtn->setToolTip(tr("Remove"));
+    removeBtn->setEnabled(false);
     QObject::connect(connectBtn, SIGNAL(clicked()), this, SLOT(onConnectClick()));
     QObject::connect(launchBtn, SIGNAL(clicked()), this, SLOT(onLaunchClick()));
+    QObject::connect(removeBtn, SIGNAL(clicked()), this, SLOT(onRemoveClick()));
     
     topPanel->addWidget(connectBtn);
     topPanel->addWidget(launchBtn);
     topPanel->addStretch();
+    topPanel->addWidget(removeBtn);
     
     layout->setContentsMargins(0,0,0,0);
 }
@@ -40,10 +45,11 @@ void DetailedView::clear()
     logArea->clear();
     connectBtn->setToolTip(tr("Connect"));
     connectBtn->setEnabled(false);
-    connectBtn->setIcon(QIcon::fromTheme("state-error"));
+    connectBtn->setIcon(QIcon::fromTheme("state-ok"));
     launchBtn->setToolTip(tr("Launch"));
     launchBtn->setEnabled(false);
     launchBtn->setIcon(QIcon::fromTheme("kt-start"));
+    removeBtn->setEnabled(false);
     connected = false;
     launched = false;
 }
@@ -59,10 +65,10 @@ void DetailedView::setConnected(bool value)
         connected = value;
         if (connected) {
             connectBtn->setToolTip(tr("Disonnect"));
-            connectBtn->setIcon(QIcon::fromTheme("state-ok"));
+            connectBtn->setIcon(QIcon::fromTheme("state-error"));
         } else {
             connectBtn->setToolTip(tr("Connect"));
-            connectBtn->setIcon(QIcon::fromTheme("state-error"));
+            connectBtn->setIcon(QIcon::fromTheme("state-ok"));
         }
     }
 }
@@ -102,4 +108,15 @@ void DetailedView::onLaunchClick()
     } else {
         emit launch();
     }
+}
+
+
+void DetailedView::onRemoveClick()
+{
+    emit remove();
+}
+
+void DetailedView::setRemovable(bool value)
+{
+    removeBtn->setEnabled(value);
 }

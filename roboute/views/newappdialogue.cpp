@@ -7,7 +7,8 @@ NewAppDialogue::NewAppDialogue(QWidget* parent):
     port(new QLineEdit(this)),
     login(new QLineEdit(this)),
     pass(new QLineEdit(this)),
-    log(new QLineEdit(this))
+    log(new QLineEdit(this)),
+    command(new QLineEdit(this))
 {
     QVBoxLayout* mainLayout = new QVBoxLayout(this);
     QHBoxLayout* buttonsLayout = new QHBoxLayout();
@@ -45,6 +46,7 @@ void NewAppDialogue::createForm(QFormLayout* layout)
     layout->addRow(tr("ssh login"), login);
     layout->addRow(tr("Password"), pass);
     layout->addRow(tr("Log file"), log);
+    layout->addRow(tr("Command"), command);
 }
 
 QMap<QString, QString> NewAppDialogue::getData() const
@@ -56,6 +58,7 @@ QMap<QString, QString> NewAppDialogue::getData() const
     map.insert("login", login->text());
     map.insert("password", pass->text());
     map.insert("logFile", log->text());
+    map.insert("command", command->text());
     
     return map;
 }

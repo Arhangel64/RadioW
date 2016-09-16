@@ -2,8 +2,11 @@
 #define ROBOUTE_H
 
 #include <QtCore/QObject>
-#include <QMap>
+#include <QtCore/QMap>
+#include <QtCore/QList>
+#include <QtCore/QVariant>
 #include <QtCore/QThread>
+#include <QtCore/QSettings>
 
 #include <wType/string.h>
 #include <wType/uint64.h>
@@ -40,13 +43,17 @@ public:
 public:
     
 private:
-    void debug(std::string str);
-    void debug(uint64_t id, const QString& msg);
+    void debug(std::string str) const;
+    void debug(uint64_t id, const QString& msg) const;
+    void saveSettings() const;
+    void readSettings();
+    void addService(Service* srv);
     
 signals:
-    void debugMessage(const QString& msg);
+    void debugMessage(const QString& msg) const;
     void log(uint64_t id,const QString& msg);
     void newService(const Service& srv);
+    void serviceRemoved(uint64_t id);
     void serviceConnected(uint64_t id);
     void serviceConnecting(uint64_t id);
     void serviceDisconnecting(uint64_t id);
@@ -61,6 +68,7 @@ public slots:
     void start();
     void stop();
     void addService(const QMap<QString, QString>& params);
+    void removeService(uint64_t id);
     void connectService(uint64_t id);
     void disconnectService(uint64_t id);
     void launchService(uint64_t id);

@@ -9,7 +9,8 @@ Service::Service(
     const QString& p_port, 
     const QString& p_login, 
     const QString& p_password,
-    const QString& p_logFile
+    const QString& p_logFile,
+    const QString& p_command
 ):
     QObject(),
     socket(new W::Socket(W::String(u"Roboute"))),
@@ -17,6 +18,7 @@ Service::Service(
     login(p_login),
     password(p_password),
     logFile(p_logFile),
+    command(p_command),
     state(Disconnected),
     name(p_name),
     address(p_address),
@@ -45,10 +47,30 @@ Service* Service::create(const QMap<QString, QString>& params)
     QString login = params["login"];
     QString password = params["password"];
     QString logFile = params["logFile"];
+    QString command = params["command"];
     
-    Service* srv = new Service(++lastId, name, address, port, login, password, logFile);
+    Service* srv = new Service(++lastId, name, address, port, login, password, logFile, command);
     return srv;
 }
+
+Service* Service::fromSerialized(const QMap<QString, QVariant>& params)
+{
+    QString name = params["name"].toString();
+    QString address = params["address"].toString();
+    QString port = params["port"].toString();
+    QString login = params["login"].toString();
+    QString password = params["password"].toString();
+    QString logFile = params["logFile"].toString();
+    QString command = params["command"].toString();
+    uint64_t id = params["id"].toUInt();
+    
+    if (id > lastId) {
+        lastId = id;
+    }
+    Service* srv = new Service(id, name, address, port, login, password, logFile, command);
+    return srv;
+}
+
 
 void Service::onSshOpened()
 {
@@ -74,6 +96,22 @@ void Service::onSshClosed()
 void Service::onSshError(W::SshSocket::Error errCode, const QString& msg)
 {
     emit serviceMessage(msg);
+    switch (state) {
+        case Disconnected:
+            break;
+        case Connecting:
+            state = Disconnected;
+            emit disconnected();
+            break;
+        case Authorizing:
+        case Echo:
+        case Listening:
+        case Connected:
+            disconnect();
+            break;
+        default:
+            break;
+    }
 }
 
 void Service::onSshAuthorized()
@@ -123,10 +161,12 @@ void Service::connect()
 
 void Service::disconnect()
 {
-    state = Disconnecting;
-    emit serviceMessage("disconnecting");
-    emit disconnecting();
-    dataSsh->close();
+    if (state != Disconnected) { 
+        state = Disconnecting;
+        emit serviceMessage("disconnecting");
+        emit disconnecting();
+        dataSsh->close();
+    }
 }
 
 void Service::onSshFinished(const QString& command)
@@ -143,5 +183,20 @@ void Service::onSshFinished(const QString& command)
     }
 }
 
+QVariant Service::saveState() const
+{
+    QMap<QString, QVariant> state;
+    quint64 qid = id;
+    state.insert("id", qid);
+    state.insert("login", login);
+    state.insert("password", password);
+    state.insert("logFile", logFile);
+    state.insert("name", name);
+    state.insert("address", address);
+    state.insert("port", port);
+    state.insert("command", command);
+    
+    return state;
+}
 
 

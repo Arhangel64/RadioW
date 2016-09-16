@@ -4,19 +4,31 @@
 #include <wSocket/socket.h>
 #include <wSsh/sshsocket.h>
 #include <wType/string.h>
+
 #include <QtCore/QString>
 #include <QtCore/QMap>
+#include <QtCore/QVariant>
 
 class Service : public QObject
 {
     Q_OBJECT
 private:
-    Service(uint64_t p_id, const QString& p_name, const QString& p_address, const QString& p_port, const QString& p_login, const QString& p_password, const QString& p_logFile);
+    Service(uint64_t p_id, 
+            const QString& p_name, 
+            const QString& p_address, 
+            const QString& p_port, 
+            const QString& p_login, 
+            const QString& p_password, 
+            const QString& p_logFile, 
+            const QString& p_command
+    );
     
 public:
     ~Service();
     
     static Service* create(const QMap<QString, QString>& params);
+    static Service* fromSerialized(const QMap<QString, QVariant>& params);
+    QVariant saveState() const;
     
 private:
     enum State {
@@ -35,6 +47,7 @@ private:
     QString login;
     QString password;
     QString logFile;
+    QString command;
     State state;
     
 public:

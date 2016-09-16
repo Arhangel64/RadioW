@@ -25,7 +25,7 @@ private:
     QLineEdit* login;
     QLineEdit* pass;
     QLineEdit* log;
-    
+    QLineEdit* command;
     
 private:
     void createButtons(QHBoxLayout* layout);

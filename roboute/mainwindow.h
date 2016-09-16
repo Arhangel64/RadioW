@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QtWidgets/QMainWindow>
+#include <QtCore/QSettings>
 
 #include "views/mainview.h"
 #include "views/newappdialogue.h"
@@ -27,7 +28,7 @@ private:
     
     void subscribeDetailsById(quint64 id);
     void unsubscribeDetailsById(quint64 id);
-    
+    void restoreSettings();
     
 signals:
     void addService(const QMap<QString, QString>&);
@@ -35,8 +36,10 @@ signals:
     void disconnectService(uint64_t);
     void launchService(uint64_t);
     void stopService(uint64_t);
+    void removeService(uint64_t id);
     
 public slots:
+    void saveSettings();
     void robouteMessage(const QString& msg);
     void newService(const Service& srv);
     void serviceConnected(uint64_t id);
@@ -49,6 +52,7 @@ public slots:
     void serviceLaunchingFailed(uint64_t id);
     void serviceStoppingFailed(uint64_t id);
     void serviceLog(uint64_t id, const QString& log);
+    void serviceRemoved(uint64_t id);
     
 private slots:
     void selectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
@@ -62,6 +66,7 @@ private slots:
     void onDetailsDisconnect();
     void onDetailsLaunch();
     void onDetailsStop();
+    void onDetailsRemove();
 };
 
 #endif // MAINWINDOW_H

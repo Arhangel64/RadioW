@@ -26,6 +26,9 @@ MainWindow::MainWindow():
     );
     connect(widget->details, SIGNAL(connect()), this, SLOT(onDetailsConnect()));
     connect(widget->details, SIGNAL(disconnect()), this, SLOT(onDetailsDisconnect()));
+    connect(widget->details, SIGNAL(remove()), this, SLOT(onDetailsRemove()));
+    
+    restoreSettings();
 }
 
 void MainWindow::selectionChanged(const QItemSelection &selected, const QItemSelection &deselected)
@@ -60,6 +63,7 @@ void MainWindow::subscribeDetailsById(quint64 id)
     widget->details->setConnected(app->getConnected());
     widget->details->setLaunchable(app->getLaunchable());
     widget->details->setLaunched(app->getLaunched());
+    widget->details->setRemovable(id != 0);
     delete history;
     detalizedId = id;
     connect(app, SIGNAL(newLogMessage(const QString&)), widget->details, SLOT(appendMessage(const QString&)));
@@ -108,6 +112,7 @@ void MainWindow::newApplication()
     connect(newApp, SIGNAL(accepted()), SLOT(newAppAccepted()));
     connect(newApp, SIGNAL(rejected()), SLOT(newAppRejected()));
     newApp->setModal(true);
+    newApp->setWindowTitle(tr("New application"));
     newApp->show();
 }
 
@@ -149,6 +154,12 @@ void MainWindow::onDetailsStop()
 {
     emit stopService(detalizedId);
 }
+
+void MainWindow::onDetailsRemove()
+{
+    emit removeService(detalizedId);
+}
+
 
 void MainWindow::serviceConnecting(uint64_t id)
 {
@@ -204,3 +215,32 @@ void MainWindow::serviceLog(uint64_t id, const QString& log)
     apps->logMessage(id, log);
 }
 
+void MainWindow::serviceRemoved(uint64_t id)
+{
+    apps->removeElement(id);
+}
+
+void MainWindow::restoreSettings()
+{
+    QSettings settings;
+    
+    restoreGeometry(settings.value("window/geometry").toByteArray());
+    restoreState(settings.value("window/state").toByteArray());
+    widget->splitter->restoreState(settings.value("view/splitterState").toByteArray());
+}
+
+void MainWindow::saveSettings()
+{
+    QSettings settings;
+    settings.beginGroup("window");
+    
+    settings.setValue("geometry", saveGeometry());
+    settings.setValue("state", saveState());
+    
+    settings.endGroup();
+    settings.beginGroup("view");
+    
+    settings.setValue("splitterState", widget->splitter->saveState());
+    
+    settings.endGroup();
+}

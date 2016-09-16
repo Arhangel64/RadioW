@@ -42,12 +42,14 @@ Roboute::~Roboute()
 void Roboute::start()
 {
     debug("Starting roboute...");
+    readSettings();
     debug("Roboute is ready");
 }
 
 void Roboute::stop()
 {
     debug("Stopping roboute...");
+    saveSettings();
     QMap<uint64_t, Service*>::iterator beg = services.begin();
     QMap<uint64_t, Service*>::iterator end = services.end();
     
@@ -56,7 +58,7 @@ void Roboute::stop()
     }
 }
 
-void Roboute::debug(std::string str)
+void Roboute::debug(std::string str) const
 {
     cout << str << endl;
     QString dbg = str.c_str();
@@ -64,7 +66,7 @@ void Roboute::debug(std::string str)
     emit debugMessage(dbg);
 }
 
-void Roboute::debug(uint64_t id, const QString& msg)
+void Roboute::debug(uint64_t id, const QString& msg) const
 {
     Service* srv = services[id];
     QString dbg = srv->name + ": " + msg;
@@ -75,6 +77,24 @@ void Roboute::debug(uint64_t id, const QString& msg)
 void Roboute::addService(const QMap<QString, QString>& params)
 {
     Service* srv = Service::create(params);
+    addService(srv);
+}
+
+void Roboute::removeService(uint64_t id)
+{
+    QMap<uint64_t, Service*>::iterator itr = services.find(id);
+    if (itr != services.end()) {
+        Service* srv = *itr;
+        debug(id, "removing...");
+        srv->disconnect();
+        srv->deleteLater();
+        services.erase(itr);
+        emit serviceRemoved(id);
+    }
+}
+
+void Roboute::addService(Service* srv)
+{
     services.insert(srv->id, srv);
     
     connect(srv, SIGNAL(serviceMessage(const QString&)), this, SLOT(onServiceMessage(const QString&)));
@@ -86,6 +106,7 @@ void Roboute::addService(const QMap<QString, QString>& params)
     
     emit newService(*srv);
 }
+
 
 void Roboute::connectService(uint64_t id)
 {
@@ -141,5 +162,41 @@ void Roboute::onServiceLog(const QString& msg)
 {
     Service* srv = static_cast<Service*>(sender());
     emit log(srv->id, msg);
+}
+
+void Roboute::saveSettings() const
+{
+    debug("Saving settings...");
+    
+    QSettings settings;
+    settings.beginGroup("services");
+    
+    QList<QVariant> list;
+    
+    QMap<uint64_t, Service*>::const_iterator beg = services.begin();
+    QMap<uint64_t, Service*>::const_iterator end = services.end();
+    
+    for (; beg != end; ++beg) {
+        list.push_back((*beg)->saveState());
+    }
+    settings.setValue("list", list);
+    
+    settings.endGroup();
+}
+
+void Roboute::readSettings()
+{
+    debug("Reading settings...");
+    
+    QSettings settings;
+    
+    QList<QVariant> list = settings.value("services/list").toList();
+    
+    QList<QVariant>::const_iterator beg = list.begin();
+    QList<QVariant>::const_iterator end = list.end();
+    
+    for (; beg != end; ++beg) {
+        addService(Service::fromSerialized(beg->toMap()));
+    }
 }
 

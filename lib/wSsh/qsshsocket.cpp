@@ -30,6 +30,8 @@ void QSshSocket::disconnect()
             itr = commands.begin();
         }
         ssh_disconnect(session);
+        ssh_free(session);
+        session = ssh_new();
         emit disconnected();
     }
 }
@@ -46,6 +48,9 @@ void QSshSocket::connect(QString host, int port)
             m_connected = true;
             emit connected();
         } else {
+            ssh_disconnect(session);
+            ssh_free(session);
+            session = ssh_new();
             emit error(SessionCreationError);
         }
     } else {

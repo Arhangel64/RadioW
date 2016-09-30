@@ -40,6 +40,7 @@ namespace W
         Uint64 getId() const;
         String getRemoteName() const;
         String getName() const;
+        typedef QAbstractSocket::SocketError SocketError;
         
     private:
         explicit Socket(const String& p_name, QWebSocket *p_socket, uint64_t p_id, QObject *parent = 0);
@@ -63,6 +64,7 @@ namespace W
     signals:
         void connected();
         void disconnected();
+        void error(W::Socket::SocketError err, const QString& msg);
         void message(const W::Event&);
         void proxy(const W::Event&);
         
@@ -72,6 +74,7 @@ namespace W
     private slots:
         void onSocketConnected();
         void onSocketDisconnected();
+        void onSocketError(QAbstractSocket::SocketError err);
         void onBinaryMessageReceived(const QByteArray& ba);
         
     private:

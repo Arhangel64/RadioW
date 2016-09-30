@@ -70,6 +70,7 @@ void AppModel::setConnected(bool value)
     if (value != connected) {
         connected = value;
         emit changedConnected(connected);
+        emit changedLaunchable(launchable && connected);
     }
 }
 
@@ -77,7 +78,7 @@ void AppModel::setLaunchable(bool value)
 {
     if (value != launchable) {
         launchable = value;
-        emit changedLaunchable(launchable);
+        emit changedLaunchable(launchable && connected);
     }
 }
 
@@ -85,6 +86,6 @@ void AppModel::setLaunched(bool value)
 {
     if (value != launched) {
         launched = value;
-        emit changedLaunchable(launched);
+        emit changedLaunched(launched);
     }
 }

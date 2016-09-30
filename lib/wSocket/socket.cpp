@@ -84,6 +84,7 @@ void W::Socket::setHandlers() {
     connect(socket, SIGNAL(connected()), SLOT(onSocketConnected()));
     connect(socket, SIGNAL(disconnected()), SLOT(onSocketDisconnected()));
     connect(socket, SIGNAL(binaryMessageReceived(const QByteArray&)), SLOT(onBinaryMessageReceived(const QByteArray&)));
+    connect(socket, SIGNAL(error(QAbstractSocket::SocketError)), SLOT(onSocketError(QAbstractSocket::SocketError)));
 }
 
 void W::Socket::onSocketConnected()
@@ -248,3 +249,12 @@ void W::Socket::cantDeliver(const W::Event& event) const
     ev.setSenderId(id);
     send(ev);
 }
+
+void W::Socket::onSocketError(QAbstractSocket::SocketError err)
+{
+    if (state == connecting_s) {
+        state = disconnected_s;
+    }
+    emit error(err, socket->errorString());
+}
+

@@ -26,8 +26,8 @@ int main(int argc, char **argv) {
     QObject::connect(roboute, SIGNAL(serviceConnectionFailed(uint64_t)), wnd, SLOT(serviceConnectionFailed(uint64_t)));
     QObject::connect(roboute, SIGNAL(serviceLaunched(uint64_t)), wnd, SLOT(serviceLaunched(uint64_t)));
     QObject::connect(roboute, SIGNAL(serviceStopped(uint64_t)), wnd, SLOT(serviceStopped(uint64_t)));
-    QObject::connect(roboute, SIGNAL(serviceLaunchingFailed(uint64_t)), wnd, SLOT(serviceLaunchingFailed(uint64_t)));
-    QObject::connect(roboute, SIGNAL(serviceStoppingFailed(uint64_t)), wnd, SLOT(serviceStoppingFailed(uint64_t)));
+    QObject::connect(roboute, SIGNAL(serviceLaunching(uint64_t)), wnd, SLOT(serviceLaunching(uint64_t)));
+    QObject::connect(roboute, SIGNAL(serviceStopping(uint64_t)), wnd, SLOT(serviceStopping(uint64_t)));
     QObject::connect(roboute, SIGNAL(serviceRemoved(uint64_t)), wnd, SLOT(serviceRemoved(uint64_t)));
     QObject::connect(roboute, SIGNAL(log(uint64_t, const QString&)), wnd, SLOT(serviceLog(uint64_t, const QString&)));
     QObject::connect(wnd, SIGNAL(addService(const QMap<QString, QString>&)), roboute, SLOT(addService(const QMap<QString, QString>&)));

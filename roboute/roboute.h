@@ -61,8 +61,8 @@ signals:
     void serviceConnectionFailed(uint64_t id);
     void serviceLaunched(uint64_t id);
     void serviceStopped(uint64_t id);
-    void serviceLaunchingFailed(uint64_t id);
-    void serviceStoppingFailed(uint64_t id);
+    void serviceLaunching(uint64_t id);
+    void serviceStopping(uint64_t id);
     
 public slots:
     void start();
@@ -80,6 +80,10 @@ private slots:
     void onServiceConnected();
     void onServiceDisconnecting();
     void onServiceDisconnected();
+    void onServiceLaunching();
+    void onServiceLaunched();
+    void onServiceStopping();
+    void onServiceStopped();
     void onServiceLog(const QString& msg);
     
 private:

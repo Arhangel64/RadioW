@@ -26,6 +26,8 @@ MainWindow::MainWindow():
     );
     connect(widget->details, SIGNAL(connect()), this, SLOT(onDetailsConnect()));
     connect(widget->details, SIGNAL(disconnect()), this, SLOT(onDetailsDisconnect()));
+    connect(widget->details, SIGNAL(launch()), this, SLOT(onDetailsLaunch()));
+    connect(widget->details, SIGNAL(stop()), this, SLOT(onDetailsStop()));
     connect(widget->details, SIGNAL(remove()), this, SLOT(onDetailsRemove()));
     
     restoreSettings();
@@ -193,21 +195,25 @@ void MainWindow::serviceConnectionFailed(uint64_t id)
 void MainWindow::serviceLaunched(uint64_t id)
 {
     apps->setLaunched(id, true);
+    apps->setLaunchable(id, true);
 }
 
 void MainWindow::serviceStopped(uint64_t id)
 {
     apps->setLaunched(id, false);
+    apps->setLaunchable(id, true);
 }
 
-void MainWindow::serviceLaunchingFailed(uint64_t id)
+void MainWindow::serviceLaunching(uint64_t id)
 {
     apps->setLaunched(id, false);
+    apps->setLaunchable(id, false);
 }
 
-void MainWindow::serviceStoppingFailed(uint64_t id)
+void MainWindow::serviceStopping(uint64_t id)
 {
     apps->setLaunched(id, true);
+    apps->setLaunchable(id, false);
 }
 
 void MainWindow::serviceLog(uint64_t id, const QString& log)

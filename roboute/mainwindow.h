@@ -48,9 +48,9 @@ public slots:
     void serviceDisconnecting(uint64_t id);
     void serviceConnectionFailed(uint64_t id);
     void serviceLaunched(uint64_t id);
+    void serviceLaunching(uint64_t id);
     void serviceStopped(uint64_t id);
-    void serviceLaunchingFailed(uint64_t id);
-    void serviceStoppingFailed(uint64_t id);
+    void serviceStopping(uint64_t id);
     void serviceLog(uint64_t id, const QString& log);
     void serviceRemoved(uint64_t id);
     

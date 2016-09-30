@@ -33,6 +33,17 @@ W::String::String(const W::String& original):
 
 }
 
+W::String::String(const StdStr p_data):
+    Object(),
+    data(0)
+{
+    std::wstring_convert<std::codecvt_utf8<char16_t>,char16_t> convert;
+    std::u16string u16 = convert.from_bytes(p_data);
+    
+    data = new u16string(u16);
+}
+
+
 W::String::~String()
 {
     delete data;

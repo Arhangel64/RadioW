@@ -20,6 +20,7 @@ Service::Service(
     logFile(p_logFile),
     command(p_command),
     state(Disconnected),
+    appState(Dead),
     name(p_name),
     address(p_address),
     port(p_port),
@@ -31,6 +32,10 @@ Service::Service(
     QObject::connect(dataSsh, SIGNAL(data(const QString&, const QString&)), this, SLOT(onSshData(const QString&, const QString&)));
     QObject::connect(dataSsh, SIGNAL(error(W::SshSocket::Error, const QString&)), this, SLOT(onSshError(W::SshSocket::Error, const QString&)));
     QObject::connect(dataSsh, SIGNAL(finished(const QString&)), this, SLOT(onSshFinished(const QString&)));
+    
+    QObject::connect(socket, SIGNAL(connected()), this, SLOT(onSocketConnected()));
+    QObject::connect(socket, SIGNAL(disconnected()), this, SLOT(onSocketDisconnected()));
+    QObject::connect(socket, SIGNAL(error(W::Socket::SocketError, const QString&)), this, SLOT(onSocketError(W::Socket::SocketError, const QString&)));
 }
 
 Service::~Service()
@@ -89,7 +94,12 @@ void Service::onSshClosed()
     if (state == Disconnecting) {
         state = Disconnected;
     }
+    if (appState == Active) {
+        socket->close();
+    }
+    appState = Dead;
     emit serviceMessage("connection clozed");
+    emit stopped();
     emit disconnected();
 }
 
@@ -134,9 +144,15 @@ void Service::onSshData(const QString& command, const QString& data)
             if (command == tail) {
                 state = Connected;
                 emit connected();
-                emit serviceMessage("first data from lig file, connected!");
+                emit serviceMessage("first data from log file, connected!");
             }
         case Connected:
+            if (appState == Checking) {
+                appState = WaitingWebSocket;
+                socket->open(W::String(address.toStdString()), W::Uint64(port.toInt()));
+                emit launching();
+                emit serviceMessage("Trying to reach service by websocket");
+            }
             if (command == tail) {
                 emit log(data);
             }
@@ -152,6 +168,7 @@ void Service::connect()
     if (state == Disconnected) {
         dataSsh->open(address);
         state = Connecting;
+        appState = Checking;
         emit serviceMessage("connecting to " + address);
         emit connecting();
     } else {
@@ -163,8 +180,13 @@ void Service::disconnect()
 {
     if (state != Disconnected) { 
         state = Disconnecting;
+        if (appState == Active) {
+            socket->close();
+        }
+        appState = Dead;
         emit serviceMessage("disconnecting");
         emit disconnecting();
+        emit stopped();
         dataSsh->close();
     }
 }
@@ -199,4 +221,33 @@ QVariant Service::saveState() const
     return state;
 }
 
+void Service::launch()
+{
+    if (state == Connected && appState == Dead) {
+        dataSsh->execute("nohup " + command + " >> " + logFile + "&");
+        appState = Checking;
+        emit launching();
+    }
+}
+
+void Service::onSocketConnected()
+{
+    appState = Active;
+    emit launched();
+}
+
+void Service::onSocketDisconnected()
+{
+    appState = Dead;
+    emit stopped();
+}
+
+void Service::onSocketError(W::Socket::SocketError err, const QString& msg)
+{
+    emit serviceMessage(msg);
+    if (appState == WaitingWebSocket) {
+        appState = Dead;
+        emit stopped();
+    }
+}
 

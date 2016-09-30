@@ -4,6 +4,7 @@
 #include <wSocket/socket.h>
 #include <wSsh/sshsocket.h>
 #include <wType/string.h>
+#include <wType/uint64.h>
 
 #include <QtCore/QString>
 #include <QtCore/QMap>
@@ -41,6 +42,13 @@ private:
         Disconnecting
     };
     
+    enum AppState {
+        Dead,
+        Checking,
+        WaitingWebSocket,
+        Active
+    };
+    
     W::Socket* socket;
     W::SshSocket* dataSsh;
     static uint64_t lastId;
@@ -49,6 +57,7 @@ private:
     QString logFile;
     QString command;
     State state;
+    AppState appState;
     
 public:
     QString name;
@@ -62,11 +71,16 @@ signals:
     void connected();
     void disconnecting();
     void disconnected();
+    void launching();
+    void launched();
+    void stopping();
+    void stopped();
     void log(const QString& data);
     
 public slots:
     void connect();
     void disconnect();
+    void launch();
     
 private:
     
@@ -77,6 +91,10 @@ private slots:
     void onSshData(const QString& command, const QString& data);
     void onSshError(W::SshSocket::Error errCode, const QString& msg);
     void onSshFinished(const QString& command);
+    
+    void onSocketConnected();
+    void onSocketDisconnected();
+    void onSocketError(W::Socket::SocketError err, const QString& msg);
 };
 
 #endif // SERVICE_H

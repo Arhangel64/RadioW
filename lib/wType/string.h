@@ -13,6 +13,7 @@ namespace W{
         String();
         explicit String(const u16string& p_data);
         explicit String(const char16_t* p_data);
+        explicit String(const StdStr p_data);
         String(const String& original);
         
         ~String();

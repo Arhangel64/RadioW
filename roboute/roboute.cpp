@@ -102,6 +102,10 @@ void Roboute::addService(Service* srv)
     connect(srv, SIGNAL(connected()), this, SLOT(onServiceConnected()));
     connect(srv, SIGNAL(disconnecting()), this, SLOT(onServiceDisconnecting()));
     connect(srv, SIGNAL(disconnected()), this, SLOT(onServiceDisconnected()));
+    connect(srv, SIGNAL(launching()), this, SLOT(onServiceLaunching()));
+    connect(srv, SIGNAL(launched()), this, SLOT(onServiceLaunched()));
+    connect(srv, SIGNAL(stopping()), this, SLOT(onServiceStopping()));
+    connect(srv, SIGNAL(stopped()), this, SLOT(onServiceStopped()));
     connect(srv, SIGNAL(log(const QString&)), this, SLOT(onServiceLog(const QString&)));
     
     emit newService(*srv);
@@ -122,6 +126,8 @@ void Roboute::disconnectService(uint64_t id)
 
 void Roboute::launchService(uint64_t id)
 {
+    Service* srv = services[id];
+    srv->launch();
 }
 
 void Roboute::stopService(uint64_t id)
@@ -198,5 +204,29 @@ void Roboute::readSettings()
     for (; beg != end; ++beg) {
         addService(Service::fromSerialized(beg->toMap()));
     }
+}
+
+void Roboute::onServiceLaunched()
+{
+    Service* srv = static_cast<Service*>(sender());
+    emit serviceLaunched(srv->id);
+}
+
+void Roboute::onServiceLaunching()
+{
+    Service* srv = static_cast<Service*>(sender());
+    emit serviceLaunching(srv->id);
+}
+
+void Roboute::onServiceStopped()
+{
+    Service* srv = static_cast<Service*>(sender());
+    emit serviceStopped(srv->id);
+}
+
+void Roboute::onServiceStopping()
+{
+    Service* srv = static_cast<Service*>(sender());
+    emit serviceStopping(srv->id);
 }
 

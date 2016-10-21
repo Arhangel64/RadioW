@@ -14,7 +14,8 @@ Service::Service(
 ):
     QObject(),
     socket(new W::Socket(W::String(u"Roboute"))),
-    dataSsh(new W::SshSocket()),
+    dataSsh(new W::SshSocket(p_login, p_password)),
+    commandSsh(new W::SshSocket(p_login, p_password)),
     login(p_login),
     password(p_password),
     logFile(p_logFile),
@@ -28,10 +29,15 @@ Service::Service(
 {
     QObject::connect(dataSsh, SIGNAL(opened()), this, SLOT(onSshOpened()));
     QObject::connect(dataSsh, SIGNAL(closed()), this, SLOT(onSshClosed()));
-    QObject::connect(dataSsh, SIGNAL(authorized()), this, SLOT(onSshAuthorized()));
-    QObject::connect(dataSsh, SIGNAL(data(const QString&, const QString&)), this, SLOT(onSshData(const QString&, const QString&)));
+    QObject::connect(dataSsh, SIGNAL(data(const QString&)), this, SLOT(onDataSshData(const QString&)));
     QObject::connect(dataSsh, SIGNAL(error(W::SshSocket::Error, const QString&)), this, SLOT(onSshError(W::SshSocket::Error, const QString&)));
-    QObject::connect(dataSsh, SIGNAL(finished(const QString&)), this, SLOT(onSshFinished(const QString&)));
+    QObject::connect(dataSsh, SIGNAL(finished()), this, SLOT(onDataSshFinished()));
+    
+    QObject::connect(commandSsh, SIGNAL(opened()), this, SLOT(onSshOpened()));
+    QObject::connect(commandSsh, SIGNAL(closed()), this, SLOT(onSshClosed()));
+    QObject::connect(commandSsh, SIGNAL(data(const QString&)), this, SLOT(onCommandSshData( const QString&)));
+    QObject::connect(commandSsh, SIGNAL(error(W::SshSocket::Error, const QString&)), this, SLOT(onSshError(W::SshSocket::Error, const QString&)));
+    QObject::connect(commandSsh, SIGNAL(finished()), this, SLOT(onCommandSshFinished()));
     
     QObject::connect(socket, SIGNAL(connected()), this, SLOT(onSocketConnected()));
     QObject::connect(socket, SIGNAL(disconnected()), this, SLOT(onSocketDisconnected()));
@@ -42,6 +48,7 @@ Service::~Service()
 {
     delete socket;
     delete dataSsh;
+    delete commandSsh;
 }
 
 Service* Service::create(const QMap<QString, QString>& params)
@@ -79,11 +86,18 @@ Service* Service::fromSerialized(const QMap<QString, QVariant>& params)
 
 void Service::onSshOpened()
 {
-    if (state == Connecting) {
-        emit serviceMessage("connection established");
-        state = Authorizing;
-        dataSsh->authorize(login, password);
-        emit serviceMessage("authorizing");
+    if (state == Connecting && dataSsh->isReady() && commandSsh->isReady()) {
+        emit serviceMessage("authorized");
+        state = Echo;
+        dataSsh->execute("echo === Roboute connected === >> " + logFile);
+        emit serviceMessage("checking log file");
+        
+        if (appState == Checking) {
+            appState = WaitingWebSocket;
+            socket->open(W::String(address.toStdString()), W::Uint64(port.toInt()));
+            emit launching();
+            emit serviceMessage("Trying to reach service by websocket");
+        }
     } else {
         //TODO;
     }
@@ -91,16 +105,14 @@ void Service::onSshOpened()
 
 void Service::onSshClosed()
 {
+    if (state == Disconnected) {
+        emit serviceMessage("connection clozed");
+        emit stopped();
+        emit disconnected();
+    }
     if (state == Disconnecting) {
         state = Disconnected;
     }
-    if (appState == Active) {
-        socket->close();
-    }
-    appState = Dead;
-    emit serviceMessage("connection clozed");
-    emit stopped();
-    emit disconnected();
 }
 
 void Service::onSshError(W::SshSocket::Error errCode, const QString& msg)
@@ -113,7 +125,6 @@ void Service::onSshError(W::SshSocket::Error errCode, const QString& msg)
             state = Disconnected;
             emit disconnected();
             break;
-        case Authorizing:
         case Echo:
         case Listening:
         case Connected:
@@ -124,42 +135,35 @@ void Service::onSshError(W::SshSocket::Error errCode, const QString& msg)
     }
 }
 
-void Service::onSshAuthorized()
+void Service::onDataSshData(const QString& data)
 {
-    if (state == Authorizing) {
-        emit serviceMessage("authorized");
-        state = Echo;
-        dataSsh->execute("echo === Roboute connected === >> " + logFile);
-        emit serviceMessage("checking log file");
-    } else {
-        //TODO;
-    }
-}
-
-void Service::onSshData(const QString& command, const QString& data)
-{
-    QString tail = "tail -f " + logFile;
     switch (state) {
         case Listening:
-            if (command == tail) {
-                state = Connected;
-                emit connected();
-                emit serviceMessage("first data from log file, connected!");
-            }
+            state = Connected;
+            emit connected();
+            emit serviceMessage("first data from log file, connected!");
         case Connected:
-            if (appState == Checking) {
-                appState = WaitingWebSocket;
-                socket->open(W::String(address.toStdString()), W::Uint64(port.toInt()));
-                emit launching();
-                emit serviceMessage("Trying to reach service by websocket");
-            }
-            if (command == tail) {
-                emit log(data);
-            }
+            emit log(data);
             break;
         default:
             break;
     }
+}
+
+void Service::onCommandSshData(const QString& data)
+{
+    emit serviceMessage("data from command ssh: " + data);
+    if (appState == Checking) {
+        appState = WaitingWebSocket;
+        socket->open(W::String(address.toStdString()), W::Uint64(port.toInt()));
+        emit launching();
+        emit serviceMessage("Trying to reach service by websocket");
+    }
+}
+
+void Service::onCommandSshFinished()
+{
+    emit serviceMessage("command ssh EOF");
 }
 
 
@@ -167,6 +171,7 @@ void Service::connect()
 {
     if (state == Disconnected) {
         dataSsh->open(address);
+        commandSsh->open(address);
         state = Connecting;
         appState = Checking;
         emit serviceMessage("connecting to " + address);
@@ -188,10 +193,11 @@ void Service::disconnect()
         emit disconnecting();
         emit stopped();
         dataSsh->close();
+        commandSsh->close();
     }
 }
 
-void Service::onSshFinished(const QString& command)
+void Service::onDataSshFinished()
 {
     switch (state) {
         case Echo:
@@ -224,8 +230,8 @@ QVariant Service::saveState() const
 void Service::launch()
 {
     if (state == Connected && appState == Dead) {
-        dataSsh->execute("nohup " + command + " >> " + logFile + "&");
         appState = Checking;
+        commandSsh->execute("nohup " + command + " >> " + logFile + "&");
         emit launching();
     }
 }

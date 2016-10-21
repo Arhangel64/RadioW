@@ -11,7 +11,7 @@ namespace W {
         Q_OBJECT
         
     public:
-        SshSocket(QObject* parent = 0);
+        SshSocket(const QString& p_login, const QString& p_password, QObject* parent = 0);
         ~SshSocket();
         
         enum Error {
@@ -25,18 +25,18 @@ namespace W {
         
         void open(const QString& address, uint16_t port = 22);
         void close();
-        void authorize(const QString& login, const QString& password);
         void execute(const QString& command);
+        bool isReady() const;
         
     signals:
         void opened();
         void closed();
-        void authorized();
         void error(W::SshSocket::Error code, const QString& message);
-        void data(const QString& command, const QString& data);
-        void finished(const QString& command);
+        void data(const QString& data);
+        void finished();
         
     private:
+        void authorize();
         enum State {
             Disconnected,
             Connecting,
@@ -48,6 +48,8 @@ namespace W {
         
         QSshSocket* socket;
         QThread* thread;
+        QString login;
+        QString password;
         State state;
         
     private slots:
@@ -55,8 +57,8 @@ namespace W {
         void onSocketDisconnected();
         void onSocketLoggedIn();
         void onSocketError(QSshSocket::SshError p_error);
-        void onSocketCommandData(QString command, QString p_data);
-        void onSocketEOF(QString command);
+        void onSocketCommandData(QString p_data);
+        void onSocketEOF();
         
     };
 }

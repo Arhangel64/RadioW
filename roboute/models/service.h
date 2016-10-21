@@ -35,7 +35,6 @@ private:
     enum State {
         Disconnected,
         Connecting,
-        Authorizing,
         Echo,
         Listening,
         Connected,
@@ -51,6 +50,7 @@ private:
     
     W::Socket* socket;
     W::SshSocket* dataSsh;
+    W::SshSocket* commandSsh;
     static uint64_t lastId;
     QString login;
     QString password;
@@ -87,10 +87,11 @@ private:
 private slots:
     void onSshOpened();
     void onSshClosed();
-    void onSshAuthorized();
-    void onSshData(const QString& command, const QString& data);
+    void onDataSshData(const QString& data);
+    void onCommandSshData(const QString& data);
     void onSshError(W::SshSocket::Error errCode, const QString& msg);
-    void onSshFinished(const QString& command);
+    void onDataSshFinished();
+    void onCommandSshFinished();
     
     void onSocketConnected();
     void onSocketDisconnected();

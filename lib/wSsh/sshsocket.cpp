@@ -1,18 +1,20 @@
 #include "sshsocket.h"
 #include <QtCore/QDebug>
 
-W::SshSocket::SshSocket(QObject* parent):
+W::SshSocket::SshSocket(const QString& p_login, const QString& p_password, QObject* parent):
     QObject(parent),
     socket(new QSshSocket()),
     thread(new QThread()),
+    login(p_login),
+    password(p_password),
     state(Disconnected)
 {
     connect(socket, SIGNAL(connected()), this, SLOT(onSocketConnected()));
     connect(socket, SIGNAL(disconnected()), this, SLOT(onSocketDisconnected()));
     connect(socket, SIGNAL(loginSuccessful()), this, SLOT(onSocketLoggedIn()));
     connect(socket, SIGNAL(error(QSshSocket::SshError)), this, SLOT(onSocketError(QSshSocket::SshError)));
-    connect(socket, SIGNAL(commandData(QString, QString)), this, SLOT(onSocketCommandData(QString, QString)));
-    connect(socket, SIGNAL(endOfFile(QString)), this, SLOT(onSocketEOF(QString)));
+    connect(socket, SIGNAL(commandData(QString)), this, SLOT(onSocketCommandData(QString)));
+    connect(socket, SIGNAL(endOfFile()), this, SLOT(onSocketEOF()));
     
     socket->moveToThread(thread);
 }
@@ -47,13 +49,13 @@ void W::SshSocket::onSocketConnected()
 {
     if (state == Connecting) {
         state = Connected;
-        emit opened();
+        authorize();
     } else {
         //TODO;
     }
 }
 
-void W::SshSocket::authorize(const QString& login, const QString& password)
+void W::SshSocket::authorize()
 {
     if (state == Connected) {
         state = Authorizing;
@@ -67,7 +69,7 @@ void W::SshSocket::onSocketLoggedIn()
 {
     if (state == Authorizing) {
         state = Authorized;
-        emit authorized();
+        emit opened();
     }
 }
 
@@ -110,10 +112,10 @@ void W::SshSocket::execute(const QString& command)
     }
 }
 
-void W::SshSocket::onSocketCommandData(QString command, QString p_data)
+void W::SshSocket::onSocketCommandData(QString p_data)
 {
     if (state == Authorized) {
-        emit data(command, p_data);
+        emit data(p_data);
     }
 }
 
@@ -157,11 +159,15 @@ void W::SshSocket::onSocketError(QSshSocket::SshError p_error)
     emit error(errCode, msg);
 }
 
-void W::SshSocket::onSocketEOF(QString command)
+void W::SshSocket::onSocketEOF()
 {
-    emit finished(command);
+    emit finished();
 }
 
+bool W::SshSocket::isReady() const
+{
+    return state == Authorized;
+}
 
 
 

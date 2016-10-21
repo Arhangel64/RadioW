@@ -255,6 +255,7 @@ void W::Socket::onSocketError(QAbstractSocket::SocketError err)
     if (state == connecting_s) {
         state = disconnected_s;
     }
+    //socket->close();
     emit error(err, socket->errorString());
 }
 

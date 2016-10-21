@@ -33,14 +33,15 @@ public:
 
     bool isLoggedIn();
     bool isConnected();
+    bool isExecuting();
 
 signals:
     void connected();
     void disconnected();
     void error(QSshSocket::SshError error);
     void loginSuccessful();
-    void commandData(QString command, QString data);
-    void endOfFile(QString command);
+    void commandData(QString data);
+    void endOfFile();
 
 public slots:
     void connect(QString host, int port = 22);
@@ -60,10 +61,11 @@ private:
     bool loggedIn;
     ssh_session session;
     bool m_connected;
-    QMap<qintptr, Command*> commands;
+    bool executing;
+    Command* command;
     
 private:
-    void destroyCommand(quintptr ptr);
+    void destroyCommand();
     
 private slots:
     void socketRead(int ptr);

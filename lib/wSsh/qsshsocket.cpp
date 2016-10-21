@@ -5,7 +5,8 @@ QSshSocket::QSshSocket(QObject * parent)
     loggedIn(false),
     session(ssh_new()),
     m_connected(false),
-    commands()
+    executing(false),
+    command(0)
 {
     int verbosity = SSH_LOG_PROTOCOL;
     ssh_options_set(session, SSH_OPTIONS_LOG_VERBOSITY, &verbosity);
@@ -22,12 +23,9 @@ void QSshSocket::disconnect()
     if (m_connected) {
         loggedIn = false;
         m_connected = false;
-        QMap<qintptr, Command*>::iterator itr = commands.begin();
-        QMap<qintptr, Command*>::iterator end = commands.end();
     
-        while (itr != end) {
-            destroyCommand((*itr)->id);
-            itr = commands.begin();
+        if (executing) {
+            destroyCommand();
         }
         ssh_disconnect(session);
         ssh_free(session);
@@ -75,15 +73,19 @@ void QSshSocket::login(QString user, QString password)
     
 }
 
-void QSshSocket::executeCommand(QString command)
+void QSshSocket::executeCommand(QString p_command)
 {
+    if (executing) {
+        //todo
+        return;
+    }
     ssh_channel channel = ssh_channel_new(session);
     if (ssh_channel_open_session(channel) != SSH_OK) {
         emit error(ChannelCreationError);
     }
     int success;
     do {
-        success = ssh_channel_request_exec(channel, command.toLatin1().data());
+        success = ssh_channel_request_exec(channel, p_command.toLatin1().data());
     } while (success == SSH_AGAIN);
     
     if (success != SSH_OK) {
@@ -95,8 +97,8 @@ void QSshSocket::executeCommand(QString command)
         QSocketNotifier* readNotifier = new QSocketNotifier(fd, QSocketNotifier::Read);
         QObject::connect(readNotifier, SIGNAL(activated(int)), this, SLOT(socketRead(int)));
     
-        Command* cmd = new Command{fd, command, channel, readNotifier};
-        commands.insert(fd, cmd);
+        command = new Command{fd, p_command, channel, readNotifier};
+        executing = true;
     }
 }
 
@@ -111,10 +113,15 @@ bool QSshSocket::isLoggedIn()
     return loggedIn;
 }
 
+bool QSshSocket::isExecuting()
+{
+    return executing;
+}
+
+
 void QSshSocket::socketRead(int ptr)
 {
-    Command* cmd = commands[ptr];
-    cmd->notifier->setEnabled(false);
+    command->notifier->setEnabled(false);
     
     QByteArray buffer;
     buffer.resize(1048576);
@@ -122,7 +129,7 @@ void QSshSocket::socketRead(int ptr)
     int totalBytes = 0;
     int newBytes = 0;
     do {
-        newBytes = ssh_channel_read_nonblocking(cmd->channel, &(buffer.data()[totalBytes]), buffer.size() - totalBytes, 0);
+        newBytes = ssh_channel_read_nonblocking(command->channel, &(buffer.data()[totalBytes]), buffer.size() - totalBytes, 0);
         
         if (newBytes > 0) {
             totalBytes += newBytes;
@@ -132,25 +139,27 @@ void QSshSocket::socketRead(int ptr)
     
     if (newBytes == SSH_ERROR) {
         emit error(ReadError);
-        destroyCommand(ptr);
-    } else if (ssh_channel_is_eof(cmd->channel) != 0) {
-        emit endOfFile(cmd->command);
-        destroyCommand(ptr);
-    } else {
-        cmd->notifier->setEnabled(true);
+        destroyCommand();
+    } else if (ssh_channel_is_eof(command->channel) != 0) {
+        command->notifier->setEnabled(true);
         QString response = QString(buffer).mid(0, totalBytes);
-        emit commandData(cmd->command, response);
+        emit commandData(response);
+        emit endOfFile();
+        destroyCommand();
+    } else {
+        command->notifier->setEnabled(true);
+        QString response = QString(buffer).mid(0, totalBytes);
+        emit commandData(response);
     }
 }
 
-void QSshSocket::destroyCommand(quintptr ptr)
+void QSshSocket::destroyCommand()
 {
-    Command* cmd = commands[ptr];
-    delete cmd->notifier;
-    ssh_channel_send_eof(cmd->channel);
-    ssh_channel_close(cmd->channel);
-    ssh_channel_free(cmd->channel);
-    delete cmd;
-    commands.erase(commands.find(ptr));
+    delete command->notifier;
+    ssh_channel_send_eof(command->channel);
+    ssh_channel_close(command->channel);
+    ssh_channel_free(command->channel);
+    delete command;
+    executing = false;
 }
 

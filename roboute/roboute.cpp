@@ -132,6 +132,8 @@ void Roboute::launchService(uint64_t id)
 
 void Roboute::stopService(uint64_t id)
 {
+    Service* srv = services[id];
+    srv->stop();
 }
 
 void Roboute::onServiceMessage(const QString& msg)

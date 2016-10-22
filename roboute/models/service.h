@@ -44,8 +44,10 @@ private:
     enum AppState {
         Dead,
         Checking,
+        Launching,
         WaitingWebSocket,
-        Active
+        Active,
+        Stopping
     };
     
     W::Socket* socket;
@@ -81,6 +83,7 @@ public slots:
     void connect();
     void disconnect();
     void launch();
+    void stop();
     
 private:
     

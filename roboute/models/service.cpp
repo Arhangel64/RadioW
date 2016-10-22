@@ -143,6 +143,12 @@ void Service::onDataSshData(const QString& data)
             emit connected();
             emit serviceMessage("first data from log file, connected!");
         case Connected:
+            if (appState == Launching) {
+                if (data.contains("ready")) {
+                    appState = WaitingWebSocket;
+                    socket->open(W::String(address.toStdString()), W::Uint64(port.toInt()));
+                }
+            }
             emit log(data);
             break;
         default:
@@ -152,18 +158,16 @@ void Service::onDataSshData(const QString& data)
 
 void Service::onCommandSshData(const QString& data)
 {
-    emit serviceMessage("data from command ssh: " + data);
-    if (appState == Checking) {
-        appState = WaitingWebSocket;
-        socket->open(W::String(address.toStdString()), W::Uint64(port.toInt()));
-        emit launching();
-        emit serviceMessage("Trying to reach service by websocket");
-    }
+    
 }
 
 void Service::onCommandSshFinished()
 {
-    emit serviceMessage("command ssh EOF");
+    if (appState == Checking) {
+        appState = Launching;
+        emit launching();
+        emit serviceMessage("Trying to reach service by websocket");
+    }
 }
 
 
@@ -236,6 +240,17 @@ void Service::launch()
     }
 }
 
+void Service::stop()
+{
+    if (state == Connected && appState == Active) {
+        QString file = command.section("/", -1);
+        commandSsh->execute("killall -SIGINT " + file);
+        appState = Stopping;
+        emit stopping();
+    }
+}
+
+
 void Service::onSocketConnected()
 {
     appState = Active;
@@ -251,9 +266,7 @@ void Service::onSocketDisconnected()
 void Service::onSocketError(W::Socket::SocketError err, const QString& msg)
 {
     emit serviceMessage(msg);
-    if (appState == WaitingWebSocket) {
-        appState = Dead;
-        emit stopped();
-    }
+    appState = Dead;
+    emit stopped();
 }
 

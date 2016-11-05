@@ -12,6 +12,7 @@ Corax::Corax(QObject *parent):
     server(new W::Server(W::String(u"corax"), this)),
     logger(new W::Logger()),
     h_test(0),
+    modelName(W::String(u"Corax"), W::Address({u"corax", u"name"})),
     dispatcher(new W::Dispatcher())
 {
     if (corax != 0) 
@@ -57,12 +58,14 @@ void Corax::start()
 {
     cout << "Starting corax..." << endl;
     server->listen(8080);
+    modelName.registerModel(dispatcher, server);
     cout << "Corax is ready" << endl;
 }
 
 void Corax::stop()
 {
     cout << "Stopping corax..." << endl;
+    modelName.unregisterModel();
     server->stop();
 }
 

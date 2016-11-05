@@ -152,3 +152,9 @@ void W::Event::setSenderId(const W::Uint64& senderId)
     sender = senderId;
 }
 
+void W::Event::setSenderId(uint64_t senderId)
+{
+    sender = Uint64(senderId);
+}
+
+

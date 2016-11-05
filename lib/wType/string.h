@@ -1,5 +1,5 @@
-#ifndef STRING_H
-#define STRING_H
+#ifndef W_STRING_H
+#define W_STRING_H
 
 #include "object.h"
 
@@ -49,4 +49,4 @@ namespace W{
 
 }
 
-#endif // STRING_H
+#endif // W_STRING_H

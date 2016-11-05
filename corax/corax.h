@@ -16,6 +16,8 @@
 #include <wDispatcher/logger.h>
 #include <wDispatcher/handler.h>
 
+#include <wModels/modelstring.h>
+
 #include <utils/exception.h>
 
 class Corax: public QObject
@@ -33,6 +35,7 @@ private:
     W::Logger *logger;
     
     W::Handler* h_test;
+    M::String modelName;
     
 public:
     W::Dispatcher *dispatcher;

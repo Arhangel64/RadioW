@@ -36,6 +36,7 @@ namespace W
         const Object& getData() const;
         
         void setSenderId(const Uint64& senderId);
+        void setSenderId(uint64_t senderId);
         
     private:
         Boolean system;

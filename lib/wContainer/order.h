@@ -36,10 +36,12 @@ namespace W
     public:
         typedef typename List::size_type size_type;
         typedef typename List::const_iterator const_iterator;
+        typedef typename List::iterator iterator;
         
     protected:
         typedef std::map<data_type, const_iterator, comparator> Map;
         typedef typename Map::const_iterator m_const_itr;
+        typedef typename Map::iterator m_itr;
     
     public:
         Order():

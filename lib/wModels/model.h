@@ -39,8 +39,8 @@ namespace M {
     protected:
         W::Address address;
         
-        void response(W::Vocabulary* vc, const W::Address& handlerAddress, const W::Event& src) const;
-        void broadcast(W::Vocabulary* vc, const W::Address& handlerAddress) const;
+        void response(W::Vocabulary* vc, const W::Address& handlerAddress, const W::Event& src);
+        void broadcast(W::Vocabulary* vc, const W::Address& handlerAddress);
         
         virtual void h_subscribe(const W::Event& ev);
         virtual void h_unsubscribe(const W::Event& ev);
@@ -48,6 +48,7 @@ namespace M {
     private:
         typedef std::map<uint64_t, W::Order<W::Address>> Map;
         typedef std::list<W::Handler*> HList;
+        typedef std::list<M::Model*> MList;
         
         bool registered;
         W::Dispatcher* dispatcher;
@@ -56,7 +57,7 @@ namespace M {
         uint64_t subscribersCount;
         HList* handlers;
         W::Vector* properties;
-        std::list<M::Model*> models;
+        MList* models;
         
     private slots:
         void onSocketDisconnected();

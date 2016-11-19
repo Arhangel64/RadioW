@@ -2,6 +2,7 @@
 #define CORAX_H
 
 #include <QtCore/QObject>
+#include <QtCore/QString>
 
 #include <wSocket/socket.h>
 #include <wSocket/server.h>
@@ -48,6 +49,9 @@ public slots:
     void onSocketDisconnected();
     void start();
     void stop();
+    
+private slots:
+    void onModelServiceMessage(const QString& msg);
     
 private:
     class SingletonError: 

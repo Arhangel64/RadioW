@@ -23,7 +23,7 @@
                 var vc = new Vocabulary();
                 
                 vc.insert("url", new String(url));
-                this.send("getPageAddress", vc);
+                this.send(vc, "getPageAddress");
             },
             "_h_pageAddress": function(ev) {
                 var data = ev.getData();

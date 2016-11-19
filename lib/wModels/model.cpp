@@ -10,7 +10,7 @@ M::Model::Model(const W::Address p_address, QObject* parent):
     subscribersCount(0),
     handlers(new HList()),
     properties(new W::Vector()),
-    models()
+    models(new MList())
 {
     W::Handler* subscribe = W::Handler::create(address + W::Address({u"subscribe"}), this, &M::Model::h_subscribe);
     W::Handler* unsubscribe = W::Handler::create(address + W::Address({u"unsubscribe"}), this, &M::Model::h_unsubscribe);
@@ -24,21 +24,23 @@ M::Model::~Model()
         unregisterModel();
     }
     
-    std::list<M::Model*>::iterator itr = models.begin();
-    std::list<M::Model*>::iterator end = models.end();
+    MList::iterator itr = models->begin();
+    MList::iterator end = models->end();
         
     for (; itr != end; ++itr) {
         delete *itr;
     }
 
     delete subscribers;
-    delete handlers;
     delete properties;
+    delete handlers;
+    delete models;
 }
 
 void M::Model::addModel(M::Model* model)
 {
-    models.push_back(model);
+    models->push_back(model);
+    connect(model, SIGNAL(serviceMessage(const QString&)), SIGNAL(serviceMessage(const QString&)));
     if (registered) {
         model->registerModel(dispatcher, server);
     }
@@ -83,8 +85,8 @@ void M::Model::registerModel(W::Dispatcher* dp, W::Server* srv)
         dispatcher = dp;
         server = srv;
         
-        std::list<M::Model*>::iterator itr = models.begin();
-        std::list<M::Model*>::iterator end = models.end();
+        MList::iterator itr = models->begin();
+        MList::iterator end = models->end();
         
         for (; itr != end; ++itr) {
             M::Model* model = *itr;
@@ -109,8 +111,8 @@ void M::Model::unregisterModel()
         emit serviceMessage(QString("Model ") + address.toString().c_str() + " is already unregistered");
         throw 2;
     } else {
-        std::list<M::Model*>::iterator itr = models.begin();
-        std::list<M::Model*>::iterator end = models.end();
+        MList::iterator itr = models->begin();
+        MList::iterator end = models->end();
         
         for (; itr != end; ++itr) {
             Model* model = *itr;
@@ -231,8 +233,12 @@ void M::Model::h_unsubscribe(const W::Event& ev)
     emit serviceMessage(QString("Model ") + address.toString().c_str() + ": now has " + subscribersCount + " subscribers");
 }
 
-void M::Model::response(W::Vocabulary* vc, const W::Address& handlerAddress, const W::Event& src) const
+void M::Model::response(W::Vocabulary* vc, const W::Address& handlerAddress, const W::Event& src)
 {
+    if (!registered) {
+        emit serviceMessage(QString("An attempt to send event from model ") + address.toString().c_str() + " which was not registered");
+        throw 8;
+    }
     const W::Vocabulary& svc = static_cast<const W::Vocabulary&>(src.getData());
     const W::Address& source = static_cast<const W::Address&>(svc.at(u"source"));
     uint64_t id = src.getSenderId();
@@ -244,8 +250,12 @@ void M::Model::response(W::Vocabulary* vc, const W::Address& handlerAddress, con
 }
 
 
-void M::Model::broadcast(W::Vocabulary* vc, const W::Address& handlerAddress) const
+void M::Model::broadcast(W::Vocabulary* vc, const W::Address& handlerAddress)
 {
+    if (!registered) {
+        emit serviceMessage(QString("An attempt to send event from model ") + address.toString().c_str() + " which was not registered");
+        throw 8;
+    }
     Map::const_iterator itr = subscribers->begin();
     Map::const_iterator end = subscribers->end();
     vc->insert(u"source", address);

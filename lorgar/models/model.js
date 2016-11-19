@@ -161,7 +161,7 @@
                     throw new Error("An attempt to remove not not existing model from " + this.className);
                 }
             },
-            "send": function(handler, vc) {
+            "send": function(vc, handler) {
                 var addr = this._pairAddress["+"](new Address([handler]));
                 var id = this._socket.getId().clone();
                 
@@ -177,7 +177,7 @@
                     this._subscribed = true;
                     
                     var vc = new Vocabulary();
-                    this.send("subscribe", vc);
+                    this.send(vc, "subscribe");
                     
                     for (var i = 0; i < this._models.length; ++i) {
                         this._models[i].subscribe();
@@ -202,7 +202,7 @@
                     this._subscribed = false;
                     
                     var vc = new Vocabulary();
-                    this.send("unsubscribe", vc);
+                    this.send(vc, "unsubscribe");
                     
                     for (var i = 0; i < this._models.length; ++i) {
                         this._models[i].unsubscribe();

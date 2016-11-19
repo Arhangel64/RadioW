@@ -22,6 +22,7 @@ Corax::Corax(QObject *parent):
     Corax::corax = this;
     
     connect(server, SIGNAL(newConnection(const W::Socket&)), SLOT(onNewConnection(const W::Socket&)));
+    connect(&modelName, SIGNAL(serviceMessage(const QString&)), SLOT(onModelServiceMessage(const QString&)));
     
     dispatcher->registerDefaultHandler(logger);
     
@@ -58,6 +59,7 @@ void Corax::start()
 {
     cout << "Starting corax..." << endl;
     server->listen(8080);
+    cout << "Registering models..." << endl;
     modelName.registerModel(dispatcher, server);
     cout << "Corax is ready" << endl;
 }
@@ -81,3 +83,9 @@ void Corax::test(const W::Event& ev)
     W::Event nev(static_cast<const W::Address&>(vc.at(u"source")), nvc);
     server->getConnection(ev.getSenderId()).send(nev);
 }
+
+void Corax::onModelServiceMessage(const QString& msg)
+{
+    cout << msg.toStdString() << endl;
+}
+

@@ -12,8 +12,8 @@ M::Model::Model(const W::Address p_address, QObject* parent):
     properties(new W::Vector()),
     models(new MList())
 {
-    W::Handler* subscribe = W::Handler::create(address + W::Address({u"subscribe"}), this, &M::Model::h_subscribe);
-    W::Handler* unsubscribe = W::Handler::create(address + W::Address({u"unsubscribe"}), this, &M::Model::h_unsubscribe);
+    W::Handler* subscribe = W::Handler::create(address + W::Address({u"subscribe"}), this, &M::Model::_h_subscribe);
+    W::Handler* unsubscribe = W::Handler::create(address + W::Address({u"unsubscribe"}), this, &M::Model::_h_unsubscribe);
     addHandler(subscribe);
     addHandler(unsubscribe);
 }
@@ -178,7 +178,7 @@ void M::Model::h_subscribe(const W::Event& ev)
     nvc->insert(u"properties", *properties);
     
     response(nvc, W::Address({u"properties"}), ev);
-    emit serviceMessage(QString("Model ") + address.toString().c_str() + ": now has " + subscribersCount + " subscribers");
+    emit serviceMessage(QString("Model ") + address.toString().c_str() + ": now has " + std::to_string(subscribersCount).c_str() + " subscribers");
 }
 
 void M::Model::onSocketDisconnected()
@@ -197,7 +197,7 @@ void M::Model::onSocketDisconnected()
     subscribersCount -= itr->second.size();
     subscribers->erase(itr);
     
-    emit serviceMessage(QString("Model ") + address.toString().c_str() + ": now has " + subscribersCount + " subscribers");
+    emit serviceMessage(QString("Model ") + address.toString().c_str() + ": now has " + std::to_string(subscribersCount).c_str() + " subscribers");
 }
 
 void M::Model::h_unsubscribe(const W::Event& ev)
@@ -230,7 +230,7 @@ void M::Model::h_unsubscribe(const W::Event& ev)
     }
     --subscribersCount;
     
-    emit serviceMessage(QString("Model ") + address.toString().c_str() + ": now has " + subscribersCount + " subscribers");
+    emit serviceMessage(QString("Model ") + address.toString().c_str() + ": now has " + std::to_string(subscribersCount).c_str() + " subscribers");
 }
 
 void M::Model::response(W::Vocabulary* vc, const W::Address& handlerAddress, const W::Event& src)

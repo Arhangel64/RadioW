@@ -54,7 +54,9 @@ void Roboute::stop()
     QMap<uint64_t, Service*>::iterator end = services.end();
     
     for (; beg != end; ++beg) {
-        (*beg)->disconnect();
+        Service* srv = *beg;
+        srv->unregisterControllers(dispatcher);
+        srv->disconnect();
     }
 }
 
@@ -86,6 +88,7 @@ void Roboute::removeService(uint64_t id)
     if (itr != services.end()) {
         Service* srv = *itr;
         debug(id, "removing...");
+        srv->unregisterControllers(dispatcher);
         srv->disconnect();
         srv->deleteLater();
         services.erase(itr);
@@ -106,7 +109,10 @@ void Roboute::addService(Service* srv)
     connect(srv, SIGNAL(launched()), this, SLOT(onServiceLaunched()));
     connect(srv, SIGNAL(stopping()), this, SLOT(onServiceStopping()));
     connect(srv, SIGNAL(stopped()), this, SLOT(onServiceStopped()));
+    connect(srv, SIGNAL(nodeNameChanged(const QString&)), this, SLOT(onNodeNameChanged(const QString&)));
     connect(srv, SIGNAL(log(const QString&)), this, SLOT(onServiceLog(const QString&)));
+    
+    srv->registerContollers(dispatcher);
     
     emit newService(*srv);
 }
@@ -230,5 +236,12 @@ void Roboute::onServiceStopping()
 {
     Service* srv = static_cast<Service*>(sender());
     emit serviceStopping(srv->id);
+}
+
+void Roboute::onNodeNameChanged(const QString& name)
+{
+    Service* srv = static_cast<Service*>(sender());
+    
+    debug(srv->id, "name now is " + name);
 }
 

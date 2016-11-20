@@ -6,6 +6,8 @@
 #include <wType/string.h>
 #include <wType/uint64.h>
 
+#include <wControllers/controllerstring.h>
+
 #include <QtCore/QString>
 #include <QtCore/QMap>
 #include <QtCore/QVariant>
@@ -30,6 +32,8 @@ public:
     static Service* create(const QMap<QString, QString>& params);
     static Service* fromSerialized(const QMap<QString, QVariant>& params);
     QVariant saveState() const;
+    void registerContollers(W::Dispatcher* dp);
+    void unregisterControllers(W::Dispatcher* dp);
     
 private:
     enum State {
@@ -53,6 +57,7 @@ private:
     W::Socket* socket;
     W::SshSocket* dataSsh;
     W::SshSocket* commandSsh;
+    C::String* nodeName;
     static uint64_t lastId;
     QString login;
     QString password;
@@ -67,6 +72,7 @@ public:
     QString port;
     const uint64_t id;
     
+    
 signals:
     void serviceMessage(const QString& msg);
     void connecting();
@@ -78,6 +84,7 @@ signals:
     void stopping();
     void stopped();
     void log(const QString& data);
+    void nodeNameChanged(const QString& name);
     
 public slots:
     void connect();

@@ -12,7 +12,7 @@ Corax::Corax(QObject *parent):
     server(new W::Server(W::String(u"corax"), this)),
     logger(new W::Logger()),
     h_test(0),
-    modelName(W::String(u"Corax"), W::Address({u"corax", u"name"})),
+    modelName(W::String(u"Corax"), W::Address({u"name"})),
     dispatcher(new W::Dispatcher())
 {
     if (corax != 0) 

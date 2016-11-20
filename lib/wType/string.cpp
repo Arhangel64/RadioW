@@ -160,3 +160,12 @@ W::String::operator u16string() const
     return *data;
 }
 
+W::String & W::String::operator+(int number)
+{
+    StdStr str = std::to_string(number);;
+    std::wstring_convert<std::codecvt_utf8<char16_t>,char16_t> convert;
+    std::u16string u16 = convert.from_bytes(str);
+    (*data) += u16;
+    
+    return *this;
+}

@@ -4,7 +4,7 @@ M::String::String(const W::String& str, const W::Address& addr, QObject* parent)
     M::Model(addr, parent),
     data(new W::String(str))
 {
-    addHandler(W::Handler::create(address + W::Address({u"get"}), this, &M::String::h_get));
+    addHandler(W::Handler::create(address + W::Address({u"get"}), this, &M::String::_h_get));
 }
 
 M::String::String(W::String* str, const W::Address& addr, QObject* parent):

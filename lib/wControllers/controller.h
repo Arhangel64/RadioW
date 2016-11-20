@@ -9,6 +9,7 @@
 #include <wType/event.h>
 #include <wType/vector.h>
 #include <wType/vocabulary.h>
+#include <wType/string.h>
 #include <wDispatcher/dispatcher.h>
 #include <wDispatcher/handler.h>
 #include <wSocket/socket.h>
@@ -18,7 +19,7 @@ namespace C {
     {
         Q_OBJECT
     public:
-        Controller(const W::Address p_address, QObject* parent = 0);
+        Controller(const W::Address& p_address, const W::Address& my_address, QObject* parent = 0);
         virtual ~Controller();
         
         void addController(C::Controller* ctrl);
@@ -27,6 +28,7 @@ namespace C {
         void unregisterController();
         void subscribe();
         void unsubscribe();
+        void dropSubscription();
         
     signals:
         void serviceMessage(const QString& msg);
@@ -50,6 +52,9 @@ namespace C {
         CList* controllers;
         HList* handlers;
         W::Vector* properties;
+        
+    private slots:
+        void onSocketDisconnected();
     };
 }
 

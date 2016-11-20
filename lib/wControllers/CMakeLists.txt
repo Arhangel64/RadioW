@@ -8,10 +8,12 @@ set(CMAKE_AUTOMOC ON)
 
 set(HEADERS
     controller.h
+    controllerstring.h
 )
 
 set(SOURCES
     controller.cpp
+    controllerstring.cpp
 )
 
 add_library(wControllers STATIC ${HEADERS} ${SOURCES})

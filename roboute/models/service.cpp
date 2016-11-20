@@ -16,6 +16,7 @@ Service::Service(
     socket(new W::Socket(W::String(u"Roboute"))),
     dataSsh(new W::SshSocket(p_login, p_password)),
     commandSsh(new W::SshSocket(p_login, p_password)),
+    nodeName(new C::String(W::Address{u"name"})),
     login(p_login),
     password(p_password),
     logFile(p_logFile),
@@ -42,13 +43,16 @@ Service::Service(
     QObject::connect(socket, SIGNAL(connected()), this, SLOT(onSocketConnected()));
     QObject::connect(socket, SIGNAL(disconnected()), this, SLOT(onSocketDisconnected()));
     QObject::connect(socket, SIGNAL(error(W::Socket::SocketError, const QString&)), this, SLOT(onSocketError(W::Socket::SocketError, const QString&)));
+    
+    QObject::connect(nodeName, SIGNAL(change(const QString&)), this, SIGNAL(nodeNameChanged(const QString&)));
 }
 
 Service::~Service()
 {
-    delete socket;
-    delete dataSsh;
+    delete nodeName;
     delete commandSsh;
+    delete dataSsh;
+    delete socket;
 }
 
 Service* Service::create(const QMap<QString, QString>& params)
@@ -190,6 +194,7 @@ void Service::disconnect()
     if (state != Disconnected) { 
         state = Disconnecting;
         if (appState == Active) {
+            nodeName->unsubscribe();
             socket->close();
         }
         appState = Dead;
@@ -254,6 +259,7 @@ void Service::stop()
 void Service::onSocketConnected()
 {
     appState = Active;
+    nodeName->subscribe();
     emit launched();
 }
 
@@ -269,4 +275,21 @@ void Service::onSocketError(W::Socket::SocketError err, const QString& msg)
     appState = Dead;
     emit stopped();
 }
+
+void Service::registerContollers(W::Dispatcher* dp)
+{
+    QObject::connect(socket, SIGNAL(message(const W::Event&)), dp, SLOT(pass(const W::Event&)));
+    nodeName->registerController(dp, socket);
+}
+
+void Service::unregisterControllers(W::Dispatcher* dp)
+{
+    QObject::disconnect(socket, SIGNAL(message(const W::Event&)), dp, SLOT(pass(const W::Event&)));
+    nodeName->unregisterController();
+}
+
+
+
+
+
 

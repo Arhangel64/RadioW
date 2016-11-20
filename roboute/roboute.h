@@ -85,6 +85,7 @@ private slots:
     void onServiceStopping();
     void onServiceStopped();
     void onServiceLog(const QString& msg);
+    void onNodeNameChanged(const QString& name);
     
 private:
     class SingletonError: 

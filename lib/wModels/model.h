@@ -16,6 +16,11 @@
 #include <wDispatcher/handler.h>
 #include <wContainer/order.h>
 
+#define handler(HANDLER)    \
+    void _h_##HANDLER(const W::Event& ev) {h_##HANDLER(ev);}\
+    virtual void h_##HANDLER(const W::Event& ev);\
+
+
 namespace M {
     
     class Model : public QObject
@@ -42,8 +47,8 @@ namespace M {
         void response(W::Vocabulary* vc, const W::Address& handlerAddress, const W::Event& src);
         void broadcast(W::Vocabulary* vc, const W::Address& handlerAddress);
         
-        virtual void h_subscribe(const W::Event& ev);
-        virtual void h_unsubscribe(const W::Event& ev);
+        handler(subscribe)
+        handler(unsubscribe)
         
     private:
         typedef std::map<uint64_t, W::Order<W::Address>> Map;

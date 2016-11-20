@@ -1,9 +1,11 @@
 #include "controller.h"
 
-C::Controller::Controller(const W::Address p_address, QObject* parent):
+
+
+C::Controller::Controller(const W::Address& p_address, const W::Address& my_address, QObject* parent):
     QObject(parent),
     pairAddress(p_address),
-    address(),
+    address(my_address),
     dispatcher(0),
     socket(0),
     registered(false),
@@ -71,6 +73,7 @@ void C::Controller::registerController(W::Dispatcher* dp, W::Socket* sock)
     } else {
         dispatcher = dp;
         socket = sock;
+        connect(socket, SIGNAL(disconnected()), this, SLOT(onSocketDisconnected()));
         
         CList::iterator itr = controllers->begin();
         CList::iterator end = controllers->end();
@@ -114,6 +117,7 @@ void C::Controller::unregisterController()
             dispatcher->unregisterHandler(handler);
         }
         
+        disconnect(socket, SIGNAL(disconnected()), this, SLOT(onSocketDisconnected()));
         dispatcher = 0;
         socket = 0;
         
@@ -169,6 +173,21 @@ void C::Controller::unsubscribe()
     subscribed = false;
 }
 
+void C::Controller::onSocketDisconnected()
+{
+    dropSubscription();
+}
 
+void C::Controller::dropSubscription()
+{
+    CList::iterator itr = controllers->begin();
+    CList::iterator end = controllers->end();
+    
+    for (; itr != end; ++itr) {
+        (*itr)->dropSubscription();
+    }
+    
+    subscribed = false;
+}
 
 

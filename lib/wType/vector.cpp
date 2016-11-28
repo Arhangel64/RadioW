@@ -125,6 +125,10 @@ void W::Vector::push(const W::Object& value)
     data->push_back(value.copy());
 }
 
+void W::Vector::push(W::Object* value)
+{
+    data->push_back(value);
+}
 
 const W::Object& W::Vector::at(uint32_t index) const
 {

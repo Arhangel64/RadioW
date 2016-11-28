@@ -1,6 +1,8 @@
 #ifndef APPMODEL_H
 #define APPMODEL_H
 
+#include "apppropertiesmodel.h"
+
 #include <QtCore/QObject>
 #include <list>
 
@@ -21,6 +23,7 @@ public:
     
 public:
     const uint64_t id;
+    AppPropertiesModel props;
     
 signals:
     void newLogMessage(const QString& msg);

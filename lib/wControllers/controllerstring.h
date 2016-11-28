@@ -7,7 +7,7 @@
 #include <wType/vocabulary.h>
 #include <wType/event.h>
 
-#include <QtCore/QObject>
+#include <QtCore/QString>
 
 namespace C {
     class String : public C::Controller
@@ -23,7 +23,7 @@ namespace C {
     protected:
         W::String data;
         
-        virtual void h_get(const W::Event& ev);
+        handler(get)
         
     private:
         static uint64_t counter;

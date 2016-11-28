@@ -10,12 +10,14 @@ set(HEADERS
     applistmodel.h
     appmodel.h
     service.h
+    apppropertiesmodel.h
 )
 
 set(SOURCES
     applistmodel.cpp
     appmodel.cpp
     service.cpp
+    apppropertiesmodel.cpp
 )
 
 add_library(robouteModels STATIC ${HEADERS} ${SOURCES})

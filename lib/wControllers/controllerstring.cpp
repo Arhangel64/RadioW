@@ -6,7 +6,7 @@ C::String::String(const W::Address p_address, QObject* parent):
     C::Controller(p_address, W::Address({W::String(u"string") + counter++}), parent),
     data(u"")
 {
-    W::Handler* get = W::Handler::create(address + W::Address({u"get"}), this, &C::String::h_get);
+    W::Handler* get = W::Handler::create(address + W::Address({u"get"}), this, &C::String::_h_get);
     addHandler(get);
 }
 

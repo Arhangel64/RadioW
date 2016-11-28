@@ -7,6 +7,7 @@
 #include <QtWidgets/QListView>
 #include <QtCore/QAbstractListModel>
 #include <QtWidgets/QPlainTextEdit>
+#include <QtCore/QSettings>
 
 //#include "applistitemdelegate.h"
 #include "detailedview.h"
@@ -22,6 +23,9 @@ public:
     QSplitter* splitter;
     QListView* list;
     DetailedView* details;
+    
+    void saveSettings();
+    void readSettings();
     
 private:
     bool detailed;

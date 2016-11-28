@@ -27,6 +27,7 @@ namespace W
         
         void clear();
         void push(const Object& value);
+        void push(Object* value);
         const Object& at(uint32_t index) const;
         
         static const objectType type = vector;

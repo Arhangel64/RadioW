@@ -55,6 +55,11 @@ const W::Socket& W::Server::getConnection(uint64_t p_id) const
     return *(itr->second);
 }
 
+uint64_t W::Server::getConnectionsCount() const
+{
+    return connections.size();
+}
+
 void W::Server::onNewConnection()
 {
     QWebSocket *webSocket = server->nextPendingConnection();

@@ -32,3 +32,29 @@ void M::String::h_get(const W::Event& ev)
     
     response(vc, W::Address({u"get"}), ev);
 }
+
+void M::String::set(const W::String& str)
+{
+    delete data;
+    data = static_cast<W::String*>(str.copy());
+    
+    if (registered) {
+        W::Vocabulary* vc = new W::Vocabulary();
+        vc->insert(u"data", str);
+    
+        broadcast(vc, W::Address{u"get"});
+    }
+}
+
+void M::String::set(W::String* str)
+{
+    delete data;
+    data = str;
+    
+    if (registered) {
+        W::Vocabulary* vc = new W::Vocabulary();
+        vc->insert(u"data", *str);
+        
+        broadcast(vc, W::Address{u"get"});
+    }
+}

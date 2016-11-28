@@ -14,7 +14,7 @@ C::Controller::Controller(const W::Address& p_address, const W::Address& my_addr
     handlers(new HList()),
     properties(new W::Vector())
 {
-    W::Handler* props = W::Handler::create(address + W::Address({u"properties"}), this, &C::Controller::h_properties);
+    W::Handler* props = W::Handler::create(address + W::Address({u"properties"}), this, &C::Controller::_h_properties);
     addHandler(props);
 }
 

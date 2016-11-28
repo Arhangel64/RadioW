@@ -15,9 +15,9 @@
 
 #include <wDispatcher/dispatcher.h>
 #include <wDispatcher/logger.h>
-#include <wDispatcher/handler.h>
 
 #include <wModels/modelstring.h>
+#include <wModels/list.h>
 
 #include <utils/exception.h>
 
@@ -35,14 +35,12 @@ private:
     W::Server *server;
     W::Logger *logger;
     
-    W::Handler* h_test;
-    M::String modelName;
+    M::String* modelName;
+    M::String* connectionsCount;
+    M::List* managementCommands;
     
 public:
     W::Dispatcher *dispatcher;
-    
-public:
-    void test(const W::Event& ev);
     
 public slots:
     void onNewConnection(const W::Socket& socket);

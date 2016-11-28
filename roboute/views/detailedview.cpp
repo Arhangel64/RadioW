@@ -1,21 +1,34 @@
 #include "detailedview.h"
 
+#include <QtWidgets/QHeaderView>
+
 DetailedView::DetailedView(QWidget* parent):
     QWidget(parent),
     layout(new QGridLayout(this)),
     topPanel(new QHBoxLayout()),
     logArea(new QPlainTextEdit(this)),
+    splitter(new QSplitter(this)),
+    props(new QTableView(this)),
     connectBtn(new QPushButton(QIcon::fromTheme("state-ok"), "", this)),
     launchBtn(new QPushButton(QIcon::fromTheme("kt-start"), "", this)),
     removeBtn(new QPushButton(QIcon::fromTheme("remove"), "", this)),
     connected(false),
-    launched(false)
+    launched(false),
+    model(0)
 {
     setLayout(layout);
     logArea->setReadOnly(true);
     
     layout->addLayout(topPanel, 0, 0, 1, 1);
-    layout->addWidget(logArea, 1, 0, 1, 1);
+    layout->addWidget(splitter, 1, 0, 1, 1);
+    
+    splitter->addWidget(logArea);
+    splitter->addWidget(props);
+    
+    props->verticalHeader()->hide();
+    props->horizontalHeader()->setStretchLastSection(true);
+    props->setCornerButtonEnabled(false);
+    props->setShowGrid(false);
 
     connectBtn->setToolTip(tr("Connect"));
     connectBtn->setEnabled(false);
@@ -94,29 +107,98 @@ void DetailedView::setLaunched(bool value)
 
 void DetailedView::onConnectClick()
 {
+    if (model == 0) {
+        return;
+    }
     if (connected) {
-        emit disconnect();
+        emit disconnect(model->id);
     } else {
-        emit connect();
+        emit connect(model->id);
     }
 }
 
 void DetailedView::onLaunchClick()
 {
+    if (model == 0) {
+        return;
+    }
     if (launched) {
-        emit stop();
+        emit stop(model->id);
     } else {
-        emit launch();
+        emit launch(model->id);
     }
 }
 
 
 void DetailedView::onRemoveClick()
 {
-    emit remove();
+    if (model == 0) {
+        return;
+    }
+    emit remove(model->id);
 }
 
 void DetailedView::setRemovable(bool value)
 {
     removeBtn->setEnabled(value);
 }
+
+void DetailedView::setModel(AppModel* p_model)
+{
+    if (model != 0) {
+        clearModel();
+    }
+    model = p_model;
+    QString* history = model->getHistory();
+    appendMessage(*history);
+    setConnectable(model->getConnectable());
+    setConnected(model->getConnected());
+    setLaunchable(model->getLaunchable());
+    setLaunched(model->getLaunched());
+    setRemovable(model->id != 0);
+    delete history;
+    QObject::connect(model, SIGNAL(newLogMessage(const QString&)), this, SLOT(appendMessage(const QString&)));
+    QObject::connect(model, SIGNAL(changedConnectable(bool)), this, SLOT(setConnectable(bool)));
+    QObject::connect(model, SIGNAL(changedConnected(bool)), this, SLOT(setConnected(bool)));
+    QObject::connect(model, SIGNAL(changedLaunchable(bool)), this, SLOT(setLaunchable(bool)));
+    QObject::connect(model, SIGNAL(changedLaunched(bool)), this, SLOT(setLaunched(bool)));
+    
+    QItemSelectionModel *m = props->selectionModel();
+    props->setModel(&model->props);
+    delete m;
+}
+
+void DetailedView::clearModel()
+{
+    if (model != 0) {
+        clear();
+        QObject::disconnect(model, SIGNAL(newLogMessage(const QString&)), this, SLOT(appendMessage(const QString&)));
+        QObject::disconnect(model, SIGNAL(changedConnectable(bool)), this, SLOT(setConnectable(bool)));
+        QObject::disconnect(model, SIGNAL(changedConnected(bool)), this, SLOT(setConnected(bool)));
+        QObject::disconnect(model, SIGNAL(changedLaunchable(bool)), this, SLOT(setLaunchable(bool)));
+        QObject::disconnect(model, SIGNAL(changedLaunched(bool)), this, SLOT(setLaunched(bool)));
+
+        model = 0;
+    }
+}
+
+void DetailedView::saveSettings()
+{
+    QSettings settings;
+    
+    settings.beginGroup("detailedView");
+    
+    settings.setValue("splitterState", splitter->saveState());
+    settings.setValue("propsHeaderState", props->horizontalHeader()->saveState());
+    
+    settings.endGroup();
+}
+
+void DetailedView::readSettings()
+{
+    QSettings settings;
+    
+    splitter->restoreState(settings.value("detailedView/splitterState").toByteArray());
+    props->horizontalHeader()->restoreState(settings.value("detailedView/propsHeaderState").toByteArray());
+}
+

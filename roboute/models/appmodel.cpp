@@ -3,6 +3,7 @@
 AppModel::AppModel(uint64_t p_id, const QString& p_name):
     QObject(),
     id(p_id),
+    props(),
     name(p_name),
     log(),
     connectable(false),

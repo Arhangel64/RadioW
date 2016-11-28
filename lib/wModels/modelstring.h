@@ -18,6 +18,9 @@ namespace M {
         
         ~String();
         
+        void set(const W::String& str);
+        void set(W::String* str);
+        
     protected:
         void h_subscribe(const W::Event& ev);
         handler(get)

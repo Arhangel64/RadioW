@@ -1,6 +1,8 @@
 #ifndef CONTROLLER_H
 #define CONTROLLER_H
 
+#include <utils/defines.h>
+
 #include <list>
 #include <QtCore/QObject>
 #include <QtCore/QString>
@@ -38,7 +40,7 @@ namespace C {
         W::Address address;
         
         void send(W::Vocabulary* vc, const W::Address& handlerAddress);
-        virtual void h_properties(const W::Event& event);
+        handler(properties)
         
         
     private:

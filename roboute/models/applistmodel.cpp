@@ -59,7 +59,7 @@ QVariant AppListModel::data(const QModelIndex& i, int role) const
 
 bool AppListModel::insertRows(int row, int count, const QModelIndex& parent)
 {
-    if(toInsert.size() != count) {
+    if (toInsert.size() != count) {
         return false;
     }
     beginInsertRows(parent, row, count);
@@ -106,7 +106,7 @@ void AppListModel::logMessage(uint64_t id, const QString& msg)
     
 }
 
-const AppModel* AppListModel::getApp(uint64_t id)
+AppModel* AppListModel::getApp(uint64_t id)
 {
     return map[id];
 }
@@ -122,6 +122,7 @@ void AppListModel::clear()
     }
     map.clear();
     index.clear();
+    helper.clear();
     endResetModel();
 }
 
@@ -143,4 +144,9 @@ void AppListModel::setLaunchable(uint64_t id, bool value)
 void AppListModel::setLaunched(uint64_t id, bool value)
 {
     map[id]->setLaunched(value);
+}
+
+void AppListModel::setProp(uint64_t id, const QString& key, const QString& value)
+{
+    map[id]->props.setProp(key, value);
 }

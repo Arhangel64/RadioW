@@ -7,6 +7,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
 
 set(HEADERS
+    defines.h
     exception.h
     signalcatcher.h
 )

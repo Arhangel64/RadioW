@@ -58,6 +58,7 @@ private:
     W::SshSocket* dataSsh;
     W::SshSocket* commandSsh;
     C::String* nodeName;
+    C::String* connectionsAmount;
     static uint64_t lastId;
     QString login;
     QString password;
@@ -85,6 +86,7 @@ signals:
     void stopped();
     void log(const QString& data);
     void nodeNameChanged(const QString& name);
+    void connectionsAmountChanged(const QString& amount);
     
 public slots:
     void connect();

@@ -9,11 +9,13 @@ set(CMAKE_AUTOMOC ON)
 set(HEADERS
     model.h
     modelstring.h
+    list.h
 )
 
 set(SOURCES
     model.cpp
     modelstring.cpp
+    list.cpp
 )
 
 add_library(wModels STATIC ${HEADERS} ${SOURCES})

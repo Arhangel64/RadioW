@@ -20,7 +20,7 @@ public:
     
     void push_back(uint64_t id, const QString& name);
     void removeElement(uint64_t id);
-    const AppModel* getApp(uint64_t id);
+    AppModel* getApp(uint64_t id);
     void clear();
     
     QVariant data(const QModelIndex &i, int role = Qt::DisplayRole) const;
@@ -31,6 +31,7 @@ public:
     void setConnected(uint64_t id, bool value);
     void setLaunchable(uint64_t id, bool value);
     void setLaunched(uint64_t id, bool value);
+    void setProp(uint64_t id, const QString& key, const QString& value);
     
 private:
     typedef QMap<uint64_t, AppModel*> Map;

@@ -8,7 +8,6 @@
 #include "views/newappdialogue.h"
 #include "models/applistmodel.h"
 #include "models/appmodel.h"
-#include "models/service.h"
 
 class MainWindow : public QMainWindow
 {
@@ -21,7 +20,6 @@ private:
     AppListModel* apps;
     MainView* widget;
     NewAppDialogue* newApp;
-    quint64 detalizedId;
     
 private:
     void createActions();
@@ -41,7 +39,8 @@ signals:
 public slots:
     void saveSettings();
     void robouteMessage(const QString& msg);
-    void newService(const Service& srv);
+    void newService(uint64_t id, const QString& name);
+    void servicePropChange(uint64_t id, const QString& key, const QString& value);
     void serviceConnected(uint64_t id);
     void serviceConnecting(uint64_t id);
     void serviceDisconnected(uint64_t id);
@@ -61,12 +60,6 @@ private slots:
     void newApplication();
     void newAppAccepted();
     void newAppRejected();
-    
-    void onDetailsConnect();
-    void onDetailsDisconnect();
-    void onDetailsLaunch();
-    void onDetailsStop();
-    void onDetailsRemove();
 };
 
 #endif // MAINWINDOW_H

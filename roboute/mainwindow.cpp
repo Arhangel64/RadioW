@@ -8,8 +8,7 @@ MainWindow::MainWindow():
     QMainWindow(),
     apps(new AppListModel(this)),
     widget(new MainView(apps, this)),
-    newApp(0),
-    detalizedId(0)
+    newApp(0)
 {
     createActions();
     setCentralWidget(widget);
@@ -24,11 +23,11 @@ MainWindow::MainWindow():
         as, SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)), 
         this, SLOT(selectionChanged(const QItemSelection&, const QItemSelection&))
     );
-    connect(widget->details, SIGNAL(connect()), this, SLOT(onDetailsConnect()));
-    connect(widget->details, SIGNAL(disconnect()), this, SLOT(onDetailsDisconnect()));
-    connect(widget->details, SIGNAL(launch()), this, SLOT(onDetailsLaunch()));
-    connect(widget->details, SIGNAL(stop()), this, SLOT(onDetailsStop()));
-    connect(widget->details, SIGNAL(remove()), this, SLOT(onDetailsRemove()));
+    connect(widget->details, SIGNAL(connect(uint64_t)), this, SIGNAL(connectService(uint64_t)));
+    connect(widget->details, SIGNAL(disconnect(uint64_t)), this, SIGNAL(disconnectService(uint64_t)));
+    connect(widget->details, SIGNAL(launch(uint64_t)), this, SIGNAL(launchService(uint64_t)));
+    connect(widget->details, SIGNAL(stop(uint64_t)), this, SIGNAL(stopService(uint64_t)));
+    connect(widget->details, SIGNAL(remove(uint64_t)), this, SIGNAL(removeService(uint64_t)));
     
     restoreSettings();
 }
@@ -58,32 +57,12 @@ void MainWindow::selectionChanged(const QItemSelection &selected, const QItemSel
 
 void MainWindow::subscribeDetailsById(quint64 id)
 {
-    const AppModel* app = apps->getApp(id);
-    QString* history = app->getHistory();
-    widget->details->appendMessage(*history);
-    widget->details->setConnectable(app->getConnectable());
-    widget->details->setConnected(app->getConnected());
-    widget->details->setLaunchable(app->getLaunchable());
-    widget->details->setLaunched(app->getLaunched());
-    widget->details->setRemovable(id != 0);
-    delete history;
-    detalizedId = id;
-    connect(app, SIGNAL(newLogMessage(const QString&)), widget->details, SLOT(appendMessage(const QString&)));
-    connect(app, SIGNAL(changedConnectable(bool)), widget->details, SLOT(setConnectable(bool)));
-    connect(app, SIGNAL(changedConnected(bool)), widget->details, SLOT(setConnected(bool)));
-    connect(app, SIGNAL(changedLaunchable(bool)), widget->details, SLOT(setLaunchable(bool)));
-    connect(app, SIGNAL(changedLaunched(bool)), widget->details, SLOT(setLaunched(bool)));
+    widget->details->setModel(apps->getApp(id));
 }
 
 void MainWindow::unsubscribeDetailsById(quint64 id)
 {
-    const AppModel* app = apps->getApp(id);
-    widget->details->clear();
-    disconnect(app, SIGNAL(newLogMessage(const QString&)), widget->details, SLOT(appendMessage(const QString&)));
-    disconnect(app, SIGNAL(changedConnectable(bool)), widget->details, SLOT(setConnectable(bool)));
-    disconnect(app, SIGNAL(changedConnected(bool)), widget->details, SLOT(setConnected(bool)));
-    disconnect(app, SIGNAL(changedLaunchable(bool)), widget->details, SLOT(setLaunchable(bool)));
-    disconnect(app, SIGNAL(changedLaunched(bool)), widget->details, SLOT(setLaunched(bool)));
+    widget->details->clearModel();
 }
 
 void MainWindow::robouteMessage(const QString& msg)
@@ -131,37 +110,11 @@ void MainWindow::newAppRejected()
     newApp = 0;
 }
 
-void MainWindow::newService(const Service& srv)
+void MainWindow::newService(uint64_t id, const QString& name)
 {
-    apps->push_back(srv.id, srv.name);
-    apps->setConnectable(srv.id, true);
+    apps->push_back(id, name);
+    apps->setConnectable(id, true);
 }
-
-void MainWindow::onDetailsConnect()
-{
-    emit connectService(detalizedId);
-}
-
-void MainWindow::onDetailsDisconnect()
-{
-    emit disconnectService(detalizedId);
-}
-
-void MainWindow::onDetailsLaunch()
-{
-    emit launchService(detalizedId);
-}
-
-void MainWindow::onDetailsStop()
-{
-    emit stopService(detalizedId);
-}
-
-void MainWindow::onDetailsRemove()
-{
-    emit removeService(detalizedId);
-}
-
 
 void MainWindow::serviceConnecting(uint64_t id)
 {
@@ -232,7 +185,8 @@ void MainWindow::restoreSettings()
     
     restoreGeometry(settings.value("window/geometry").toByteArray());
     restoreState(settings.value("window/state").toByteArray());
-    widget->splitter->restoreState(settings.value("view/splitterState").toByteArray());
+    
+    widget->readSettings();
 }
 
 void MainWindow::saveSettings()
@@ -244,9 +198,14 @@ void MainWindow::saveSettings()
     settings.setValue("state", saveState());
     
     settings.endGroup();
-    settings.beginGroup("view");
     
-    settings.setValue("splitterState", widget->splitter->saveState());
-    
-    settings.endGroup();
+    widget->saveSettings();
 }
+
+void MainWindow::servicePropChange(uint64_t id, const QString& key, const QString& value)
+{
+    apps->setProp(id, key, value);
+}
+
+
+

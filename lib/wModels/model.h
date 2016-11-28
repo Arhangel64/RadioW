@@ -1,6 +1,8 @@
 #ifndef W_MODEL_H
 #define W_MODEL_H
 
+#include <utils/defines.h>
+
 #include <map>
 #include <list>
 #include <QtCore/QObject>
@@ -15,11 +17,6 @@
 #include <wDispatcher/dispatcher.h>
 #include <wDispatcher/handler.h>
 #include <wContainer/order.h>
-
-#define handler(HANDLER)    \
-    void _h_##HANDLER(const W::Event& ev) {h_##HANDLER(ev);}\
-    virtual void h_##HANDLER(const W::Event& ev);\
-
 
 namespace M {
     
@@ -43,6 +40,7 @@ namespace M {
         
     protected:
         W::Address address;
+        bool registered;
         
         void response(W::Vocabulary* vc, const W::Address& handlerAddress, const W::Event& src);
         void broadcast(W::Vocabulary* vc, const W::Address& handlerAddress);
@@ -55,7 +53,6 @@ namespace M {
         typedef std::list<W::Handler*> HList;
         typedef std::list<M::Model*> MList;
         
-        bool registered;
         W::Dispatcher* dispatcher;
         W::Server* server;
         Map* subscribers;

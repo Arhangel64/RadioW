@@ -28,6 +28,7 @@ namespace W
         void stop();
         
         const Socket& getConnection(uint64_t p_id) const;
+        uint64_t getConnectionsCount() const;
         
     private:
         typedef std::map<String, std::map<uint64_t, Socket*>> p_map;

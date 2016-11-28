@@ -37,3 +37,23 @@ void MainView::showDetails()
     }
 }
 
+void MainView::saveSettings()
+{
+    QSettings settings;
+    settings.beginGroup("view");
+    
+    settings.setValue("splitterState", splitter->saveState());
+    
+    settings.endGroup();
+    
+    details->saveSettings();
+}
+
+void MainView::readSettings()
+{
+    QSettings settings;
+    
+    splitter->restoreState(settings.value("view/splitterState").toByteArray());
+    
+    details->readSettings();
+}

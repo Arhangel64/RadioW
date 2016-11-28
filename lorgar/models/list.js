@@ -27,6 +27,9 @@
             },
             "_h_get": function(ev) {
                 var data = ev.getData();
+                if (this._data) {
+                    this._data.destructor();
+                }
                 this.trigger("clear");
                 
                 this._data = data.at("data").clone();

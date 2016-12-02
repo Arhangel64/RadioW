@@ -22,20 +22,22 @@ Service::Service(
     password(p_password),
     logFile(p_logFile),
     command(p_command),
+    psResults(),
+    pid(),
     state(Disconnected),
-    appState(Dead),
+    appState(Unknown),
     name(p_name),
     address(p_address),
     port(p_port),
     id(p_id)
 {
-    QObject::connect(dataSsh, SIGNAL(opened()), this, SLOT(onSshOpened()));
+    QObject::connect(dataSsh, SIGNAL(opened()), this, SLOT(onDataSshOpened()));
     QObject::connect(dataSsh, SIGNAL(closed()), this, SLOT(onSshClosed()));
     QObject::connect(dataSsh, SIGNAL(data(const QString&)), this, SLOT(onDataSshData(const QString&)));
     QObject::connect(dataSsh, SIGNAL(error(W::SshSocket::Error, const QString&)), this, SLOT(onSshError(W::SshSocket::Error, const QString&)));
     QObject::connect(dataSsh, SIGNAL(finished()), this, SLOT(onDataSshFinished()));
     
-    QObject::connect(commandSsh, SIGNAL(opened()), this, SLOT(onSshOpened()));
+    QObject::connect(commandSsh, SIGNAL(opened()), this, SLOT(onCommandSshOpened()));
     QObject::connect(commandSsh, SIGNAL(closed()), this, SLOT(onSshClosed()));
     QObject::connect(commandSsh, SIGNAL(data(const QString&)), this, SLOT(onCommandSshData( const QString&)));
     QObject::connect(commandSsh, SIGNAL(error(W::SshSocket::Error, const QString&)), this, SLOT(onSshError(W::SshSocket::Error, const QString&)));
@@ -90,23 +92,24 @@ Service* Service::fromSerialized(const QMap<QString, QVariant>& params)
     return srv;
 }
 
-
-void Service::onSshOpened()
+void Service::onDataSshOpened()
 {
-    if (state == Connecting && dataSsh->isReady() && commandSsh->isReady()) {
-        emit serviceMessage("authorized");
+    if (state == Connecting) {
         state = Echo;
         dataSsh->execute("echo === Roboute connected === >> " + logFile);
         emit serviceMessage("checking log file");
         
-        if (appState == Checking) {
-            appState = WaitingWebSocket;
-            socket->open(W::String(address.toStdString()), W::Uint64(port.toInt()));
-            emit launching();
-            emit serviceMessage("Trying to reach service by websocket");
-        }
     } else {
         //TODO;
+    }
+}
+
+void Service::onCommandSshOpened()
+{
+    if (appState == Unknown) {
+        appState = Checking;
+        requestPid();
+        emit serviceMessage("checking if the process launched");
     }
 }
 
@@ -152,8 +155,8 @@ void Service::onDataSshData(const QString& data)
         case Connected:
             if (appState == Launching) {
                 if (data.contains("ready")) {
-                    appState = WaitingWebSocket;
-                    socket->open(W::String(address.toStdString()), W::Uint64(port.toInt()));
+                    connectWebsocket();
+                    requestPid();
                 }
             }
             emit log(data);
@@ -165,15 +168,52 @@ void Service::onDataSshData(const QString& data)
 
 void Service::onCommandSshData(const QString& data)
 {
-    
+    QStringList list = data.split("\n");
+    psResults.insert(psResults.end(), list.begin(), list.end());
 }
 
 void Service::onCommandSshFinished()
 {
-    if (appState == Checking) {
-        appState = Launching;
-        emit launching();
-        emit serviceMessage("Trying to reach service by websocket");
+    switch (appState) {
+        case Checking: 
+        case WaitingWebSocket:
+        case Active:                //that's very bad!
+        {
+            bool found = false;
+            std::list<QString>::const_iterator itr = psResults.begin();
+            std::list<QString>::const_iterator end = psResults.end();
+            QString option;
+            for (; itr != end; ++itr) {
+                option = *itr;
+                if (!option.contains(" grep ") && option.contains(command)) {
+                    found = true;
+                    break;
+                }
+            }
+        
+            if (found) {
+                QRegExp expr("\\s");
+                pid = option.section(expr, 0, 0);
+                emit serviceMessage("got the process id: " + pid + ", correct?");
+                emit serviceMessage("process seems to be launched");
+                
+                if (appState == Checking) {
+                    connectWebsocket();
+                }
+            } else {
+                appState = Dead;
+                emit stopped();
+                emit serviceMessage("process seems to be not launched");
+            }
+            break;
+        }
+        case Launching:
+            emit serviceMessage(QString("process launch command sent,") +
+            " requesting pid, waiting for specific 'ready' key in log");        //need to do smthing about this
+            break;
+        default:
+            break;
+            
     }
 }
 
@@ -184,7 +224,6 @@ void Service::connect()
         dataSsh->open(address);
         commandSsh->open(address);
         state = Connecting;
-        appState = Checking;
         emit serviceMessage("connecting to " + address);
         emit connecting();
     } else {
@@ -201,7 +240,9 @@ void Service::disconnect()
             nodeName->unsubscribe();
             socket->close();
         }
-        appState = Dead;
+        pid = "";
+        psResults.clear();
+        appState = Unknown;
         emit serviceMessage("disconnecting");
         emit disconnecting();
         emit stopped();
@@ -243,7 +284,7 @@ QVariant Service::saveState() const
 void Service::launch()
 {
     if (state == Connected && appState == Dead) {
-        appState = Checking;
+        appState = Launching;
         commandSsh->execute("nohup " + command + " >> " + logFile + "&");
         emit launching();
     }
@@ -253,7 +294,7 @@ void Service::stop()
 {
     if (state == Connected && appState == Active) {
         QString file = command.section("/", -1);
-        commandSsh->execute("killall -SIGINT " + file);
+        commandSsh->execute("kill -s SIGINT " + pid);
         appState = Stopping;
         emit stopping();
     }
@@ -262,7 +303,7 @@ void Service::stop()
 
 void Service::onSocketConnected()
 {
-    appState = Active;
+    appState = Active;                  //this is a fail It's not right!
     nodeName->subscribe();
     connectionsAmount->subscribe();
     emit launched();
@@ -270,13 +311,13 @@ void Service::onSocketConnected()
 
 void Service::onSocketDisconnected()
 {
-    appState = Dead;
+    appState = Dead;                    //this is not correct!
     emit stopped();
 }
 
 void Service::onSocketError(W::Socket::SocketError err, const QString& msg)
 {
-    emit serviceMessage(msg);
+    emit serviceMessage(msg);           //this is not correct!
     appState = Dead;
     emit stopped();
 }
@@ -295,7 +336,19 @@ void Service::unregisterControllers(W::Dispatcher* dp)
     nodeName->unregisterController();
 }
 
+void Service::requestPid()
+{
+    pid = "";
+    psResults.clear();
+    commandSsh->execute("ps -ax | grep '" + command + "'");
+}
 
+void Service::connectWebsocket()
+{
+    appState = WaitingWebSocket;
+    socket->open(W::String(address.toStdString()), W::Uint64(port.toInt()));
+    emit serviceMessage("trying to reach service by websocket");
+}
 
 
 

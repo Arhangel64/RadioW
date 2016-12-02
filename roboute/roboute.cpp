@@ -55,8 +55,8 @@ void Roboute::stop()
     
     for (; beg != end; ++beg) {
         Service* srv = *beg;
-        srv->unregisterControllers(dispatcher);
         srv->disconnect();
+        srv->unregisterControllers(dispatcher);
     }
 }
 

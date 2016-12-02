@@ -1,6 +1,8 @@
 #ifndef SERVICE_H
 #define SERVICE_H
 
+#include <list>
+
 #include <wSocket/socket.h>
 #include <wSsh/sshsocket.h>
 #include <wType/string.h>
@@ -46,8 +48,9 @@ private:
     };
     
     enum AppState {
-        Dead,
+        Unknown,
         Checking,
+        Dead,
         Launching,
         WaitingWebSocket,
         Active,
@@ -64,8 +67,13 @@ private:
     QString password;
     QString logFile;
     QString command;
+    std::list<QString> psResults;
+    QString pid;
     State state;
     AppState appState;
+    
+    void requestPid();
+    void connectWebsocket();
     
 public:
     QString name;
@@ -97,7 +105,8 @@ public slots:
 private:
     
 private slots:
-    void onSshOpened();
+    void onDataSshOpened();
+    void onCommandSshOpened();
     void onSshClosed();
     void onDataSshData(const QString& data);
     void onCommandSshData(const QString& data);

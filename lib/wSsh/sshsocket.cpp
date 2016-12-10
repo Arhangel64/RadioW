@@ -96,6 +96,7 @@ void W::SshSocket::onSocketDisconnected()
 {
     if (state == Disconnecting) {
         thread->quit();
+        thread->wait();
         state = Disconnected;
         emit closed();
     } else {

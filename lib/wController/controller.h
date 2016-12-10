@@ -30,7 +30,6 @@ namespace C {
         void unregisterController();
         void subscribe();
         void unsubscribe();
-        void dropSubscription();
         
     signals:
         void serviceMessage(const QString& msg);

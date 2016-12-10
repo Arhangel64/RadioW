@@ -1,0 +1,13 @@
+cmake_minimum_required(VERSION 2.8.12)
+
+add_jslib(wController/controller.js lib/wController/controller ${LORGAR_DIR} browser)
+add_jslib(wController/globalControls.js lib/wController/globalControls ${LORGAR_DIR} browser)
+add_jslib(wController/link.js lib/wController/link ${LORGAR_DIR} browser)
+add_jslib(wController/list.js lib/wController/list ${LORGAR_DIR} browser)
+add_jslib(wController/navigationPanel.js lib/wController/navigationPanel ${LORGAR_DIR} browser)
+add_jslib(wController/page.js lib/wController/page ${LORGAR_DIR} browser)
+add_jslib(wController/pageStorage.js lib/wController/pageStorage ${LORGAR_DIR} browser)
+add_jslib(wController/panesList.js lib/wController/panesList ${LORGAR_DIR} browser)
+add_jslib(wController/string.js lib/wController/string ${LORGAR_DIR} browser)
+add_jslib(wController/theme.js lib/wController/theme ${LORGAR_DIR} browser)
+add_jslib(wController/themeSelecter.js lib/wController/themeSelecter ${LORGAR_DIR} browser)

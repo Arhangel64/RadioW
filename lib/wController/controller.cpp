@@ -1,7 +1,5 @@
 #include "controller.h"
 
-
-
 C::Controller::Controller(const W::Address& p_address, const W::Address& my_address, QObject* parent):
     QObject(parent),
     pairAddress(p_address),
@@ -34,6 +32,13 @@ C::Controller::~Controller()
         delete *itr;
     }
     
+    HList::iterator hItr = handlers->begin();
+    HList::iterator hEnd = handlers->end();
+    
+    for (; hItr != hEnd; ++hItr) {
+        delete *hItr;
+    }
+    
     delete controllers;
     delete handlers;
     delete properties;
@@ -45,6 +50,9 @@ void C::Controller::addController(C::Controller* ctrl)
     connect(ctrl, SIGNAL(serviceMessage(const QString&)), SIGNAL(serviceMessage(const QString&)));
     if (registered) {
         ctrl->registerController(dispatcher, socket);
+    }
+    if (subscribed && !ctrl->subscribed) {
+        ctrl->subscribe();
     }
 }
 
@@ -175,18 +183,6 @@ void C::Controller::unsubscribe()
 
 void C::Controller::onSocketDisconnected()
 {
-    dropSubscription();
-}
-
-void C::Controller::dropSubscription()
-{
-    CList::iterator itr = controllers->begin();
-    CList::iterator end = controllers->end();
-    
-    for (; itr != end; ++itr) {
-        (*itr)->dropSubscription();
-    }
-    
     subscribed = false;
 }
 

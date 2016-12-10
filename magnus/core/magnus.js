@@ -11,10 +11,9 @@ var Handler = require("../lib/wDispatcher/handler");
 var Logger = require("../lib/wDispatcher/logger");
 var log = require("../lib/log")(module);
 
-var GlobalControls = require("../models/globalControls");
-var PageStorage = require("../models/pageStorage");
-var Page = require("../models/page");
-var ModelString = require("../models/string");
+var GlobalControls = require("../lib/wModel/globalControls");
+var PageStorage = require("../lib/wModel/pageStorage");
+var ModelString = require("../lib/wModel/string");
 
 var HomePage = require("../pages/home");
 var MusicPage = require("../pages/music");
@@ -24,7 +23,6 @@ var Magnus = Subscribable.inherit({
     "className": "Magnus",
     "constructor": function(config) {
         Subscribable.fn.constructor.call(this);
-        global.magnus = this;
         
         this._cfg = config;
         
@@ -35,7 +33,8 @@ var Magnus = Subscribable.inherit({
         
         var port = this._cfg.get("webSocketServerPort");
         this.server.listen(port);
-        log.info("Magnus is listening on port " + port);
+        
+        global.magnus = this;
     },
     "connectCorax": function() {
         this.coraxSocket.open("localhost", 8080);
@@ -51,11 +50,21 @@ var Magnus = Subscribable.inherit({
         this.dispatcher.registerDefaultHandler(this._logger);
     },
     "_initModels": function() {
-        this._gc = new GlobalControls(new Address(["magnus", "gc"]));
+        this._gc = new GlobalControls(new Address(["magnus", "gc"]), {version: this._cfg.get("version")});
         this._ps = new PageStorage(new Address(["magnus", "ps"]))
         
-        this._gc.register(this.dispatcher);
-        this._ps.register(this.dispatcher);
+        this._name = new ModelString(new Address(["name"]), "Magnus");
+        this._connectionsAmount = new ModelString(new Address(["connectionsAmount"]), "0");
+        
+        this._gc.on("serviceMessage", this._onModelServiceMessage, this);
+        this._ps.on("serviceMessage", this._onModelServiceMessage, this);
+        this._name.on("serviceMessage", this._onModelServiceMessage, this);
+        this._connectionsAmount.on("serviceMessage", this._onModelServiceMessage, this);
+        
+        this._gc.register(this.dispatcher, this.server);
+        this._ps.register(this.dispatcher, this.server);
+        this._name.register(this.dispatcher, this.server);
+        this._connectionsAmount.register(this.dispatcher, this.server);
     },
     "_initPages": function() {
         var root = new HomePage(new Address(["pages", "/"]));
@@ -78,29 +87,56 @@ var Magnus = Subscribable.inherit({
     "_initServer": function() {
         this.server = new Server("Magnus");
         this.server.on("newConnection", this._onNewConnection, this);
+        this.server.on("ready", this._onServerReady, this)
     },
     "_onCoraxConnected": function() {
-        var address = new Address(["corax", "test"]);
-        var vc = new Vocabulary();
-        vc.insert("msg", new String("Hello, I'm Magnus"));
-        vc.insert("source", new Address(["magnus", "test"]));
+//         var address = new Address(["corax", "test"]);
+//         var vc = new Vocabulary();
+//         vc.insert("msg", new String("Hello, I'm Magnus"));
+//         vc.insert("source", new Address(["magnus", "test"]));
+//         
+//         var ev = new Event(address, vc);
+//         ev.setSenderId(this.coraxSocket.getId().clone());
+//         
+//         this.coraxSocket.send(ev);
+//         ev.destructor();
+    },
+    "_onModelServiceMessage": function(msg, severity) {
+        var fn;
         
-        var ev = new Event(address, vc);
-        ev.setSenderId(this.coraxSocket.getId().clone());
+        switch (severity) {
+            case 2:
+                fn = log.error;
+                break;
+            case 1:
+                fn = log.warn;
+                break;
+            case 0:
+            default:
+                fn = log.info;
+                break;
+        }
         
-        this.coraxSocket.send(ev);
-        ev.destructor();
+        fn(msg);
     },
     "_onNewConnection": function(socket) {
         socket.on("message", this.dispatcher.pass, this.dispatcher);
-        socket.one("disconnected", Magnus.onSocketDisconnected, {mgn: this, soc: socket});
+        socket.one("disconnected", Magnus.onSocketDisconnected.bind(this, socket));
         
         log.info("New connection, id: " + socket.getId().toString());
+        
+        this._connectionsAmount.set(this.server.getConnectionsCount().toString());
+    },
+    "_onServerReady": function() {
+        log.info("Magnus is listening on port " + this._cfg.get("webSocketServerPort"));
+        log.info("Magnus is ready");
     }
 });
 
-Magnus.onSocketDisconnected = function() {
-    log.info("Connection closed, id: " + this.soc.getId().toString());
+Magnus.onSocketDisconnected = function(socket) {
+    log.info("Connection closed, id: " + socket.getId().toString());
+    
+    this._connectionsAmount.set(this.server.getConnectionsCount().toString());
 }
 
 module.exports = Magnus;

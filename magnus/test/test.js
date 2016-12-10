@@ -1,5 +1,6 @@
 "use strict";
 var Class = require("../lib/utils/class");
+var TUint64 = require("../lib/wTest/uint64");
 var TAbstractMap = require("../lib/wTest/abstractmap");
 var TAbstractList = require("../lib/wTest/abstractlist");
 var TAbstractOrder = require("../lib/wTest/abstractorder");
@@ -14,6 +15,7 @@ var Test = Class.inherit({
         this._t = 0;
         this._tests = [];
         
+        this.addTest(new TUint64());
         this.addTest(new TAbstractList());
         this.addTest(new TAbstractMap());
         this.addTest(new TAbstractOrder());

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.12)
-project(models)
+project(model)
 
 find_package(Qt5Core REQUIRED)
 
@@ -18,9 +18,9 @@ set(SOURCES
     list.cpp
 )
 
-add_library(wModels STATIC ${HEADERS} ${SOURCES})
+add_library(wModel STATIC ${HEADERS} ${SOURCES})
 
-target_link_libraries(wModels Qt5::Core)
-target_link_libraries(wModels wSocket)
-target_link_libraries(wModels wDispatcher)
-target_link_libraries(wModels wType)
+target_link_libraries(wModel Qt5::Core)
+target_link_libraries(wModel wSocket)
+target_link_libraries(wModel wDispatcher)
+target_link_libraries(wModel wType)

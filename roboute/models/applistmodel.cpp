@@ -82,7 +82,7 @@ bool AppListModel::removeRows(int row, int count, const QModelIndex& parent)
     if (row + count > index.size()) {
         return false;
     }
-    beginRemoveRows(parent, row, count);
+    beginRemoveRows(parent, row, row + count);
     Index::iterator itr;
     Index::iterator beg = index.begin() + row;
     Index::iterator end = beg + count;

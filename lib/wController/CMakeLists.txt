@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.12)
-project(controllers)
+project(controller)
 
 find_package(Qt5Core REQUIRED)
 
@@ -18,10 +18,10 @@ set(SOURCES
     list.cpp
 )
 
-add_library(wControllers STATIC ${HEADERS} ${SOURCES})
+add_library(wController STATIC ${HEADERS} ${SOURCES})
 
-target_link_libraries(wControllers Qt5::Core)
-target_link_libraries(wControllers wSocket)
-target_link_libraries(wControllers wDispatcher)
-target_link_libraries(wControllers wType)
+target_link_libraries(wController Qt5::Core)
+target_link_libraries(wController wSocket)
+target_link_libraries(wController wDispatcher)
+target_link_libraries(wController wType)
 

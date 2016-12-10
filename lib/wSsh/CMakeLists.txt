@@ -20,3 +20,4 @@ add_library(wSsh ${HEADERS} ${SOURCES})
 
 target_link_libraries(wSsh Qt5::Core)
 target_link_libraries(wSsh ssh)
+target_link_libraries(wSsh ssh_threads)

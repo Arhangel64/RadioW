@@ -29,7 +29,7 @@ if (httpLog) {
 
 app.use(require("./middleware/reply"));
 
-app.use(express.static('public'));
+app.use(express.static(__dirname + '/public'));
 
 app.use(require("./middleware/notFound"));
 app.use(require("./middleware/errorHandler"));

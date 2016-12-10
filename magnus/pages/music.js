@@ -1,8 +1,8 @@
 "use strict";
 
-var Page = require("../models/page");
-var String = require("../models/string");
-var PanesList = require("../models/panesList");
+var Page = require("../lib/wModel/page");
+var String = require("../lib/wModel/string");
+var PanesList = require("../lib/wModel/panesList");
 
 var Address = require("../lib/wType/address");
 var counter = 0;

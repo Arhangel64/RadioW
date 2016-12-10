@@ -8,9 +8,10 @@
 #include <wType/string.h>
 #include <wType/uint64.h>
 
-#include <wControllers/controllerstring.h>
+#include <wController/controllerstring.h>
 
 #include <QtCore/QString>
+#include <QtCore/QStringList>
 #include <QtCore/QMap>
 #include <QtCore/QVariant>
 

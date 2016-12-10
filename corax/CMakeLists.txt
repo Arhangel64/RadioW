@@ -15,6 +15,6 @@ target_link_libraries(corax Qt5::Network)
 target_link_libraries(corax wSocket)
 target_link_libraries(corax wDispatcher)
 target_link_libraries(corax utils)
-target_link_libraries(corax wModels)
+target_link_libraries(corax wModel)
 
 install(TARGETS corax RUNTIME DESTINATION bin)

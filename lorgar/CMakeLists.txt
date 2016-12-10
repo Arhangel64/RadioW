@@ -5,7 +5,6 @@ add_subdirectory(css)
 add_subdirectory(lib)
 add_subdirectory(test)
 add_subdirectory(core)
-add_subdirectory(models)
 add_subdirectory(views)
 
 configure_file(index.html index.html)

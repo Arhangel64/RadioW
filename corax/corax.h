@@ -16,8 +16,8 @@
 #include <wDispatcher/dispatcher.h>
 #include <wDispatcher/logger.h>
 
-#include <wModels/modelstring.h>
-#include <wModels/list.h>
+#include <wModel/modelstring.h>
+#include <wModel/list.h>
 
 #include <utils/exception.h>
 

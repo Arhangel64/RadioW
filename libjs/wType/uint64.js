@@ -68,6 +68,8 @@ var Uint64 = Object.inherit({
     },
     "toString": function() {
         if (this._h !== 0) {
+            console.log(this._h);
+            console.log(this._l);
             throw new Error("Don't know yet how to show uint64 in javascript");
         }
         return this._l.toString();

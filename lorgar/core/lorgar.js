@@ -14,9 +14,10 @@
     defineArray.push("lib/wType/vocabulary");
     defineArray.push("lib/wType/string");
     
-    defineArray.push("models/globalControls");
-    defineArray.push("models/pageStorage");
-    defineArray.push("models/page");
+    defineArray.push("lib/wController/globalControls");
+    defineArray.push("lib/wController/pageStorage");
+    defineArray.push("lib/wController/page");
+    defineArray.push("lib/wController/link");
     
     defineArray.push("views/view");
     defineArray.push("views/layout");
@@ -35,9 +36,10 @@
         var Vocabulary = require("lib/wType/vocabulary");
         var String = require("lib/wType/string");
         
-        var GlobalControls = require("models/globalControls");
-        var PageStorage = require("models/pageStorage");
-        var PageModel = require("models/page");
+        var GlobalControls = require("lib/wController/globalControls");
+        var PageStorage = require("lib/wController/pageStorage");
+        var PageController = require("lib/wController/page");
+        var LinkController = require("lib/wController/link");
         
         var View = require("views/view");
         var Layout = require("views/layout");
@@ -49,7 +51,7 @@
             "constructor": function() {
                 Class.fn.constructor.call(this);
                 
-                this._currentPageModel = undefined;
+                this._currentPageCtl = undefined;
                 this._currentTheme = {};
                 
                 this._initDispatcher();
@@ -58,22 +60,22 @@
                 this._initViews();
                 this._initModels();
                 
+                LinkController.registerChangePageHandler(this.changePage, this);
+                
                 this.connectMagnus();
                 //this.connectCorax();
             },
             "destructor": function() {
-                if (this._currentPageModel) {
-                    this._currentPageModel.destructor();
+                if (this._currentPageCtl) {
+                    this._currentPageCtl.destructor();
                 }
                 
                 this._gc.destructor();
                 this._body.destructor();
                 
                 this.coraxSocket.close();
-                this.dispatcher.unregisterHandler(this._h_test);
                 this.dispatcher.unregisterDefaultHandler(this._logger);
                 
-                this._h_test.destructor();
                 this._logger.destructor();
                 this.dispatcher.destructor();
                 this.magnusSocket.destructor();
@@ -82,9 +84,7 @@
                 Class.fn.destructor.call(this);
             },
             "changePage": function(addr) {
-                setTimeout((function() {
-                    this._initPageModel(addr);
-                }).bind(this), 1)
+                this._initPageController(addr);
             },
             "connectCorax": function() {
                 this.coraxSocket.open("localhost", 8080);
@@ -93,15 +93,7 @@
                 this.magnusSocket.open("localhost", 8081);
             },
             "_coraxSocketConnected": function() {
-                var address = new Address(["corax", "test"]);
-                var vc = new Vocabulary();
-                vc.insert("msg", new String("Hello, I'm Lorgar"));
-                vc.insert("source", new Address(["lorgar", "test"]));
-                
-                var ev = new Event(address, vc);
-                ev.setSenderId(this.coraxSocket.getId());
-                
-                this.coraxSocket.send(ev);
+                console.log("corax socket connected");
             },
             "_coraxSocketDisconnected": function() {
                 console.log("corax socket disconnected");
@@ -119,9 +111,7 @@
             },
             "_initDispatcher": function() {
                 this.dispatcher = new Dispatcher();
-                this._h_test = new Handler(new Address(["lorgar", "test"]), this, this._test);
                 this._logger = new Logger();
-                this.dispatcher.registerHandler(this._h_test);
                 this.dispatcher.registerDefaultHandler(this._logger);
             },
             "_initMagnusSocket": function() {
@@ -135,18 +125,20 @@
                 this._gc = new GlobalControls(new Address(["magnus", "gc"]), this._mainLayout);
                 this._ps = new PageStorage(new Address(["magnus", "ps"]));
                 
+                this._gc.on("themeSelected", this.setTheme, this);
+                
                 this._gc.register(this.dispatcher, this.magnusSocket);
                 this._ps.register(this.dispatcher, this.magnusSocket);
             },
-            "_initPageModel": function(addr) {
-                if (this._currentPageModel) {
-                    this._currentPageModel.destructor();
+            "_initPageController": function(addr) {
+                if (this._currentPageCtl) {
+                    this._currentPageCtl.destructor();
                 }
                 this._currentPage.clear();
-                this._currentPageModel = new PageModel(addr);
-                this._currentPageModel.register(this.dispatcher, this.magnusSocket);
-                this._currentPageModel.addView(this._currentPage);
-                this._currentPageModel.subscribe();
+                this._currentPageCtl = new PageController(addr);
+                this._currentPageCtl.register(this.dispatcher, this.magnusSocket);
+                this._currentPageCtl.addView(this._currentPage);
+                this._currentPageCtl.subscribe();
             },
             "_initViews": function() {
                 this._body = new Layout();
@@ -174,9 +166,9 @@
             "_magnusSocketConnected": function() {
                 this._gc.subscribe();
                 
-                if (!this._currentPageModel) {
+                if (!this._currentPageCtl) {
                     this._ps.getPageAddress(location.pathname);
-                    this._ps.one("pageAddress", this._initPageModel, this);
+                    this._ps.one("pageAddress", this._initPageController, this);
                 }
             },
             "_magnusSocketDisconnected": function() {
@@ -192,9 +184,6 @@
             "setTheme": function(theme) {
                 this._currentTheme = theme;
                 this._mainLayout.applyTheme(theme);
-            },
-            "_test": function(e) {
-                console.info(e.toString());
             }
         });
         

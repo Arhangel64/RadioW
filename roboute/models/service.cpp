@@ -192,9 +192,24 @@ void Service::onCommandSshFinished()
             }
         
             if (found) {
-                QRegExp expr("\\s");
-                pid = option.section(expr, 0, 0);
-                emit serviceMessage("got the process id: " + pid + ", correct?");
+                QStringList mems = option.split(QRegExp("\\s"));
+                QStringList::const_iterator mItr = mems.begin();
+                QStringList::const_iterator mEnd = mems.end();
+                found = false;
+                for (; mItr != mEnd; ++mItr) {
+                    QString candidate = *mItr;
+                    if (candidate.contains(QRegExp("\\d{2,}"))) {
+                        pid = candidate;
+                        found = true;
+                        break;
+                    }
+                }
+                if (found) {
+                    emit serviceMessage("got the process id: " + pid + ", correct?");
+                } else {
+                    emit serviceMessage("Couldn't find process id");
+                }
+                
                 emit serviceMessage("process seems to be launched");
                 
                 if (appState == Checking) {
@@ -285,7 +300,7 @@ void Service::launch()
 {
     if (state == Connected && appState == Dead) {
         appState = Launching;
-        commandSsh->execute("nohup " + command + " >> " + logFile + "&");
+        commandSsh->execute("nohup " + command + " >> " + logFile + " 2>&1 &");
         emit launching();
     }
 }

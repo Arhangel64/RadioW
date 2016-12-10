@@ -32,7 +32,7 @@ var Server = Subscribable.inherit({
     "listen": function(port) {
         if (!this._listening) {
             this._listening = true;
-            this._server = new WebSocketServer({port: port});
+            this._server = new WebSocketServer({port: port}, this._proxy.onReady);
             this._server.on("connection", this._proxy.onConnection);
         }
     },
@@ -53,18 +53,25 @@ var Server = Subscribable.inherit({
         }
         return itr["*"]().second;
     },
+    "getConnectionsCount": function() {
+        return this._connections.size();
+    },
     "_initProxy": function() {
         this._proxy = {
-            onConnection: this._onConnection.bind(this)
+            onConnection: this._onConnection.bind(this),
+            onReady: this._onReady.bind(this)
         };
     },
     "_onConnection": function(socket) {
         this._lastId["++"]();
         var wSocket = new Socket(this._name, socket, this._lastId);
-        this._connections.insert(this._lastId, wSocket);
+        this._connections.insert(this._lastId.clone(), wSocket);
         
         wSocket.one("connected", Server.onSocketConnected, {srv: this, soc: wSocket});
         wSocket.one("disconnected", Server.onSocketDisconnected, {srv: this, soc: wSocket});
+    },
+    "_onReady": function() {
+        this.trigger("ready");
     }
 });
     Server.onSocketDisconnected = function() {
@@ -72,7 +79,7 @@ var Server = Subscribable.inherit({
         if (!cItr["=="](this.srv._connections.end())) {
             var pair = cItr["*"]();
             this.srv._connections.erase(cItr);
-            //pair.first.destructor();
+            pair.first.destructor();
         }
         var nItr = this.srv._peers.find(this.soc.getRemoteName());
         if (!nItr["=="](this.srv._peers.end())) {

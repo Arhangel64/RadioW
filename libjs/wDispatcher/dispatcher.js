@@ -45,6 +45,10 @@ var Dispatcher = Class.inherit({
             var ord = itr["*"]().second;
             ord.erase(handler);
             
+            if (ord.size() === 0) {
+                this._handlers.erase(itr);
+            }
+            
         } else {
             throw new Error("Can't unregister hander");
         }

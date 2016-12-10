@@ -45,10 +45,8 @@ module.exports = Class.inherit({
         }
 
         for (var key in this) {
-            if (this.hasOwnProperty(key)) {
-                this[key] = undefined;
-                delete this[key];
-            }
+            this[key] = undefined;
+            delete this[key];
         }
     }
 });

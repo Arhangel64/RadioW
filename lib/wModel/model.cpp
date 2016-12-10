@@ -30,6 +30,13 @@ M::Model::~Model()
     for (; itr != end; ++itr) {
         delete *itr;
     }
+    
+    HList::iterator hItr = handlers->begin();
+    HList::iterator hEnd = handlers->end();
+        
+    for (; hItr != hEnd; ++hItr) {
+        delete *hItr;
+    }
 
     delete subscribers;
     delete properties;
@@ -108,7 +115,7 @@ void M::Model::registerModel(W::Dispatcher* dp, W::Server* srv)
 void M::Model::unregisterModel()
 {
     if (!registered) {
-        emit serviceMessage(QString("Model ") + address.toString().c_str() + " is already unregistered");
+        emit serviceMessage(QString("Model ") + address.toString().c_str() + " is not registered");
         throw 2;
     } else {
         MList::iterator itr = models->begin();

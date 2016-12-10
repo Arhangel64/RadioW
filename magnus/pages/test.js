@@ -1,7 +1,7 @@
 "use strict";
 
-var Page = require("../models/page");
-var String = require("../models/string");
+var Page = require("../lib/wModel/page");
+var String = require("../lib/wModel/string");
 
 var Address = require("../lib/wType/address");
 

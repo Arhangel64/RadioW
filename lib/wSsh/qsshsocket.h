@@ -63,6 +63,8 @@ private:
     bool m_connected;
     bool executing;
     Command* command;
+    static bool lib_ssh_inited;
+    static void lib_ssh_init();
     
 private:
     void destroyCommand();

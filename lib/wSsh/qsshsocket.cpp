@@ -1,21 +1,25 @@
 #include "qsshsocket.h"
+#include <libssh/callbacks.h>
+
+bool QSshSocket::lib_ssh_inited = false;
 
 QSshSocket::QSshSocket(QObject * parent)
     :QObject(parent),
     loggedIn(false),
-    session(ssh_new()),
+    session(0),
     m_connected(false),
     executing(false),
     command(0)
 {
-    int verbosity = SSH_LOG_PROTOCOL;
-    ssh_options_set(session, SSH_OPTIONS_LOG_VERBOSITY, &verbosity);
+    if (!lib_ssh_inited) {
+        lib_ssh_init();
+        lib_ssh_inited = true;
+    }
     qRegisterMetaType<QSshSocket::SshError>(); //not sure if it supposed to be here
 }
 
 QSshSocket::~QSshSocket()
 {
-    ssh_free(session);
 }
 
 void QSshSocket::disconnect()
@@ -29,7 +33,7 @@ void QSshSocket::disconnect()
         }
         ssh_disconnect(session);
         ssh_free(session);
-        session = ssh_new();
+        session = 0;
         emit disconnected();
     }
 }
@@ -37,6 +41,9 @@ void QSshSocket::disconnect()
 void QSshSocket::connect(QString host, int port)
 {
     if (!m_connected) {
+        session = ssh_new();
+        int verbosity = SSH_LOG_PROTOCOL;
+        ssh_options_set(session, SSH_OPTIONS_LOG_VERBOSITY, &verbosity);
         ssh_options_set(session, SSH_OPTIONS_HOST, host.toLatin1().data());
         ssh_options_set(session, SSH_OPTIONS_PORT, &port);
 
@@ -48,7 +55,7 @@ void QSshSocket::connect(QString host, int port)
         } else {
             ssh_disconnect(session);
             ssh_free(session);
-            session = ssh_new();
+            session = 0;
             emit error(SessionCreationError);
         }
     } else {
@@ -163,3 +170,8 @@ void QSshSocket::destroyCommand()
     executing = false;
 }
 
+void QSshSocket::lib_ssh_init()
+{
+    ssh_threads_set_callbacks(ssh_threads_get_pthread());
+    ssh_init();
+}

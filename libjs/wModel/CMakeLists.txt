@@ -1,0 +1,12 @@
+cmake_minimum_required(VERSION 2.8.12)
+
+configure_file(model.js model.js)
+configure_file(globalControls.js globalControls.js)
+configure_file(link.js link.js)
+configure_file(list.js list.js)
+configure_file(page.js page.js)
+configure_file(pageStorage.js pageStorage.js)
+configure_file(panesList.js panesList.js)
+configure_file(string.js string.js)
+configure_file(theme.js theme.js)
+configure_file(themeStorage.js themeStorage.js)

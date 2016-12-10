@@ -1,0 +1,12 @@
+cmake_minimum_required(VERSION 2.8.12)
+
+add_jslib(wModel/globalControls.js lib/wModel/globalControls ${MAGNUS_DIR} node)
+add_jslib(wModel/link.js lib/wModel/link ${MAGNUS_DIR} node)
+add_jslib(wModel/list.js lib/wModel/list ${MAGNUS_DIR} node)
+add_jslib(wModel/model.js lib/wModel/model ${MAGNUS_DIR} node)
+add_jslib(wModel/page.js lib/wModel/page ${MAGNUS_DIR} node)
+add_jslib(wModel/pageStorage.js lib/wModel/pageStorage ${MAGNUS_DIR} node)
+add_jslib(wModel/panesList.js lib/wModel/panesList ${MAGNUS_DIR} node)
+add_jslib(wModel/string.js lib/wModel/string ${MAGNUS_DIR} node)
+add_jslib(wModel/theme.js lib/wModel/theme ${MAGNUS_DIR} node)
+add_jslib(wModel/themeStorage.js lib/wModel/themeStorage ${MAGNUS_DIR} node)

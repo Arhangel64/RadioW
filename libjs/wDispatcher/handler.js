@@ -13,6 +13,11 @@ var Handler = Class.inherit({
         this._ctx = instance;
         this._mth = method;
     },
+    "destructor": function() {
+        this.address.destructor();
+        
+        Class.fn.destructor.call(this);
+    },
     "pass": function(event) {
         this._mth.call(this._ctx, event);
     },

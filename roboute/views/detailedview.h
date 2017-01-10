@@ -6,7 +6,7 @@
 #include <QtCore/QSettings>
 
 #include <QtWidgets/QWidget>
-#include <QtWidgets/QPlainTextEdit>
+#include <QtWidgets/QTextEdit>
 #include <QtWidgets/QTableView>
 #include <QtWidgets/QSplitter>
 #include <QtWidgets/QGridLayout>
@@ -28,7 +28,7 @@ public:
 private:
     QGridLayout* layout;
     QHBoxLayout* topPanel;
-    QPlainTextEdit* logArea;
+    QTextEdit* logArea;
     QSplitter* splitter;
     QTableView* props;
     QPushButton* connectBtn;

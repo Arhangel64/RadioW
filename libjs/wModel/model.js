@@ -54,6 +54,9 @@ var Model = Subscribable.inherit({
         
         var handler = new Handler(this._address["+"](new Address([name])), this, this["_h_" + name]);
         
+        this._addHandler(handler);
+    },
+    "_addHandler": function(handler) {
         this._handlers.push(handler);
         if (this._registered) {
             this._dp.registerHandler(handler);
@@ -64,7 +67,7 @@ var Model = Subscribable.inherit({
             throw new Error("An attempt to add not a model into " + this.className);
         }
         this._models.push(model);
-        model.on("serviceMessage", this._onModelSystemMessage, this);
+        model.on("serviceMessage", this._onModelServiceMessage, this);
         if (this._registered) {
             model.register(this._dp, this._server);
         }
@@ -173,8 +176,8 @@ var Model = Subscribable.inherit({
         --this._subscribersCount;
         this.trigger("serviceMessage", this._address.toString() + " has now " + this._subscribersCount + " subscribers", 0);
     },
-    "_onModelSystemMessage": function(msg, severity) {
-        this.trigger("systemMessage", severity);
+    "_onModelServiceMessage": function(msg, severity) {
+        this.trigger("serviceMessage", msg, severity);
     },
     "_onSocketDisconnected": function(ev, socket) {
         var id = socket.getId();
@@ -208,6 +211,16 @@ var Model = Subscribable.inherit({
             dp.registerHandler(this._handlers[i]);
         }
         this._registered = true;
+    },
+    "_removeHandler": function(handler) {
+        var index = this._handlers.indexOf(handler);
+        if (index === -1) {
+            throw new Error("An attempt to remove non existing handler");
+        }
+        this._handlers.splice(index, 1);
+        if (this._registered) {
+            this._dp.unregisterHandler(handler);
+        }
     },
     "response": function(vc, handler, src) {
         if (!this._registered) {

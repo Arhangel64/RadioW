@@ -97,6 +97,14 @@ namespace W
             return order.end();
         }
         
+        iterator begin() {
+            return order.begin();
+        }
+        
+        iterator end() {
+            return order.end();
+        }
+        
     private:
         List order;
         Map r_map;

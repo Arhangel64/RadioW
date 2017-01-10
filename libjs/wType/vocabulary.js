@@ -49,12 +49,29 @@ var Vocabulary = Object.inherit({
             this._data[key.toString()] = value;
         }
     },
+    "erase": function(key) {
+        var value = this._data[key];
+        if (value === undefined) {
+            throw new Error("An attempt to erase not existing object from vocabulary");
+        }
+        value.destructor();
+        delete this._data[key];
+        --this._length;
+    },
     "getKeys": function() {
         return global.Object.keys(this._data);
+    },
+    "has": function(key) {
+        return this._data[key] instanceof Object;
     },
     "insert": function(key, value) {
         if (!(value instanceof Object)) {
             throw new Error("An attempt to insert not a W::Object into vocabulary");
+        }
+        var oldValue = this._data[key];
+        if (oldValue !== undefined) {
+            oldValue.destructor();
+            --this._length;
         }
         this._data[key] = value
         

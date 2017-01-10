@@ -25,6 +25,7 @@ namespace M {
         
     private:
         W::Vector* data;
+        
     };
 }
 

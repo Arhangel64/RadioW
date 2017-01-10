@@ -42,7 +42,8 @@ namespace W{
         void serialize(ByteArray& out) const;
         void deserialize(ByteArray& in);
         
-        String& operator+(int);
+        String& operator+=(int);
+        String operator+(const String& other) const;
         
     private:
         u16string* data;

@@ -19,6 +19,11 @@ var List = Model.inherit({
         
         Model.fn.destructor.call(this);
     },
+    "clear": function() {
+        this._data.clear();
+        
+        this.broadcast(new Vocabulary(), "clear");
+    },
     "_h_subscribe": function(ev) {
         Model.fn._h_subscribe.call(this, ev);
         

@@ -10,12 +10,14 @@ set(HEADERS
     model.h
     modelstring.h
     list.h
+    vocabulary.h
 )
 
 set(SOURCES
     model.cpp
     modelstring.cpp
     list.cpp
+    vocabulary.cpp
 )
 
 add_library(wModel STATIC ${HEADERS} ${SOURCES})

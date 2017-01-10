@@ -142,6 +142,23 @@ void W::Vocabulary::insert(const W::String& key, const W::Object& value)
     (*data)[key] = value.copy();
 }
 
+void W::Vocabulary::insert(const String::u16string& key, W::Object* value)
+{
+    String strKey(key);
+    insert(strKey, value);
+}
+
+void W::Vocabulary::insert(const W::String& key, W::Object* value)
+{
+    Map::const_iterator itr = data->find(key);
+    
+    if (itr != data->end()) 
+    {
+        delete itr->second;
+    }
+    (*data)[key] = value;
+}
+
 
 const W::Object& W::Vocabulary::at(const String::u16string& key) const
 {
@@ -160,6 +177,52 @@ const W::Object& W::Vocabulary::at(const W::String& key) const
     
     return *(itr->second);
 }
+
+bool W::Vocabulary::has(const String::u16string& key) const
+{
+    String strKey(key);
+    return has(strKey);
+}
+
+bool W::Vocabulary::has(const W::String& key) const
+{
+    Map::const_iterator itr = data->find(key);
+    
+    return itr != data->end();
+}
+
+void W::Vocabulary::erase(const String::u16string& key)
+{
+    String strKey(key);
+    erase(strKey);
+}
+
+void W::Vocabulary::erase(const W::String& key)
+{
+    Map::const_iterator itr = data->find(key);
+    
+    if (itr == data->end())
+    {
+        throw NoElement(key);
+    }
+    
+    data->erase(itr);
+}
+
+W::Vector W::Vocabulary::keys() const
+{
+    Vector keys;
+    Map::iterator itr = data->begin();
+    Map::iterator end = data->end();
+    
+    for (; itr != end; ++itr)
+    {
+        keys.push(itr->first);
+    }
+    
+    return keys;
+}
+
 
 W::Vocabulary::NoElement::NoElement(const W::String& p_key):
     Exception(),

@@ -6,7 +6,7 @@ DetailedView::DetailedView(QWidget* parent):
     QWidget(parent),
     layout(new QGridLayout(this)),
     topPanel(new QHBoxLayout()),
-    logArea(new QPlainTextEdit(this)),
+    logArea(new QTextEdit(this)),
     splitter(new QSplitter(this)),
     props(new QTableView(this)),
     connectBtn(new QPushButton(QIcon::fromTheme("state-ok"), "", this)),
@@ -50,7 +50,15 @@ DetailedView::DetailedView(QWidget* parent):
 
 void DetailedView::appendMessage(const QString& msg)
 {
-    logArea->appendPlainText(msg);
+    QStringList list = msg.split('\n');
+    QStringList::const_iterator itr = list.begin();
+    QStringList::const_iterator end = list.end();
+    for (;itr != end; ++itr) {
+        QString str = *itr;
+        if (str != "") {
+            logArea->append(*itr);
+        }
+    }
 }
 
 void DetailedView::clear()

@@ -17,9 +17,11 @@
 #include <wDispatcher/logger.h>
 
 #include <wModel/modelstring.h>
-#include <wModel/list.h>
 
 #include <utils/exception.h>
+
+#include "commands.h"
+#include "connector.h"
 
 class Corax: public QObject
 {
@@ -37,19 +39,19 @@ private:
     
     M::String* modelName;
     M::String* connectionsCount;
-    M::List* managementCommands;
+    Commands* commands;
+    Connector* connector;
     
 public:
     W::Dispatcher *dispatcher;
     
 public slots:
-    void onNewConnection(const W::Socket& socket);
-    void onSocketDisconnected();
     void start();
     void stop();
     
 private slots:
     void onModelServiceMessage(const QString& msg);
+    void onConnectionCountChanged(uint64_t count);
     
 private:
     class SingletonError: 

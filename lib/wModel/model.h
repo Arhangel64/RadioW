@@ -35,6 +35,8 @@ namespace M {
         void registerModel(W::Dispatcher* dp, W::Server* srv);
         void unregisterModel();
         
+        void removeHandler(W::Handler* handler);
+        
     signals:
         void serviceMessage(const QString& msg);
         
@@ -50,7 +52,7 @@ namespace M {
         
     private:
         typedef std::map<uint64_t, W::Order<W::Address>> Map;
-        typedef std::list<W::Handler*> HList;
+        typedef W::Order<W::Handler*> HList;
         typedef std::list<M::Model*> MList;
         
         W::Dispatcher* dispatcher;

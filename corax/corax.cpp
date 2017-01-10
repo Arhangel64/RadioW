@@ -13,7 +13,8 @@ Corax::Corax(QObject *parent):
     logger(new W::Logger()),
     modelName(new M::String(W::String(u"Corax"), W::Address({u"name"}))),
     connectionsCount(new M::String(W::String(u"0"), W::Address({u"connectionsAmount"}))),
-    managementCommands(new M::List(W::Address{u"managementCommands"})),
+    commands(new Commands(W::Address{u"management"})),
+    connector(0),
     dispatcher(new W::Dispatcher())
 {
     if (corax != 0) 
@@ -22,19 +23,28 @@ Corax::Corax(QObject *parent):
     }
     Corax::corax = this;
     
-    connect(server, SIGNAL(newConnection(const W::Socket&)), SLOT(onNewConnection(const W::Socket&)));
+    connector = new Connector(W::String(u"Corax"), dispatcher, server, commands);
+    
     connect(modelName, SIGNAL(serviceMessage(const QString&)), SLOT(onModelServiceMessage(const QString&)));
-    connect(managementCommands, SIGNAL(serviceMessage(const QString&)), SLOT(onModelServiceMessage(const QString&)));
+    connect(commands, SIGNAL(serviceMessage(const QString&)), SLOT(onModelServiceMessage(const QString&)));
     connect(connectionsCount, SIGNAL(serviceMessage(const QString&)), SLOT(onModelServiceMessage(const QString&)));
+    connect(connector, SIGNAL(serviceMessage(const QString&)), SLOT(onModelServiceMessage(const QString&)));
+    connect(connector, SIGNAL(connectionCountChange(uint64_t)), SLOT(onConnectionCountChanged(uint64_t)));
     
     dispatcher->registerDefaultHandler(logger);
+    
+    
+    
+    connector->addNode(W::String(u"Magnus"));
 }
 
 Corax::~Corax()
 {
+    delete connector;
+    
     dispatcher->unregisterDefaultHandler(logger);
     
-    delete managementCommands;
+    delete commands;
     delete connectionsCount;
     delete modelName;
     
@@ -44,19 +54,9 @@ Corax::~Corax()
     Corax::corax = 0;
 }
 
-void Corax::onNewConnection(const W::Socket& socket)
+void Corax::onConnectionCountChanged(uint64_t count)
 {
-    cout << "New connection, id: " << socket.getId().toString() << endl;
-    connect(&socket, SIGNAL(message(const W::Event&)), dispatcher, SLOT(pass(const W::Event&)));
-    connect(&socket, SIGNAL(disconnected()), SLOT(onSocketDisconnected()));
-    connectionsCount->set(new W::String(std::to_string(server->getConnectionsCount())));
-}
-
-void Corax::onSocketDisconnected()
-{
-    W::Socket* socket = static_cast<W::Socket*>(sender());
-    cout << "Connection closed, id: " << socket->getId().toString() << endl;
-    connectionsCount->set(new W::String(std::to_string(server->getConnectionsCount())));
+    connectionsCount->set(new W::String(std::to_string(count)));
 }
 
 void Corax::start()
@@ -66,14 +66,14 @@ void Corax::start()
     cout << "Registering models..." << endl;
     modelName->registerModel(dispatcher, server);
     connectionsCount->registerModel(dispatcher, server);
-    managementCommands->registerModel(dispatcher, server);
+    commands->registerModel(dispatcher, server);
     cout << "Corax is ready" << endl;
 }
 
 void Corax::stop()
 {
     cout << "Stopping corax..." << endl;
-    managementCommands->unregisterModel();
+    commands->unregisterModel();
     connectionsCount->unregisterModel();
     modelName->unregisterModel();
     server->stop();
@@ -83,4 +83,3 @@ void Corax::onModelServiceMessage(const QString& msg)
 {
     cout << msg.toStdString() << endl;
 }
-

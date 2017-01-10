@@ -1,15 +1,15 @@
 "use strict";
 var Controller = require("./controller");
 
-var List = Controller.inherit({
-    "className": "List",
+var Vocabulary = Controller.inherit({
+    "className": "Vocabulary",
     "constructor": function(addr) {
         Controller.fn.constructor.call(this, addr);
         
         this._data = undefined;
         
         this.addHandler("get");
-        this.addHandler("push");
+        this.addHandler("change");
         this.addHandler("clear");
     },
     "destructor": function() {
@@ -19,8 +19,11 @@ var List = Controller.inherit({
         
         Controller.fn.destructor.call(this);
     },
-    "addElement": function(element) {
-        this.trigger("newElement", element);
+    "addElement": function(key, element) {
+        this.trigger("newElement", key, element);
+    },
+    "removeElement": function(key) {
+        this.trigger("removeElement", key);
     },
     "clear": function() {
         if (this._data) {
@@ -38,6 +41,27 @@ var List = Controller.inherit({
         
         this.trigger("clear");
     },
+    "_h_change": function(ev) {
+        var key;
+        var data = ev.getData();
+        
+        var erase = data.at("erase");
+        var insert = data.at("insert");
+        
+        var eSize = erase.size();
+        for (var i = 0; i < eSize; ++i) {
+            key = erase.at(i);
+            this.removeElement(key);
+            this._data.erase(key);
+        }
+        
+        var keys = insert.getKeys();
+        for (var j = 0; j < keys.length; ++j) {
+            key = kets[i];
+            this._data.isert(key, insert.at(key).clone());
+            this.newElement(key, this._data.at(key));
+        }
+    },
     "_h_clear": function(ev) {
         this.clear();
     },
@@ -46,18 +70,11 @@ var List = Controller.inherit({
         
         var data = ev.getData();
         this._data = data.at("data").clone();
-        var size = this._data.size();
+        var keys = this._data.getKeys();
+        var size = keys.length;
         for (var i = 0; i < size; ++i) {
-            this.addElement(this._data.at(i));
+            var key = keys[i];
+            this.addElement(key, this._data.at(key));
         }
-    },
-    "_h_push": function(ev) {
-        var data = ev.getData();
-        
-        var element = data.at("data").clone();
-        this._data.push(element);
-        this.addElement(element);
     }
 });
-
-module.exports = List;

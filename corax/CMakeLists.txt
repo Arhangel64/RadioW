@@ -7,7 +7,20 @@ find_package(Qt5Network REQUIRED)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
 
-add_executable(corax main.cpp corax.cpp)
+set(HEADERS
+    corax.h
+    commands.h
+    connector.h
+)
+
+set(SOURCES
+    main.cpp
+    corax.cpp
+    commands.cpp
+    connector.cpp
+)
+
+add_executable(corax ${HEADERS} ${SOURCES})
 
 target_link_libraries(corax Qt5::Core)
 target_link_libraries(corax Qt5::Network)

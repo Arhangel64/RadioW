@@ -278,3 +278,11 @@ void M::Model::broadcast(W::Vocabulary* vc, const W::Address& handlerAddress)
     }
     delete vc;
 }
+
+void M::Model::removeHandler(W::Handler* handler)
+{
+    handlers->erase(handler);
+    if (registered) {
+        dispatcher->unregisterHandler(handler);
+    }
+}

@@ -3,7 +3,7 @@
 uint64_t C::List::counter = 0;
 
 C::List::List(const W::Address p_address, QObject* parent):
-    C::Controller(p_address, W::Address({W::String(u"list") + counter++}), parent),
+    C::Controller(p_address, W::Address({W::String(u"list") += counter++}), parent),
     data()
 {
     W::Handler* get = W::Handler::create(address + W::Address({u"get"}), this, &C::List::_h_get);

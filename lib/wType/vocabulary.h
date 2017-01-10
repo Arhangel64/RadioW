@@ -3,6 +3,7 @@
 
 #include "object.h"
 #include "string.h"
+#include "vector.h"
 
 #include <utils/exception.h>
 
@@ -30,8 +31,15 @@ namespace W
         void clear();
         void insert(const String::u16string& key, const Object& value);
         void insert(const String& key, const Object& value);
+        void insert(const String::u16string& key, Object* value);
+        void insert(const String& key, Object* value);
         const Object& at(const String::u16string& key) const;
         const Object& at(const String& key) const;
+        bool has(const String::u16string& key) const;
+        bool has(const String& key) const;
+        void erase(const String::u16string& key);
+        void erase(const String& key);
+        Vector keys() const;
         
         static const objectType type = vocabulary;
         

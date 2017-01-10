@@ -32,25 +32,31 @@ void M::List::push(const W::Object& obj)
 {
     data->push(obj);
     
-    W::Vocabulary* vc = new W::Vocabulary();
-    vc->insert(u"data", obj);
-    
-    broadcast(vc, W::Address{u"push"});
+    if (registered) {
+        W::Vocabulary* vc = new W::Vocabulary();
+        vc->insert(u"data", obj);
+        
+        broadcast(vc, W::Address{u"push"});
+    }
 }
 
 void M::List::push(W::Object* obj)
 {
     data->push(obj);
     
-    W::Vocabulary* vc = new W::Vocabulary();
-    vc->insert(u"data", *obj);
-    
-    broadcast(vc, W::Address{u"push"});
+    if (registered) {
+        W::Vocabulary* vc = new W::Vocabulary();
+        vc->insert(u"data", *obj);
+        
+        broadcast(vc, W::Address{u"push"});
+    }
 }
 
 void M::List::clear()
 {
     data->clear();
     
-    broadcast(new W::Vocabulary(), W::Address{u"clear"});
+    if (registered) {
+        broadcast(new W::Vocabulary(), W::Address{u"clear"});
+    }
 }

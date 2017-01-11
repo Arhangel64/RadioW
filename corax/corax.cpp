@@ -33,8 +33,6 @@ Corax::Corax(QObject *parent):
     
     dispatcher->registerDefaultHandler(logger);
     
-    
-    
     connector->addNode(W::String(u"Magnus"));
 }
 

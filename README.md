@@ -15,15 +15,18 @@
 Attention! During the first build internet connection is mandatory. There are some nodejs dependencies, which npm is going to unstall during configuration.
 
 1. Create a build directory and checkout there. For example if you are in project directory, and want to build in subdirectory run
+
   ```bash
   mkdir build
   cd build
   ```
 2. Run cmake to configure the project, giving the path to project root directory. For example
+
   ```bash
   cmake ../
   ```
 3. Run make to build the project. For example
+
   ```bash
   make
   ```

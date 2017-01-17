@@ -16,8 +16,7 @@ Service::Service(
     socket(new W::Socket(W::String(u"Roboute"))),
     dataSsh(new W::SshSocket(p_login, p_password)),
     commandSsh(new W::SshSocket(p_login, p_password)),
-    nodeName(new C::String(W::Address{u"name"})),
-    connectionsAmount(new C::String(W::Address{u"connectionsAmount"})),
+    attributes(new C::Attributes(W::Address{u"attributes"})),
     login(p_login),
     password(p_password),
     logFile(p_logFile),
@@ -47,14 +46,14 @@ Service::Service(
     QObject::connect(socket, SIGNAL(disconnected()), this, SLOT(onSocketDisconnected()));
     QObject::connect(socket, SIGNAL(error(W::Socket::SocketError, const QString&)), this, SLOT(onSocketError(W::Socket::SocketError, const QString&)));
     
-    QObject::connect(nodeName, SIGNAL(change(const QString&)), this, SIGNAL(nodeNameChanged(const QString&)));
-    QObject::connect(connectionsAmount, SIGNAL(change(const QString&)), this, SIGNAL(connectionsAmountChanged(const QString&)));
+    QObject::connect(attributes, SIGNAL(attributeChange(const W::String&, const W::Object&)),
+                     this, SLOT(onAttrChange(const W::String&, const W::Object&)));
+    QObject::connect(attributes, SIGNAL(serviceMessage(const QString&)), SIGNAL(serviceMessage(const QString&)));
 }
 
 Service::~Service()
 {
-    delete connectionsAmount;
-    delete nodeName;
+    delete attributes;
     delete commandSsh;
     delete dataSsh;
     delete socket;
@@ -251,8 +250,7 @@ void Service::disconnect()
     if (state != Disconnected) { 
         state = Disconnecting;
         if (appState == Active) {
-            connectionsAmount->unsubscribe();
-            nodeName->unsubscribe();
+            attributes->unsubscribe();
             socket->close();
         }
         pid = "";
@@ -319,8 +317,7 @@ void Service::stop()
 void Service::onSocketConnected()
 {
     appState = Active;                  //this is a fail It's not right!
-    nodeName->subscribe();
-    connectionsAmount->subscribe();
+    attributes->subscribe();
     emit launched();
 }
 
@@ -340,15 +337,13 @@ void Service::onSocketError(W::Socket::SocketError err, const QString& msg)
 void Service::registerContollers(W::Dispatcher* dp)
 {
     QObject::connect(socket, SIGNAL(message(const W::Event&)), dp, SLOT(pass(const W::Event&)));
-    nodeName->registerController(dp, socket);
-    connectionsAmount->registerController(dp, socket);
+    attributes->registerController(dp, socket);
 }
 
 void Service::unregisterControllers(W::Dispatcher* dp)
 {
     QObject::disconnect(socket, SIGNAL(message(const W::Event&)), dp, SLOT(pass(const W::Event&)));
-    connectionsAmount->unregisterController();
-    nodeName->unregisterController();
+    attributes->unregisterController();
 }
 
 void Service::requestPid()
@@ -365,6 +360,10 @@ void Service::connectWebsocket()
     emit serviceMessage("trying to reach service by websocket");
 }
 
+void Service::onAttrChange(const W::String& key, const W::Object& value)
+{
+    emit attributeChanged(QString::fromStdString(key.toString()), QString::fromStdString(value.toString()));
+}
 
 
 

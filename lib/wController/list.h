@@ -11,6 +11,7 @@
 namespace C {
     class List : public C::Controller
     {
+        Q_OBJECT
     public:
         List(const W::Address p_address, QObject* parent);
         ~List();
@@ -20,7 +21,7 @@ namespace C {
         void newElement(const W::Object& element);
         
     protected:
-        W::Vector data;
+        W::Vector* data;
         
         handler(get)
         handler(push)

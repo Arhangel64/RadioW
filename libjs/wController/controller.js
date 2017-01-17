@@ -211,4 +211,82 @@ var Controller = Subscribable.inherit({
     }
 });
 
+Controller.createByType = function(type, address) {
+    var typeName = this.ReversedModelType[type];
+    if (typeName === undefined) {
+        throw new Error("Unknown ModelType: " + type);
+    }
+    var Type = this.constructors[typeName];
+    if (Type === undefined) {
+        throw new Error("Constructor is not loaded yet, something is wrong");
+    }
+    return new Type(address);
+}
+
+Controller.initialize = function(rc) {
+    var deps = [];
+    var types = [];
+    for (var key in this.ModelTypesPaths) {
+        if (this.ModelTypesPaths.hasOwnProperty(key)) {
+            if (!rc || rc.indexOf(key) !== -1) {
+                deps.push(this.ModelTypesPaths[key]);
+                types.push(key);
+            }
+        }
+    }
+    require(deps, function() {
+        for (var i = 0; i < types.length; ++i) {
+            Controller.constructors[types[i]] = arguments[i];
+        }
+    });
+}
+
+Controller.ModelType = {
+    String:         0,
+    List:           1,
+    Vocabulary:     2,
+    
+    Attributes:     50,
+    
+    GlobalControls: 100,
+    Link:           101,
+    Page:           102,
+    PageStorage:    103,
+    PanesList:      104,
+    Theme:          105,
+    ThemeStorage:   106
+};
+
+Controller.ReversedModelType = {
+    "0":        "String",
+    "1":        "List",
+    "2":        "Vocabulary",
+    
+    "50":       "Attributes",
+    
+    "100":      "GlobalControls",
+    "101":      "Link",
+    "102":      "Page",
+    "103":      "PageStorage",
+    "104":      "PanesList",
+    "105":      "Theme",
+    "106":      "ThemeStorage"
+};
+
+Controller.ModelTypesPaths = {
+    String:         "./string",         //resolve as dependency
+    List:           "./list",           //resolve as dependency
+    Vocabulary:     "./vocabulary",     //resolve as dependency
+    Attributes:     "./attributes",     //resolve as dependency
+    GlobalControls: "./globalControls", //resolve as dependency
+    Link:           "./link",           //resolve as dependency
+    Page:           "./page",           //resolve as dependency
+    PageStorage:    "./pageStorage",    //resolve as dependency
+    PanesList:      "./panesList",      //resolve as dependency
+    Theme:          "./theme",          //resolve as dependency
+    ThemeStorage:   "./themeStorage"    //resolve as dependency
+};
+
+Controller.constructors = {};
+
 module.exports = Controller;

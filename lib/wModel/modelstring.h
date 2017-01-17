@@ -18,8 +18,13 @@ namespace M {
         
         ~String();
         
+        void set(const W::Object & value) override;
+        void set(W::Object * value) override;
         void set(const W::String& str);
         void set(W::String* str);
+        
+        M::Model::ModelType getType() const override;
+        static const M::Model::ModelType type = M::Model::string;
         
     protected:
         void h_subscribe(const W::Event& ev);

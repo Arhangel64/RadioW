@@ -1,11 +1,26 @@
 "use strict";
 
 var Dependency = function(options) {
+    if (!Dependency.configured) {
+        throw new Error("Unable to create a dependency without static variables configuration, use Dependency.configure first");
+    }
     this._string = options.string;
     this._text = options.text;
     
     this._parse();
 }
+
+Dependency.configured = false;
+Dependency.configure = function(libDir, target) {
+    this.libDir = libDir;
+    this.target = target;
+    var tPath = target.replace(libDir, "lib");
+    tPath = tPath.replace(".js", "");
+    tPath = tPath.split("/");
+    tPath.pop();
+    this.path = tPath;
+    this.configured = true;
+};
 
 Dependency.prototype.log = function() {
     console.log("---------------------------------");
@@ -18,18 +33,13 @@ Dependency.prototype.log = function() {
 }
 
 Dependency.prototype._parse = function() {
-    var tPath = Dependency.target.replace(Dependency.libDir, "lib");
-    tPath = tPath.replace(".js", "");
-    tPath = tPath.split("/");
-    tPath.pop();
-    
     var fl = this._text[0];
     var dArr = this._text.split("/");
     
     if (fl !== ".") {
         this._name = "lib/" + this._text + "/index";
     } else {
-        var summ = tPath.slice();
+        var summ = Dependency.path.slice();
         this._name = "";
         
         for (var i = 0; i < dArr.length; ++i) {

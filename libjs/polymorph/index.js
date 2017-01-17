@@ -32,12 +32,21 @@ fs.readFile(path, function(err, buffer) {
     var output = "";
     if (!isNode) {
         file = file.replace(/module.exports[\s]*=/g, "return");
+        file = file.replace(/\"use\sstrict\";/g, "");
         var lines = file.split("\n");
         
-        output =    "(function (global){ \n" +
+        output =    "\"use strict\";\n" +
+                    "(function(global) {\n" +
                     "  var moduleName = \""+moduleName+"\"\n";
                     
         var add = dr.resolve(lines);
+        
+        for (var i = 0; i < add.dependencies.length; ++i) {
+            output += "  " + add.dependencies[i] + "\n";
+        }
+        
+        output += "\n";
+        
         for (var i = 0; i < add.header.length; ++i) {
             output += "  " + add.header[i] + "\n";
         }
@@ -47,7 +56,7 @@ fs.readFile(path, function(err, buffer) {
             output += "    " + line + "\n";
         }
         
-        output += "  " + add.bottom;
+        output += "  " + add.bottom + "\n";
         output += "})(window);";   
     } else {
         output = file;

@@ -1,5 +1,10 @@
 #include "controller.h"
 
+#include "controllerstring.h"
+#include "list.h"
+#include "vocabulary.h"
+#include "attributes.h"
+
 C::Controller::Controller(const W::Address& p_address, const W::Address& my_address, QObject* parent):
     QObject(parent),
     pairAddress(p_address),
@@ -63,6 +68,27 @@ void C::Controller::addHandler(W::Handler* handler)
         dispatcher->registerHandler(handler);
     }
 }
+
+void C::Controller::removeHandler(W::Handler* handler)
+{
+    handlers->erase(handler);
+    if (registered) {
+        dispatcher->unregisterHandler(handler);
+    }
+}
+
+void C::Controller::removeController(C::Controller* ctrl)
+{
+    if (subscribed && !ctrl->subscribed) {
+        ctrl->unsubscribe();
+    }
+    if (registered) {
+        ctrl->unregisterController();
+    }
+    disconnect(ctrl, SIGNAL(serviceMessage(const QString&)), this, SIGNAL(serviceMessage(const QString&)));
+    controllers->erase(ctrl);
+}
+
 
 void C::Controller::h_properties(const W::Event& event)
 {
@@ -185,5 +211,43 @@ void C::Controller::onSocketDisconnected()
 {
     subscribed = false;
 }
+
+C::Controller * C::Controller::createByType(int type, const W::Address& address, QObject* parent)
+{
+    C::Controller* ptr;
+    switch (type) {
+        case string:
+            ptr = new C::String(address, parent);
+            break;
+        case list:
+            ptr = new C::List(address, parent);
+            break;
+        case vocabulary:
+            ptr = new C::Vocabulary(address, parent);
+            break;
+            
+        case attributes:
+            ptr = new C::Attributes(address, parent);
+            break;
+            
+        default:
+            throw 1;
+    }
+    
+    return ptr;
+}
+
+void C::Controller::dropSubscribed()
+{
+    subscribed = false;
+    CList::iterator itr = controllers->begin();
+    CList::iterator end = controllers->end();
+    
+    for (; itr != end; ++itr) {
+        (*itr)->dropSubscribed();
+    }
+}
+
+
 
 

@@ -51,7 +51,7 @@ var Connector = Subscribable.inherit({
         var connect = new Handler(commandsAddr["+"](cn), node, node._h_connect);
         var disconnect = new Handler(commandsAddr["+"](dn), node, node._h_disconnect);
         node.on("connect", this.connectTo, this);
-        node.on("disconnect", this.disonnectNode, this);
+        node.on("disconnect", this.disconnectNode, this);
         this._commands.addCommand("connect" + key, connect, new Vocabulary());
         this._commands.addCommand("disconnect" + key, disconnect, new Vocabulary());
         this._commands.enableCommand("connect" + key, true);

@@ -15,6 +15,7 @@ var Connector = require("./connector");
 var GlobalControls = require("../lib/wModel/globalControls");
 var PageStorage = require("../lib/wModel/pageStorage");
 var ModelString = require("../lib/wModel/string");
+var Attributes = require("../lib/wModel/attributes");
 
 var HomePage = require("../pages/home");
 var MusicPage = require("../pages/music");
@@ -62,23 +63,25 @@ var Magnus = Subscribable.inherit({
     "_initModels": function() {
         this._commands = new Commands(new Address(["namagement"]));
         
-        this._gc = new GlobalControls(new Address(["magnus", "gc"]), {version: this._cfg.get("version")});
+        var version = new ModelString(new Address(["version"]), this._cfg.get("version"));
+        this._attributes = new Attributes(new Address(["attributes"]));
+        this._gc = new GlobalControls(new Address(["magnus", "gc"]));
         this._ps = new PageStorage(new Address(["magnus", "ps"]))
-        
-        this._name = new ModelString(new Address(["name"]), "Magnus");
-        this._connectionsAmount = new ModelString(new Address(["connectionsAmount"]), "0");
         
         this._commands.on("serviceMessage", this._onModelServiceMessage, this);
         this._gc.on("serviceMessage", this._onModelServiceMessage, this);
         this._ps.on("serviceMessage", this._onModelServiceMessage, this);
-        this._name.on("serviceMessage", this._onModelServiceMessage, this);
-        this._connectionsAmount.on("serviceMessage", this._onModelServiceMessage, this);
+        this._attributes.on("serviceMessage", this._onModelServiceMessage, this);
+        
+        this._attributes.addAttribute("name", new ModelString(new Address(["attributes", "name"]), "Magnus"));
+        this._attributes.addAttribute("connectionsAmount", new ModelString(new Address(["connectionsAmount"]), "0"));
+        this._attributes.addAttribute("version", version);
+        this._gc.addModelAsLink("version", version);
         
         this._commands.register(this.dispatcher, this.server);
         this._gc.register(this.dispatcher, this.server);
         this._ps.register(this.dispatcher, this.server);
-        this._name.register(this.dispatcher, this.server);
-        this._connectionsAmount.register(this.dispatcher, this.server);
+        this._attributes.register(this.dispatcher, this.server);
     },
     "_initPages": function() {
         var root = new HomePage(new Address(["pages", "/"]));
@@ -103,7 +106,7 @@ var Magnus = Subscribable.inherit({
         this.server.on("ready", this._onServerReady, this)
     },
     "_onConnectionsCountChange": function(count) {
-        this._connectionsAmount.set(count);
+        this._attributes.setAttribute("connectionsAmount", count);
     },
     "_onModelServiceMessage": function(msg, severity) {
         var fn;

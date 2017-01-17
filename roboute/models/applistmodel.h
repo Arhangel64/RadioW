@@ -31,7 +31,7 @@ public:
     void setConnected(uint64_t id, bool value);
     void setLaunchable(uint64_t id, bool value);
     void setLaunched(uint64_t id, bool value);
-    void setProp(uint64_t id, const QString& key, const QString& value);
+    void setAttribute(uint64_t id, const QString& key, const QString& value);
     
 private:
     typedef QMap<uint64_t, AppModel*> Map;

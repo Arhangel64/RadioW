@@ -21,4 +21,5 @@ void C::String::h_get(const W::Event& ev)
     data = static_cast<const W::String&>(vc.at(u"data"));
     
     emit change(QString(data.toString().c_str()));
+    emit modification(data);
 }

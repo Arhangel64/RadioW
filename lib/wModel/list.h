@@ -18,6 +18,12 @@ namespace M {
         void push(W::Object* obj);
         void clear();
         
+        void set(const W::Object & value) override;
+        void set(W::Object * value) override;
+        
+        M::Model::ModelType getType() const override;
+        static const M::Model::ModelType type = list;
+        
     protected:
         void h_subscribe(const W::Event & ev) override;
         

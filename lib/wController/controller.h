@@ -3,7 +3,6 @@
 
 #include <utils/defines.h>
 
-#include <list>
 #include <QtCore/QObject>
 #include <QtCore/QString>
 
@@ -15,12 +14,21 @@
 #include <wDispatcher/dispatcher.h>
 #include <wDispatcher/handler.h>
 #include <wSocket/socket.h>
+#include <wContainer/order.h>
 
 namespace C {
     class Controller : public QObject
     {
         Q_OBJECT
     public:
+        enum ModelType {
+            string,
+            list,
+            vocabulary,
+            
+            attributes = 50
+        };
+        
         Controller(const W::Address& p_address, const W::Address& my_address, QObject* parent = 0);
         virtual ~Controller();
         
@@ -31,8 +39,14 @@ namespace C {
         void subscribe();
         void unsubscribe();
         
+        void removeHandler(W::Handler* handler);
+        void removeController(C::Controller* ctrl);
+        
+        static C::Controller* createByType(int type, const W::Address& address, QObject* parent = 0);
+        
     signals:
         void serviceMessage(const QString& msg);
+        void modification(const W::Object& data);
         
     protected:
         W::Address pairAddress;
@@ -41,10 +55,11 @@ namespace C {
         void send(W::Vocabulary* vc, const W::Address& handlerAddress);
         handler(properties)
         
+        void dropSubscribed();
         
     private:
-        typedef std::list<W::Handler*> HList;
-        typedef std::list<C::Controller*> CList;
+        typedef W::Order<W::Handler*> HList;
+        typedef W::Order<C::Controller*> CList;
         
         W::Dispatcher* dispatcher;
         W::Socket* socket;
@@ -54,8 +69,8 @@ namespace C {
         HList* handlers;
         W::Vector* properties;
         
-    private slots:
-        void onSocketDisconnected();
+    protected slots:
+        virtual void onSocketDisconnected();
     };
 }
 

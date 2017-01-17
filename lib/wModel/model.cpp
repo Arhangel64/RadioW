@@ -286,3 +286,11 @@ void M::Model::removeHandler(W::Handler* handler)
         dispatcher->unregisterHandler(handler);
     }
 }
+
+void M::Model::removeModel(M::Model* model)
+{
+    models->erase(model);
+    if (registered) {
+        model->unregisterModel();
+    }
+}

@@ -53,7 +53,7 @@ signals:
     void debugMessage(const QString& msg) const;
     void log(uint64_t id,const QString& msg);
     void newService(uint64_t id, const QString& name);
-    void servicePropChange(uint64_t id, const QString& key, const QString& value);
+    void serviceAttrChange(uint64_t id, const QString& key, const QString& value);
     void serviceRemoved(uint64_t id);
     void serviceConnected(uint64_t id);
     void serviceConnecting(uint64_t id);
@@ -86,8 +86,7 @@ private slots:
     void onServiceStopping();
     void onServiceStopped();
     void onServiceLog(const QString& msg);
-    void onNodeNameChanged(const QString& name);
-    void onConnectionsAmountChanged(const QString& amount);
+    void onAttributeChanged(const QString& key, const QString& value);
     
 private:
     class SingletonError: 

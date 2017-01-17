@@ -109,8 +109,7 @@ void Roboute::addService(Service* srv)
     connect(srv, SIGNAL(launched()), this, SLOT(onServiceLaunched()));
     connect(srv, SIGNAL(stopping()), this, SLOT(onServiceStopping()));
     connect(srv, SIGNAL(stopped()), this, SLOT(onServiceStopped()));
-    connect(srv, SIGNAL(nodeNameChanged(const QString&)), this, SLOT(onNodeNameChanged(const QString&)));
-    connect(srv, SIGNAL(connectionsAmountChanged(const QString&)), this, SLOT(onConnectionsAmountChanged(const QString&)));
+    connect(srv, SIGNAL(attributeChanged(const QString&, const QString&)), this, SLOT(onAttributeChanged(const QString&, const QString&)));
     connect(srv, SIGNAL(log(const QString&)), this, SLOT(onServiceLog(const QString&)));
     
     srv->registerContollers(dispatcher);
@@ -239,14 +238,8 @@ void Roboute::onServiceStopping()
     emit serviceStopping(srv->id);
 }
 
-void Roboute::onNodeNameChanged(const QString& name)
+void Roboute::onAttributeChanged(const QString& key, const QString& value)
 {
     Service* srv = static_cast<Service*>(sender());
-    emit servicePropChange(srv->id, "Name", name);
-}
-
-void Roboute::onConnectionsAmountChanged(const QString& amount)
-{
-    Service* srv = static_cast<Service*>(sender());
-    emit servicePropChange(srv->id, "Opened connections", amount);
+    emit serviceAttrChange(srv->id, key, value);
 }

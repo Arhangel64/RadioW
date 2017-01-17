@@ -78,3 +78,5 @@ var Vocabulary = Controller.inherit({
         }
     }
 });
+
+module.exports = Vocabulary;

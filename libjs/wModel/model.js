@@ -109,6 +109,13 @@ var Model = Subscribable.inherit({
     "getAddress": function() {
         return this._address.clone();
     },
+    "getType": function() {
+        var type = Model.ModelType[this.className];
+        if (type === undefined) {
+            throw new Error("Undefined ModelType");
+        }
+        return type;
+    },
     "_h_subscribe": function(ev) {
         var id = ev.getSenderId();
         var source = ev.getData().at("source");
@@ -222,6 +229,19 @@ var Model = Subscribable.inherit({
             this._dp.unregisterHandler(handler);
         }
     },
+    "removeModel": function(model) {
+        if (!(model instanceof Model)) {
+            throw new Error("An attempt to remove not a model from " + this.className);
+        }
+        var index = this._models.indexOf(model);
+        if (index === -1) {
+            throw new Error("An attempt to remove non existing model from " + this.className);
+        }
+        this._models.splice(index, 1);
+        if (this._registered) {
+            model.unregister(this._dp, this._server);
+        }
+    },
     "response": function(vc, handler, src) {
         if (!this._registered) {
             throw new Error("An attempt to send a message from unregistered model " + this._address.toString());
@@ -271,5 +291,20 @@ var Model = Subscribable.inherit({
 });
 
 Model.addressOrder = AbstractOrder.template(Address);
+Model.ModelType = {
+    String:     0,
+    List:       1,
+    Vocabulary: 2,
+    
+    Attributes: 50,
+    
+    GlobalControls: 100,
+    Link: 101,
+    Page: 102,
+    PageStorage: 103,
+    PanesList: 104,
+    Theme: 105,
+    ThemeStorage: 106
+};
 
 module.exports = Model;

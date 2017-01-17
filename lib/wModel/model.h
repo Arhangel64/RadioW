@@ -24,9 +24,21 @@ namespace M {
     {
         Q_OBJECT
     public:
+        enum ModelType {
+            string,
+            list,
+            vocabulary,
+            
+            attributes = 50
+        };
+        
         Model(const W::Address p_address, QObject* parent = 0);
-        //i'm not sure about copy constructor, it doesn't make sence
+        //i'm not sure about copy constructor, it just doesn't make sence, because the address in parameter supposed to be unique
         virtual ~Model();
+        
+        virtual ModelType getType() const = 0;
+        virtual void set(W::Object* value) = 0;
+        virtual void set(const W::Object& value) = 0;
         
         void addModel(M::Model* model);
         void addHandler(W::Handler* handler);
@@ -36,6 +48,7 @@ namespace M {
         void unregisterModel();
         
         void removeHandler(W::Handler* handler);
+        void removeModel(M::Model* model);
         
     signals:
         void serviceMessage(const QString& msg);
@@ -53,7 +66,7 @@ namespace M {
     private:
         typedef std::map<uint64_t, W::Order<W::Address>> Map;
         typedef W::Order<W::Handler*> HList;
-        typedef std::list<M::Model*> MList;
+        typedef W::Order<M::Model*> MList;
         
         W::Dispatcher* dispatcher;
         W::Server* server;

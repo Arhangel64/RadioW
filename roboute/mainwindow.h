@@ -40,7 +40,7 @@ public slots:
     void saveSettings();
     void robouteMessage(const QString& msg);
     void newService(uint64_t id, const QString& name);
-    void servicePropChange(uint64_t id, const QString& key, const QString& value);
+    void serviceAttrChange(uint64_t id, const QString& key, const QString& value);
     void serviceConnected(uint64_t id);
     void serviceConnecting(uint64_t id);
     void serviceDisconnected(uint64_t id);

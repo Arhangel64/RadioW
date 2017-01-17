@@ -2,35 +2,48 @@
 var Dependency = require("./dependency");
 
 var DepResolver = function(options) {
-    this._libDir = options.libDir;
-    this._target = options.target;
+    Dependency.configure(options.libDir, options.target)
     
-    Dependency.libDir = this._libDir;
-    Dependency.target = this._target;
-    
-    this._reg = /require\(\"(.*)\"\)[^;]*;/g;
+    this._reg1 = /(?:require\s*\((?:\"(.*)\"|\'(.*)\')\)[^;]*;)(?!\s*\/\/not\sa\sd)/g;
+    this._reg2 = /(?:\"(.+)\"|\'(.+)\'),{0,1}(?=\s*\/\/resolve as d)/g;
 }
 
 DepResolver.prototype.resolve = function(lines) {
     var regres;
+    var dep;
     var header = [];
-    header.push("var defineArray = [];\n");
+    var dependencies = [];
+    dependencies.push("var defineArray = [];\n");
     
     for (var i = 0; i < lines.length; ++i) {
         var line = lines[i];
-        while((regres = this._reg.exec(line)) !== null) {
-            var dep = new Dependency({
+        var found = false;
+        while((regres = this._reg1.exec(line)) !== null) {
+            dep = new Dependency({
                 string: regres[0],
                 text: regres[1]
             });
             lines[i] = dep.modify(line);
-            header.push("defineArray.push(\"" + dep.toString() + "\");");
+            dependencies.push("defineArray.push(\"" + dep.toString() + "\");");
+            found = true;
         }
+        if (!found) {
+            while((regres = this._reg2.exec(line)) !== null) {
+                dep = new Dependency({
+                    string: regres[0],
+                    text: regres[1]
+                });
+                
+                lines[i] = dep.modify(line);
+            }
+        }
+        
     }
     header.push("define(moduleName, defineArray, function() {");
     
     return {
         header: header,
+        dependencies: dependencies,
         bottom: "});"
     }
 };

@@ -4,6 +4,7 @@ var Model = require("./model");
 var Vector = require("../wType/vector");
 var Vocabulary = require("../wType/vocabulary");
 var Object = require("../wType/object")
+var String = require("../wType/string");
 
 var ModelVocabulary = Model.inherit({
     "className": "Vocabulary",
@@ -34,7 +35,7 @@ var ModelVocabulary = Model.inherit({
             var insert = new Vocabulary();
             var erase = new Vector();
             
-            erase.push(key);
+            erase.push(new String(key));
             vc.insert("insert", insert);
             vc.insert("erase", erase);
             
@@ -59,7 +60,7 @@ var ModelVocabulary = Model.inherit({
             var erase = new Vector();
             
             if (this._data.has(key)) {
-                erase.push(key);
+                erase.push(new String(key));
             }
             insert.insert(key, value);
             

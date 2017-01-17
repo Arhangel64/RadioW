@@ -11,14 +11,12 @@ var String = require("../wType/string");
 
 var GlobalControls = List.inherit({
     "className": "GlobalControls",
-    "constructor": function(address, options) {
+    "constructor": function(address) {
         List.fn.constructor.call(this, address);
-        
-        this._o = options;
         
         this._initModels()
     },
-    "addModel": function(model, name) {
+    "addModel": function(name, model) {
         List.fn.addModel.call(this, model);
         
         var vc = new Vocabulary();
@@ -28,19 +26,22 @@ var GlobalControls = List.inherit({
         
         this.push(vc);
     },
-    "_initModels": function() {
-        if (this._o && this._o.version) {
-            var version = new ModelString(this._address["+"](new Address(["version"])), this._o.version.toString());
-            this.addModel(version, "version");
-        }
+    "addModelAsLink": function(name, model) {
+        var vc = new Vocabulary();
+        vc.insert("type", new String(model.className));
+        vc.insert("address", model.getAddress());
+        vc.insert("name", new String(name));
         
+        this.push(vc);
+    },
+    "_initModels": function() {
         var navigationPanel = this._np = new List(this._address["+"](new Address(["navigationPanel"])));
         
         navigationPanel.addProperty("backgroundColor", "primaryColor");
-        this.addModel(navigationPanel, "navigationPanel");
+        this.addModel("navigationPanel", navigationPanel);
         
         var ts = new ThemeStorage(this._address["+"](new Address(["themes"])));
-        this.addModel(ts, "themes");
+        this.addModel("themes", ts);
     },
     "addNav": function(name, address) {
         var vc = new Vocabulary();

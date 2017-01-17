@@ -26,7 +26,7 @@ var Page = List.inherit({
         vc.insert("col", new UInt64(col || 0));
         vc.insert("rowspan", new UInt64(rowspan || 1));
         vc.insert("colspan", new UInt64(colspan || 1));
-        vc.insert("aligment", new UInt64(aligment || 1));
+        vc.insert("aligment", new UInt64(aligment || Page.Aligment.LeftTop));
         vc.insert("viewOptions", viewOptions);
         
         this.push(vc);

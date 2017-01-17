@@ -146,7 +146,7 @@ void AppListModel::setLaunched(uint64_t id, bool value)
     map[id]->setLaunched(value);
 }
 
-void AppListModel::setProp(uint64_t id, const QString& key, const QString& value)
+void AppListModel::setAttribute(uint64_t id, const QString& key, const QString& value)
 {
     map[id]->props.setProp(key, value);
 }

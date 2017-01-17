@@ -20,6 +20,12 @@ namespace M {
         void erase(const W::String& key);
         void clear();
         
+        void set(const W::Object & value) override;
+        void set(W::Object* value) override;
+        
+        M::Model::ModelType getType() const override;
+        static const M::Model::ModelType type = vocabulary;
+        
     protected:
         void h_subscribe(const W::Event & ev) override;
         

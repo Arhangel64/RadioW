@@ -11,3 +11,5 @@ add_jslib(wController/panesList.js lib/wController/panesList ${LORGAR_DIR} brows
 add_jslib(wController/string.js lib/wController/string ${LORGAR_DIR} browser)
 add_jslib(wController/theme.js lib/wController/theme ${LORGAR_DIR} browser)
 add_jslib(wController/themeSelecter.js lib/wController/themeSelecter ${LORGAR_DIR} browser)
+add_jslib(wController/vocabulary.js lib/wController/vocabulary ${LORGAR_DIR} browser)
+add_jslib(wController/attributes.js lib/wController/attributes ${LORGAR_DIR} browser)

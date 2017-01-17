@@ -58,3 +58,20 @@ void M::String::set(W::String* str)
         broadcast(vc, W::Address{u"get"});
     }
 }
+
+void M::String::set(const W::Object& value)
+{
+    set(static_cast<const W::String&>(value));
+}
+
+void M::String::set(W::Object* value)
+{
+    set(static_cast<W::String*>(value));
+}
+
+
+M::Model::ModelType M::String::getType() const
+{
+    return type;
+}
+

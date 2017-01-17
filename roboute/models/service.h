@@ -8,7 +8,7 @@
 #include <wType/string.h>
 #include <wType/uint64.h>
 
-#include <wController/controllerstring.h>
+#include <wController/attributes.h>
 
 #include <QtCore/QString>
 #include <QtCore/QStringList>
@@ -61,8 +61,7 @@ private:
     W::Socket* socket;
     W::SshSocket* dataSsh;
     W::SshSocket* commandSsh;
-    C::String* nodeName;
-    C::String* connectionsAmount;
+    C::Attributes* attributes;
     static uint64_t lastId;
     QString login;
     QString password;
@@ -94,8 +93,7 @@ signals:
     void stopping();
     void stopped();
     void log(const QString& data);
-    void nodeNameChanged(const QString& name);
-    void connectionsAmountChanged(const QString& amount);
+    void attributeChanged(const QString& name, const QString& value);
     
 public slots:
     void connect();
@@ -118,6 +116,7 @@ private slots:
     void onSocketConnected();
     void onSocketDisconnected();
     void onSocketError(W::Socket::SocketError err, const QString& msg);
+    void onAttrChange(const W::String& key, const W::Object& value);
 };
 
 #endif // SERVICE_H

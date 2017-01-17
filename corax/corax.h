@@ -17,6 +17,7 @@
 #include <wDispatcher/logger.h>
 
 #include <wModel/modelstring.h>
+#include <wModel/attributes.h>
 
 #include <utils/exception.h>
 
@@ -37,8 +38,7 @@ private:
     W::Server *server;
     W::Logger *logger;
     
-    M::String* modelName;
-    M::String* connectionsCount;
+    M::Attributes* attributes;
     Commands* commands;
     Connector* connector;
     

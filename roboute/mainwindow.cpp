@@ -202,9 +202,9 @@ void MainWindow::saveSettings()
     widget->saveSettings();
 }
 
-void MainWindow::servicePropChange(uint64_t id, const QString& key, const QString& value)
+void MainWindow::serviceAttrChange(uint64_t id, const QString& key, const QString& value)
 {
-    apps->setProp(id, key, value);
+    apps->setAttribute(id, key, value);
 }
 
 

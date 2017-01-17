@@ -11,6 +11,7 @@ set(HEADERS
     controllerstring.h
     list.h
     vocabulary.h
+    attributes.h
 )
 
 set(SOURCES
@@ -18,6 +19,7 @@ set(SOURCES
     controllerstring.cpp
     list.cpp
     vocabulary.cpp
+    attributes.cpp
 )
 
 add_library(wController STATIC ${HEADERS} ${SOURCES})

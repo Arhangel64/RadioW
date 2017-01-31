@@ -46,7 +46,10 @@ void Connector::addNode(const W::String& name)
     QObject::connect(node, SIGNAL(disconnect(const W::String&)),
                      SLOT(disconnectNode(const W::String&)));
     nodes.insert(std::make_pair(node->name, node));
-    commands->addCommand(cn, connect, W::Vocabulary());     //TODO!
+    W::Vocabulary vc;
+    vc.insert(u"address", W::Uint64(W::Object::string));
+    vc.insert(u"port", W::Uint64(W::Object::uint64));
+    commands->addCommand(cn, connect, vc);
     commands->addCommand(dn, disconnect, W::Vocabulary());
     commands->enableCommand(cn, true);
 }
@@ -58,7 +61,11 @@ void Connector::sendTo(const W::String& name, const W::Event& event)
         throw 2;
     } else {
         if (!itr->second->connected) {
-            itr->second->socket->send(event);
+            if (itr->second->outgoing) {
+                itr->second->socket->send(event);
+            } else {
+                server->getConnection(itr->second->socketId).send(event);
+            }
         } else {
             //TODO;
         }
@@ -67,6 +74,7 @@ void Connector::sendTo(const W::String& name, const W::Event& event)
 
 void Connector::onNewConnection(const W::Socket& socket)
 {
+    
     emit serviceMessage(QString("New connection, id: ") + socket.getId().toString().c_str());
     connect(&socket, SIGNAL(message(const W::Event&)), dispatcher, SLOT(pass(const W::Event&)));
     connect(&socket, SIGNAL(disconnected()), SLOT(onSocketDisconnected()));
@@ -77,6 +85,10 @@ void Connector::onNewConnection(const W::Socket& socket)
         if (!itr->second->connected) {
             itr->second->connected = true;
             commands->enableCommand(W::String(u"disconnect") + itr->second->name, true);
+            commands->enableCommand(W::String(u"connect") + itr->second->name, false);
+            if (!itr->second->outgoing) {
+                itr->second->socketId = socket.getId();
+            }
         } else {
             //TODO;
         }
@@ -94,14 +106,16 @@ void Connector::onSocketDisconnected()
         if (itr->second->connected) {
             if (itr->second->outgoing) {
                 socket->deleteLater();
+                --occ;
             }
             itr->second->connected = false;
             itr->second->pending = false;
             itr->second->outgoing = false;
             itr->second->socket = 0;
+            itr->second->socketId = 0;
             
             commands->enableCommand(W::String(u"connect") + itr->second->name, true);
-            --occ;
+            commands->enableCommand(W::String(u"disconnect") + itr->second->name, false);
         } else {
             throw 3;
         }
@@ -145,7 +159,12 @@ void Connector::disconnectNode(const W::String& name)
     if (itr->second->connected) {
         commands->enableCommand(W::String(u"connect") + name, false);
         commands->enableCommand(W::String(u"disconnect") + name, false);
-        itr->second->socket->close();
+        
+        if (itr->second->outgoing) {
+            itr->second->socket->close();
+        } else {
+            server->closeConnection(itr->second->socketId);
+        }
     } else {
         //TODO;
     }
@@ -158,12 +177,31 @@ void Connector::outgoingSocketConnected()
     Voc::const_iterator itr = pending.find(socket);
     if (itr != pending.end()) {
         itr->second->pending = false;
+        
+        if (itr->second->name == socket->getRemoteName()) {
+            ++occ;
+            disconnect(socket, SIGNAL(error(W::Socket::SocketError, const QString&)),
+                    this, SLOT(outgoingSocketError(W::Socket::SocketError, const QString&)));
+            onNewConnection(*socket);
+        } else {
+            emit serviceMessage(QString("Error: outgoing socket to ") + itr->second->name.toString().c_str() +
+                                " unexpectedly connected to " + socket->getRemoteName().toString().c_str());
+            socket->deleteLater();
+            itr->second->connected = false;
+            itr->second->pending = false;
+            itr->second->outgoing = false;
+            itr->second->socket = 0;
+            itr->second->socketId = 0;
+            
+            commands->enableCommand(W::String(u"connect") + itr->second->name, true);
+            commands->enableCommand(W::String(u"disconnect") + itr->second->name, false);
+            
+        }
+        
         pending.erase(itr);
     } else {
         //TODO;
     }
-    ++occ;
-    onNewConnection(*socket);
 }
 
 void Connector::outgoingSocketError(W::Socket::SocketError err, const QString& msg)
@@ -172,13 +210,17 @@ void Connector::outgoingSocketError(W::Socket::SocketError err, const QString& m
     Voc::const_iterator itr = pending.find(socket);
     if (itr != pending.end()) {
         itr->second->pending = false;
+        
+        itr->second->socket = 0;
+        commands->enableCommand(W::String(u"connect") + itr->second->name, true);
+        commands->enableCommand(W::String(u"disconnect") + itr->second->name, false);
+        
         pending.erase(itr);
     } else {
          //TODO
     }
+    
     socket->deleteLater();
-    itr->second->socket = 0;
-    commands->enableCommand(W::String(u"connect") + itr->second->name, true);
 }
 
 uint64_t Connector::getConnectionCount() const
@@ -189,6 +231,7 @@ uint64_t Connector::getConnectionCount() const
 P::Node::Node(const W::String& p_name):
     QObject(),
     socket(0),
+    socketId(0),
     name(p_name),
     connected(false),
     outgoing(false),
@@ -209,7 +252,6 @@ void P::Node::h_disconnect(const W::Event& ev)
 {
     emit disconnect(name);
 }
-
 
 
 

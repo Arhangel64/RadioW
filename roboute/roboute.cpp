@@ -111,6 +111,9 @@ void Roboute::addService(Service* srv)
     connect(srv, SIGNAL(stopped()), this, SLOT(onServiceStopped()));
     connect(srv, SIGNAL(attributeChanged(const QString&, const QString&)), this, SLOT(onAttributeChanged(const QString&, const QString&)));
     connect(srv, SIGNAL(log(const QString&)), this, SLOT(onServiceLog(const QString&)));
+    connect(srv, SIGNAL(addCommand(const QString&, const QMap<QString, uint64_t>&)), SLOT(onAddCommand(const QString&, const QMap<QString, uint64_t>&)));
+    connect(srv, SIGNAL(removeCommand(const QString&)), SLOT(onRemoveCommand(const QString&)));
+    connect(srv, SIGNAL(clearCommands()), SLOT(onClearCommands()));
     
     srv->registerContollers(dispatcher);
     
@@ -242,4 +245,28 @@ void Roboute::onAttributeChanged(const QString& key, const QString& value)
 {
     Service* srv = static_cast<Service*>(sender());
     emit serviceAttrChange(srv->id, key, value);
+}
+
+void Roboute::onAddCommand(const QString& key, const QMap<QString, uint64_t>& arguments)
+{
+    Service* srv = static_cast<Service*>(sender());
+    emit serviceAddCommand(srv->id, key, arguments);
+}
+
+void Roboute::onRemoveCommand(const QString& key)
+{
+    Service* srv = static_cast<Service*>(sender());
+    emit serviceRemoveCommand(srv->id, key);
+}
+
+void Roboute::onClearCommands()
+{
+    Service* srv = static_cast<Service*>(sender());
+    emit serviceClearCommands(srv->id);
+}
+
+void Roboute::launchCommand(uint64_t id, const QString& name, const QMap<QString, QVariant>& args)
+{
+    Service* srv = services[id];
+    srv->launchCommand(name, args);
 }

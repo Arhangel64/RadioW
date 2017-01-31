@@ -9,6 +9,7 @@
 #include <wType/uint64.h>
 
 #include <wController/attributes.h>
+#include <wController/vocabulary.h>
 
 #include <QtCore/QString>
 #include <QtCore/QStringList>
@@ -62,6 +63,7 @@ private:
     W::SshSocket* dataSsh;
     W::SshSocket* commandSsh;
     C::Attributes* attributes;
+    C::Vocabulary* commands;
     static uint64_t lastId;
     QString login;
     QString password;
@@ -81,7 +83,6 @@ public:
     QString port;
     const uint64_t id;
     
-    
 signals:
     void serviceMessage(const QString& msg);
     void connecting();
@@ -94,15 +95,17 @@ signals:
     void stopped();
     void log(const QString& data);
     void attributeChanged(const QString& name, const QString& value);
+    void addCommand(const QString& name, const QMap<QString, uint64_t>& arguments);
+    void removeCommand(const QString& name);
+    void clearCommands();
     
 public slots:
     void connect();
     void disconnect();
     void launch();
     void stop();
-    
-private:
-    
+    void launchCommand(const QString& name, const QMap<QString, QVariant>& args);
+
 private slots:
     void onDataSshOpened();
     void onCommandSshOpened();
@@ -117,6 +120,9 @@ private slots:
     void onSocketDisconnected();
     void onSocketError(W::Socket::SocketError err, const QString& msg);
     void onAttrChange(const W::String& key, const W::Object& value);
+    void onAddCommand(const W::String& key, const W::Object& value);
+    void onRemoveCommand(const W::String& key);
+    void onClearCommands();
 };
 
 #endif // SERVICE_H

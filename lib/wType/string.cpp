@@ -172,5 +172,5 @@ W::String & W::String::operator+=(int number)
 
 W::String W::String::operator+(const W::String& other) const
 {
-    return String((*data) + *(other.data));
+    return W::String((*data) + *(other.data));
 }

@@ -2,10 +2,12 @@
 #define MAINWINDOW_H
 
 #include <QtWidgets/QMainWindow>
+#include <QtWidgets/QToolBar>
 #include <QtCore/QSettings>
 
 #include "views/mainview.h"
 #include "views/newappdialogue.h"
+#include "views/commandform.h"
 #include "models/applistmodel.h"
 #include "models/appmodel.h"
 
@@ -20,9 +22,12 @@ private:
     AppListModel* apps;
     MainView* widget;
     NewAppDialogue* newApp;
+    CommandForm* commandForm;
+    QToolBar* rightBar;
     
 private:
     void createActions();
+    void createToolbar();
     
     void subscribeDetailsById(quint64 id);
     void unsubscribeDetailsById(quint64 id);
@@ -35,6 +40,7 @@ signals:
     void launchService(uint64_t);
     void stopService(uint64_t);
     void removeService(uint64_t id);
+    void launchCommand(uint64_t id, const QString& name, const QMap<QString, QVariant>& args);
     
 public slots:
     void saveSettings();
@@ -52,6 +58,9 @@ public slots:
     void serviceStopping(uint64_t id);
     void serviceLog(uint64_t id, const QString& log);
     void serviceRemoved(uint64_t id);
+    void serviceAddCommand(uint64_t id, const QString& key, const QMap<QString, uint64_t>& arguments);
+    void serviceRemoveCommand(uint64_t id, const QString& key);
+    void serviceClearCommands(uint64_t id);
     
 private slots:
     void selectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
@@ -60,6 +69,12 @@ private slots:
     void newApplication();
     void newAppAccepted();
     void newAppRejected();
+    void commandFormAccepted();
+    void commandFormRejected();
+    
+    void attrsToggled(bool checked);
+    void commandsToggled(bool checked);
+    void onLaunchedCommand(uint64_t id, const QString& name);
 };
 
 #endif // MAINWINDOW_H

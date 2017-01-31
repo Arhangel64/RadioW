@@ -8,12 +8,16 @@ DetailedView::DetailedView(QWidget* parent):
     topPanel(new QHBoxLayout()),
     logArea(new QTextEdit(this)),
     splitter(new QSplitter(this)),
-    props(new QTableView(this)),
+    dock(new QWidget(this)),
+    props(new QTableView(dock)),
+    commands(new QListView(dock)),
     connectBtn(new QPushButton(QIcon::fromTheme("state-ok"), "", this)),
     launchBtn(new QPushButton(QIcon::fromTheme("kt-start"), "", this)),
     removeBtn(new QPushButton(QIcon::fromTheme("remove"), "", this)),
     connected(false),
     launched(false),
+    propsShown(false),
+    commandsShown(false),
     model(0)
 {
     setLayout(layout);
@@ -23,12 +27,22 @@ DetailedView::DetailedView(QWidget* parent):
     layout->addWidget(splitter, 1, 0, 1, 1);
     
     splitter->addWidget(logArea);
-    splitter->addWidget(props);
+    splitter->addWidget(dock);
+    
+    QHBoxLayout* lay = new QHBoxLayout();
+    dock->setLayout(lay);
+    lay->addWidget(props);
+    lay->addWidget(commands);
+    lay->setContentsMargins(0,0,0,0);
     
     props->verticalHeader()->hide();
     props->horizontalHeader()->setStretchLastSection(true);
     props->setCornerButtonEnabled(false);
     props->setShowGrid(false);
+    
+    props->hide();
+    commands->hide();
+    dock->hide();
 
     connectBtn->setToolTip(tr("Connect"));
     connectBtn->setEnabled(false);
@@ -39,6 +53,7 @@ DetailedView::DetailedView(QWidget* parent):
     QObject::connect(connectBtn, SIGNAL(clicked()), this, SLOT(onConnectClick()));
     QObject::connect(launchBtn, SIGNAL(clicked()), this, SLOT(onLaunchClick()));
     QObject::connect(removeBtn, SIGNAL(clicked()), this, SLOT(onRemoveClick()));
+    QObject::connect(commands, SIGNAL(doubleClicked(const QModelIndex)), SLOT(onCommandDoubleClicked(const QModelIndex)));
     
     topPanel->addWidget(connectBtn);
     topPanel->addWidget(launchBtn);
@@ -171,9 +186,13 @@ void DetailedView::setModel(AppModel* p_model)
     QObject::connect(model, SIGNAL(changedLaunchable(bool)), this, SLOT(setLaunchable(bool)));
     QObject::connect(model, SIGNAL(changedLaunched(bool)), this, SLOT(setLaunched(bool)));
     
-    QItemSelectionModel *m = props->selectionModel();
+    QItemSelectionModel *m1 = props->selectionModel();
     props->setModel(&model->props);
-    delete m;
+    delete m1;
+    
+    QItemSelectionModel *m2 = commands->selectionModel();
+    commands->setModel(&model->commands);
+    delete m2;
 }
 
 void DetailedView::clearModel()
@@ -210,3 +229,50 @@ void DetailedView::readSettings()
     props->horizontalHeader()->restoreState(settings.value("detailedView/propsHeaderState").toByteArray());
 }
 
+void DetailedView::showAttrs(bool value)
+{
+    if (value) {
+        props->show();
+    } else {
+        props->hide();
+    }
+    propsShown = value;
+    checkDock();
+    
+}
+
+void DetailedView::showCommands(bool value)
+{
+    if (value) {
+        commands->show();
+    } else {
+        commands->hide();
+    }
+    commandsShown = value;
+    checkDock();
+}
+
+void DetailedView::checkDock()
+{
+    if (commandsShown || propsShown) {
+        dock->show();
+    } else {
+        dock->hide();
+    }
+}
+
+void DetailedView::onCommandDoubleClicked(const QModelIndex& index)
+{
+    if (model == 0) {
+        return;
+    }
+    emit launchCommand(model->id, index.data().toString());
+}
+
+uint64_t DetailedView::getModelId()
+{
+    if (model == 0) {
+        throw 1;
+    }
+    return model->id;
+}

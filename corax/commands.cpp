@@ -57,7 +57,7 @@ void Commands::enableCommand(Commands::Command* cmd)
     
     W::Vocabulary* vc = new W::Vocabulary;
     vc->insert(u"address", cmd->handler->getAddress());
-    vc->insert(u"argumanets", cmd->arguments);
+    vc->insert(u"arguments", cmd->arguments);
     insert(cmd->name, vc);
 }
 

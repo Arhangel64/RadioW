@@ -104,7 +104,7 @@ var Server = Subscribable.inherit({
         var peer;
         if (itr["=="](this.srv._peers.end())) {
             peer = new Server.ConnectionsMap(false);
-            this.srv._peers.insert(name, peer);
+            this.srv._peers.insert(name.clone(), peer);
         } else {
             peer = itr["*"]().second;
         }

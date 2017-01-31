@@ -61,7 +61,7 @@ var Magnus = Subscribable.inherit({
         this.dispatcher.registerDefaultHandler(this._logger);
     },
     "_initModels": function() {
-        this._commands = new Commands(new Address(["namagement"]));
+        this._commands = new Commands(new Address(["management"]));
         
         var version = new ModelString(new Address(["version"]), this._cfg.get("version"));
         this._attributes = new Attributes(new Address(["attributes"]));

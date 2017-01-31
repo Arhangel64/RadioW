@@ -14,10 +14,13 @@ namespace C {
     {
         Q_OBJECT
     protected:
-        Vocabulary(const W::Address p_address, const W::Address& my_address, QObject* parent);  //for inheritors
+        Vocabulary(const W::Address p_address, const W::Address& my_address, QObject* parent = 0);  //for inheritors
     public:
-        Vocabulary(const W::Address p_address, QObject* parent);
+        Vocabulary(const W::Address p_address, QObject* parent = 0);
         ~Vocabulary();
+        
+        const W::Object& at(const W::String& key);
+        const W::Object& at(const W::String::u16string& key);
         
     signals:
         void clear();

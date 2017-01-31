@@ -17,8 +17,11 @@ void W::Dispatcher::pass(const W::Event& ev) const
         W::Order<W::Handler*>::const_iterator beg = itr->second.begin();
         W::Order<W::Handler*>::const_iterator end = itr->second.end();
         
-        for (; beg != end; ++beg) {
-            (*beg)->pass(ev);
+        std::list<W::Handler*> list(beg, end);
+        std::list<W::Handler*>::const_iterator itr = list.begin();
+        std::list<W::Handler*>::const_iterator tEnd = list.end();
+        for (; itr != tEnd; ++itr) {
+            (*itr)->pass(ev);
         }
     }
     else

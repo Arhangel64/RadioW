@@ -38,15 +38,15 @@ var Commands = ModelVocabulary.inherit({
         }
     },
     "_disableCommand": function(cmd) {
-        this._remveHandler(cmd.handler);
+        this._removeHandler(cmd.handler);
         cmd.enabled = false;
-        this.erase(cmd.name);
+        this.erase(cmd.name.toString());
     },
     "enableCommand": function(key, value) {
         var cmd = this._commands[key];
         
         if (!cmd) {
-            throw new Error("An attempt to access non existing command");
+            throw new Error("An attempt to access non existing command: " + key);
         }
     
         if (cmd.enabled !== value) {
@@ -63,9 +63,9 @@ var Commands = ModelVocabulary.inherit({
         
         var vc = new Vocabulary();
         vc.insert("address", cmd.handler.address.clone());
-        vc.insert("argumanets", cmd.arguments.clone());
+        vc.insert("arguments", cmd.arguments.clone());
         
-        this.insert(cmd.name.clone(), vc);
+        this.insert(cmd.name.toString(), vc);
     }
 });
 

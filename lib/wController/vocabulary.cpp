@@ -97,3 +97,12 @@ void C::Vocabulary::_clear()
     data->clear();
 }
 
+const W::Object & C::Vocabulary::at(const W::String& key)
+{
+    return data->at(key);
+}
+
+const W::Object & C::Vocabulary::at(const W::String::u16string& key)
+{
+    return data->at(key);
+}

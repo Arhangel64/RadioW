@@ -4,6 +4,8 @@ var Subscribable = require("../lib/utils/subscribable");
 var Handler = require("../lib/wDispatcher/handler");
 var String = require("../lib/wType/string");
 var Address = require("../lib/wType/address");
+var Uint64 = require("../lib/wType/uint64");
+var Object = require("../lib/wType/object");
 var Vocabulary = require("../lib/wType/vocabulary");
 var Socket = require("../lib/wSocket/socket");
 
@@ -44,7 +46,7 @@ var Connector = Subscribable.inherit({
             throw new Error("An attempt to add already existing node in connector");
         }
         
-        var node = new Node();
+        var node = new Node(key);
         var cn = new Address(["connect" + key]);
         var dn = new Address(["disconnect" + key]);
         var commandsAddr = this._commands.getAddress();
@@ -52,7 +54,10 @@ var Connector = Subscribable.inherit({
         var disconnect = new Handler(commandsAddr["+"](dn), node, node._h_disconnect);
         node.on("connect", this.connectTo, this);
         node.on("disconnect", this.disconnectNode, this);
-        this._commands.addCommand("connect" + key, connect, new Vocabulary());
+        var vc = new Vocabulary();
+        vc.insert("address", new Uint64(Object.objectType.String));
+        vc.insert("port", new Uint64(Object.objectType.Uint64));
+        this._commands.addCommand("connect" + key, connect, vc);
         this._commands.addCommand("disconnect" + key, disconnect, new Vocabulary());
         this._commands.enableCommand("connect" + key, true);
         this._nodes[key] = node;
@@ -60,17 +65,19 @@ var Connector = Subscribable.inherit({
     "connectTo": function(name, address, port) {
         var node = this._nodes[name];
         if (!node) {
-            throw new Error("An attempt to access non existing node in connector");
+            throw new Error("An attempt to access non existing node in connector: " + name);
         }
         if (!node.connected) {
             var socket = new Socket(this._parentNodeKey.clone());
             socket.on("connected", this._onOutgoingSocketConnected.bind(this, node));
-            socket.on("error", this._onOutgoingSocketError.bind(this, node));
+            var eH = this._onOutgoingSocketError.bind(this, node);
+            socket.on("error", eH);
+            node._errHandler = eH;
             node.outgoing = true;
             node.connected = false;
             node.pending = true;
             node.socket = socket;
-            this._pending.push[node];
+            this._pending.push(node);
             this._commands.enableCommand("connect" + name, false);
             this._commands.enableCommand("disconnect" + name, false);
             socket.open(address, port);
@@ -96,17 +103,22 @@ var Connector = Subscribable.inherit({
         return this._server.getConnectionsCount() + this._occ;
     },
     "_onNewConnection": function(socket) {
+        var node = this._nodes[socket.getRemoteName().toString()];
         this.trigger("serviceMessage", "New connection, id: " + socket.getId().toString(), 0);
         socket.on("message", this._dispatcher.pass, this._dispatcher);
-        socket.on("disconnected", this._onSocketDisconnected.bind(this, socket));
+        socket.on("disconnected", this._onSocketDisconnected.bind(this, socket, node));
         this.trigger("connectionsCountChange", this.getConnectionsCount());
         
-        var node = this._nodes[socket.getRemoteName().toString()];
         if (node) {
             if (!node.connected) {
                 node.connected = true;
+                this._commands.enableCommand("connect" + node.name.toString(), false);
                 this._commands.enableCommand("disconnect" + node.name.toString(), true);
+                if (!node.outgoing) {
+                    node.socket = socket;
+                }
             } else {
+                throw new Error("Connection duplicate for " + socket.getRemoteName().toString());
                 //TODO;
             }
         }
@@ -116,11 +128,24 @@ var Connector = Subscribable.inherit({
         if (index !== -1) {
             node.pending = false;
             this._pending.splice(index, 1);
+            if (node.socket.getRemoteName().toString() === node.name.toString()) {
+                node.socket.off("error", node._errHandler);
+                delete node._errHandler;
+                ++this._occ;
+                this._onNewConnection(node.socket);
+            } else {
+                this.trigger("serviceMessage", "Error: outgoing socket to " + node.name.toString() +
+                                                " unexpectedly connected to " + node.socket.getRemoteName().toString());
+                node.socket.destructor();
+                node.connected = false;
+                node.outgoing = false;
+            
+                this._commands.enableCommand("connect" + node.name.toString(), true);
+                this._commands.enableCommand("disconnect" + node.name.toString(), false);
+            }
         } else {
             //TODO;
         }
-        ++this._occ;
-        this._onNewConnection(node.socket);
     },
     "_onOutgoingSocketError": function() {
         var index = this._pending.indexOf(node);
@@ -133,29 +158,27 @@ var Connector = Subscribable.inherit({
         node.socket.destructor();
         node.socket = undefined;
         this._commands.enableCommand("connect" + node.name.toString(), true);
+        this._commands.enableCommand("disconnect" + node.name.toString(), false);
     },
-    "_onSocketDisconnected": function(socket) {
+    "_onSocketDisconnected": function(socket, node) {
         this.trigger("serviceMessage", "Connection closed, id: " + socket.getId().toString(), 0);
         
-        var key = socket.getRemoteName().toString();
-        var node = this._nodes[key];
         if (node) {
             if (node.connected) {
                 if (node.outgoing) {
                     socket.destructor();
+                    --this._occ;
                 }
                 node.connected = false;
                 node.pending = false;
                 node.outgoing = false;
                 node.socket = undefined;
                 
+                this._commands.enableCommand("disconnect" + node.name.toString(), false);
                 this._commands.enableCommand("connect" + node.name.toString(), true);
-                --this._occ;
             } else {
                 throw new Error("Something went wrong in connector");;
             }
-        } else {
-            
         }
         
         this.trigger("connectionsCountChange", this.getConnectionsCount());
@@ -193,7 +216,7 @@ var Node = Subscribable.inherit({
     "_h_connect": function(ev) {
         var vc = ev.getData();
         
-        this.trigger("connect", vc.at("address"), vc.at("port"));
+        this.trigger("connect", this.name, vc.at("address"), vc.at("port"));
     },
     "_h_disconnect": function(ev) {
         this.trigger("disconnect", this.name);

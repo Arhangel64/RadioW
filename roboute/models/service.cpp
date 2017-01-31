@@ -17,6 +17,7 @@ Service::Service(
     dataSsh(new W::SshSocket(p_login, p_password)),
     commandSsh(new W::SshSocket(p_login, p_password)),
     attributes(new C::Attributes(W::Address{u"attributes"})),
+    commands(new C::Vocabulary(W::Address{u"management"})),
     login(p_login),
     password(p_password),
     logFile(p_logFile),
@@ -49,10 +50,15 @@ Service::Service(
     QObject::connect(attributes, SIGNAL(attributeChange(const W::String&, const W::Object&)),
                      this, SLOT(onAttrChange(const W::String&, const W::Object&)));
     QObject::connect(attributes, SIGNAL(serviceMessage(const QString&)), SIGNAL(serviceMessage(const QString&)));
+    QObject::connect(commands, SIGNAL(serviceMessage(const QString&)), SIGNAL(serviceMessage(const QString&)));
+    QObject::connect(commands, SIGNAL(newElement(const W::String&, const W::Object&)), SLOT(onAddCommand(const W::String&, const W::Object&)));
+    QObject::connect(commands, SIGNAL(removeElement(const W::String&)), SLOT(onRemoveCommand(const W::String&)));
+    QObject::connect(commands, SIGNAL(clear()), SLOT(onClearCommands()));
 }
 
 Service::~Service()
 {
+    delete commands;
     delete attributes;
     delete commandSsh;
     delete dataSsh;
@@ -250,6 +256,7 @@ void Service::disconnect()
     if (state != Disconnected) { 
         state = Disconnecting;
         if (appState == Active) {
+            commands->unsubscribe();
             attributes->unsubscribe();
             socket->close();
         }
@@ -318,6 +325,7 @@ void Service::onSocketConnected()
 {
     appState = Active;                  //this is a fail It's not right!
     attributes->subscribe();
+    commands->subscribe();
     emit launched();
 }
 
@@ -338,11 +346,13 @@ void Service::registerContollers(W::Dispatcher* dp)
 {
     QObject::connect(socket, SIGNAL(message(const W::Event&)), dp, SLOT(pass(const W::Event&)));
     attributes->registerController(dp, socket);
+    commands->registerController(dp, socket);
 }
 
 void Service::unregisterControllers(W::Dispatcher* dp)
 {
     QObject::disconnect(socket, SIGNAL(message(const W::Event&)), dp, SLOT(pass(const W::Event&)));
+    commands->unregisterController();
     attributes->unregisterController();
 }
 
@@ -365,5 +375,63 @@ void Service::onAttrChange(const W::String& key, const W::Object& value)
     emit attributeChanged(QString::fromStdString(key.toString()), QString::fromStdString(value.toString()));
 }
 
+void Service::onAddCommand(const W::String& key, const W::Object& value)
+{
+    QMap<QString, uint64_t> arguments;
+    const W::Vocabulary& vc = static_cast<const W::Vocabulary&>(value);
+    const W::Vocabulary& args = static_cast<const W::Vocabulary&>(vc.at(u"arguments"));
+    
+    W::Vector keys = args.keys();
+    uint64_t size = keys.size();
+    for (int i = 0; i < size; ++i) {
+        const W::String& name = static_cast<const W::String&>(keys.at(i));
+        const W::Uint64& type = static_cast<const W::Uint64&>(args.at(name));
+        
+        arguments.insert(QString::fromStdString(name.toString()), type);
+    }
+    
+    emit addCommand(QString::fromStdString(key.toString()), arguments);
+}
 
+void Service::onRemoveCommand(const W::String& key)
+{
+    emit removeCommand(QString::fromStdString(key.toString()));
+}
+
+void Service::onClearCommands()
+{
+    emit clearCommands();
+}
+
+void Service::launchCommand(const QString& name, const QMap<QString, QVariant>& args)
+{
+    const W::Vocabulary& val = static_cast<const W::Vocabulary&>(commands->at(W::String(name.toStdString())));
+    const W::Vocabulary& aT = static_cast<const W::Vocabulary&>(val.at(u"arguments"));
+    
+    QMap<QString, QVariant>::const_iterator itr = args.begin();
+    QMap<QString, QVariant>::const_iterator end = args.end();
+    W::Vocabulary* vc = new W::Vocabulary();
+    
+    for (; itr != end; ++itr) {
+        W::String wKey(itr.key().toStdString());
+        const W::Uint64& wType = static_cast<const W::Uint64&>(aT.at(wKey));
+        int type = wType;
+        W::Object* value;
+        switch (type) {
+            case 0:
+                value = new W::String(itr.value().toString().toStdString());
+                break;
+            case 2:
+                value = new W::Uint64(itr.value().toInt());
+                break;
+            default:
+                throw 1;
+        }
+        vc->insert(wKey, value);
+    }
+    
+    W::Event ev(static_cast<const W::Address&>(val.at(u"address")), vc);
+    ev.setSenderId(socket->getId());
+    socket->send(ev);
+}
 

@@ -27,6 +27,7 @@ public:
     void saveSettings();
     void readSettings();
     
+    
 private:
     bool detailed;
     

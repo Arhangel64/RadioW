@@ -8,10 +8,12 @@
 #include <QtWidgets/QWidget>
 #include <QtWidgets/QTextEdit>
 #include <QtWidgets/QTableView>
+#include <QtWidgets/QListView>
 #include <QtWidgets/QSplitter>
 #include <QtWidgets/QGridLayout>
 #include <QtWidgets/QHBoxLayout>
 #include <QtWidgets/QPushButton>
+#include <QtWidgets/QDockWidget>
 
 class DetailedView : public QWidget
 {
@@ -21,22 +23,30 @@ public:
     DetailedView(QWidget* parent = 0);
     void setModel(AppModel* p_model);
     void clearModel();
+    uint64_t getModelId();
     
     void saveSettings();
     void readSettings();
+    
+    void showAttrs(bool value);
+    void showCommands(bool value);
     
 private:
     QGridLayout* layout;
     QHBoxLayout* topPanel;
     QTextEdit* logArea;
     QSplitter* splitter;
+    QWidget* dock;
     QTableView* props;
+    QListView* commands;
     QPushButton* connectBtn;
     QPushButton* launchBtn;
     QPushButton* removeBtn;
     
     bool connected;
     bool launched;
+    bool propsShown;
+    bool commandsShown;
     
     AppModel* model;
     
@@ -55,11 +65,14 @@ signals:
     void launch(uint64_t id);
     void stop(uint64_t id);
     void remove(uint64_t id);
+    void launchCommand(uint64_t id, const QString& name);
     
 private slots:
     void onConnectClick();
     void onLaunchClick();
     void onRemoveClick();
+    void checkDock();
+    void onCommandDoubleClicked(const QModelIndex& index);
 };
 
 #endif // DETAILEDVIEW_H

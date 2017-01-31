@@ -32,12 +32,19 @@ int main(int argc, char **argv) {
     QObject::connect(roboute, SIGNAL(serviceAttrChange(uint64_t, const QString&, const QString&)), 
                      wnd, SLOT(serviceAttrChange(uint64_t, const QString&, const QString&)));
     QObject::connect(roboute, SIGNAL(log(uint64_t, const QString&)), wnd, SLOT(serviceLog(uint64_t, const QString&)));
+    QObject::connect(roboute, SIGNAL(serviceAddCommand(uint64_t, const QString&, const QMap<QString, uint64_t>)),
+                     wnd, SLOT(serviceAddCommand(uint64_t, const QString&, const QMap<QString, uint64_t>)));
+    QObject::connect(roboute, SIGNAL(serviceRemoveCommand(uint64_t, const QString&)),
+                     wnd, SLOT(serviceRemoveCommand(uint64_t, const QString&)));
+    QObject::connect(roboute, SIGNAL(serviceClearCommands(uint64_t)), wnd, SLOT(serviceClearCommands(uint64_t)));
     QObject::connect(wnd, SIGNAL(addService(const QMap<QString, QString>&)), roboute, SLOT(addService(const QMap<QString, QString>&)));
     QObject::connect(wnd, SIGNAL(connectService(uint64_t)), roboute, SLOT(connectService(uint64_t)));
     QObject::connect(wnd, SIGNAL(disconnectService(uint64_t)), roboute, SLOT(disconnectService(uint64_t)));
     QObject::connect(wnd, SIGNAL(launchService(uint64_t)), roboute, SLOT(launchService(uint64_t)));
     QObject::connect(wnd, SIGNAL(stopService(uint64_t)), roboute, SLOT(stopService(uint64_t)));
     QObject::connect(wnd, SIGNAL(removeService(uint64_t)), roboute, SLOT(removeService(uint64_t)));
+    QObject::connect(wnd, SIGNAL(launchCommand(uint64_t, const QString&, const QMap<QString, QVariant>&)), 
+                     roboute, SLOT(launchCommand(uint64_t, const QString&, const QMap<QString, QVariant>&)));
     
     QTimer::singleShot(0, roboute, SLOT(start()));
     QObject::connect(&app, SIGNAL(aboutToQuit()), roboute, SLOT(stop()));

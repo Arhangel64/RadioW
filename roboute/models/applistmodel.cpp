@@ -62,7 +62,7 @@ bool AppListModel::insertRows(int row, int count, const QModelIndex& parent)
     if (toInsert.size() != count) {
         return false;
     }
-    beginInsertRows(parent, row, count);
+    beginInsertRows(parent, row, row + count - 1);
     
     Index::const_iterator target = index.begin() + row;
     for (int i = 0; i < count; ++i) {
@@ -82,7 +82,7 @@ bool AppListModel::removeRows(int row, int count, const QModelIndex& parent)
     if (row + count > index.size()) {
         return false;
     }
-    beginRemoveRows(parent, row, row + count);
+    beginRemoveRows(parent, row, row + count - 1);
     Index::iterator itr;
     Index::iterator beg = index.begin() + row;
     Index::iterator end = beg + count;
@@ -150,3 +150,19 @@ void AppListModel::setAttribute(uint64_t id, const QString& key, const QString& 
 {
     map[id]->props.setProp(key, value);
 }
+
+void AppListModel::addCommand(uint64_t id, const QString& key, const QMap<QString, uint64_t>& arguments)
+{
+    map[id]->commands.inserCommand(key, arguments);
+}
+
+void AppListModel::removeCommand(uint64_t id, const QString& key)
+{
+    map[id]->commands.removeCommand(key);
+}
+
+void AppListModel::clearCommands(uint64_t id)
+{
+    map[id]->commands.clear();
+}
+

@@ -8,9 +8,12 @@ MainWindow::MainWindow():
     QMainWindow(),
     apps(new AppListModel(this)),
     widget(new MainView(apps, this)),
-    newApp(0)
+    newApp(0),
+    commandForm(0),
+    rightBar(new QToolBar(this))
 {
     createActions();
+    createToolbar();
     setCentralWidget(widget);
     
     apps->push_back(0, "Roboute");
@@ -28,6 +31,7 @@ MainWindow::MainWindow():
     connect(widget->details, SIGNAL(launch(uint64_t)), this, SIGNAL(launchService(uint64_t)));
     connect(widget->details, SIGNAL(stop(uint64_t)), this, SIGNAL(stopService(uint64_t)));
     connect(widget->details, SIGNAL(remove(uint64_t)), this, SIGNAL(removeService(uint64_t)));
+    connect(widget->details, SIGNAL(launchCommand(uint64_t, const QString&)), this, SLOT(onLaunchedCommand(uint64_t, const QString&)));
     
     restoreSettings();
 }
@@ -50,8 +54,10 @@ void MainWindow::selectionChanged(const QItemSelection &selected, const QItemSel
     
     if (deselectedIndexes.size() == 1 && selectedIndexes.size() == 0) {
         widget->hideDetails();
+        rightBar->hide();
     } else if (deselectedIndexes.size() == 0 && selectedIndexes.size() == 1) {
         widget->showDetails();
+        rightBar->show();
     }
 }
 
@@ -86,6 +92,30 @@ void MainWindow::createActions()
     connect(newAct, &QAction::triggered, this, &MainWindow::newApplication);
     actionsMenu->addAction(newAct);
 }
+
+void MainWindow::createToolbar()
+{
+    addToolBar(Qt::RightToolBarArea, rightBar);
+    rightBar->setMovable(false);
+    rightBar->setObjectName("rightBar");
+    rightBar->hide();
+    
+    QAction* attrs = rightBar->addAction(QIcon::fromTheme("dialog-object-properties"), tr("Attributes"));
+    QAction* commands = rightBar->addAction(QIcon::fromTheme("dialog-scripts"), tr("Commands"));
+    
+    attrs->setCheckable(true);
+    commands->setCheckable(true);
+    
+    QActionGroup* ag = new QActionGroup(rightBar);
+    ag->setExclusive(true);
+    ag->addAction(attrs);
+    ag->addAction(commands);
+    
+    connect(attrs, SIGNAL(toggled(bool)), SLOT(attrsToggled(bool)));
+    connect(commands, SIGNAL(toggled(bool)), SLOT(commandsToggled(bool)));
+    
+}
+
 
 void MainWindow::newApplication()
 {
@@ -187,6 +217,8 @@ void MainWindow::restoreSettings()
     restoreState(settings.value("window/state").toByteArray());
     
     widget->readSettings();
+    
+    rightBar->hide();
 }
 
 void MainWindow::saveSettings()
@@ -207,5 +239,51 @@ void MainWindow::serviceAttrChange(uint64_t id, const QString& key, const QStrin
     apps->setAttribute(id, key, value);
 }
 
+void MainWindow::attrsToggled(bool checked)
+{
+    widget->details->showAttrs(checked);
+}
 
+void MainWindow::commandsToggled(bool checked)
+{
+    widget->details->showCommands(checked);
+}
+
+void MainWindow::serviceAddCommand(uint64_t id, const QString& key, const QMap<QString, uint64_t>& arguments)
+{
+    apps->addCommand(id, key, arguments);
+}
+
+void MainWindow::serviceRemoveCommand(uint64_t id, const QString& key)
+{
+    apps->removeCommand(id, key);
+}
+
+void MainWindow::serviceClearCommands(uint64_t id)
+{
+    apps->clearCommands(id);
+}
+
+void MainWindow::onLaunchedCommand(uint64_t id, const QString& name)
+{
+    commandForm = new CommandForm(name, apps->getApp(id)->commands.getCommandArgs(name), this);
+    connect(commandForm, SIGNAL(accepted()), SLOT(commandFormAccepted()));
+    connect(commandForm, SIGNAL(rejected()), SLOT(commandFormRejected()));
+    commandForm->setModal(true);
+    commandForm->setWindowTitle(tr("Execute the command"));
+    commandForm->show();
+}
+
+void MainWindow::commandFormAccepted()
+{
+    emit launchCommand(widget->details->getModelId(), commandForm->getName(), commandForm->getData());
+    delete commandForm;
+    commandForm = 0;
+}
+
+void MainWindow::commandFormRejected()
+{
+    delete commandForm;
+    commandForm = 0;
+}
 

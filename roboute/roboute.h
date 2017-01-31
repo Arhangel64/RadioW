@@ -64,6 +64,10 @@ signals:
     void serviceStopped(uint64_t id);
     void serviceLaunching(uint64_t id);
     void serviceStopping(uint64_t id);
+    void serviceAddCommand(uint64_t id, const QString& key, const QMap<QString, uint64_t>& arguments);
+    void serviceRemoveCommand(uint64_t id, const QString& key);
+    void serviceClearCommands(uint64_t id);
+    
     
 public slots:
     void start();
@@ -74,6 +78,7 @@ public slots:
     void disconnectService(uint64_t id);
     void launchService(uint64_t id);
     void stopService(uint64_t id);
+    void launchCommand(uint64_t id, const QString& name, const QMap<QString, QVariant>& args);
     
 private slots:
     void onServiceMessage(const QString& msg);
@@ -87,6 +92,9 @@ private slots:
     void onServiceStopped();
     void onServiceLog(const QString& msg);
     void onAttributeChanged(const QString& key, const QString& value);
+    void onAddCommand(const QString& key, const QMap<QString, uint64_t>& arguments);
+    void onRemoveCommand(const QString& key);
+    void onClearCommands();
     
 private:
     class SingletonError: 

@@ -9,7 +9,7 @@ Corax* Corax::corax = 0;
 
 Corax::Corax(QObject *parent):
     QObject(parent),
-    server(new W::Server(W::String(u"corax"), this)),
+    server(new W::Server(W::String(u"Corax"), this)),
     logger(new W::Logger()),
     attributes(new M::Attributes(W::Address({u"attributes"}))),
     commands(new Commands(W::Address{u"management"})),

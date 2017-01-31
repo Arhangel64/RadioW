@@ -54,7 +54,7 @@ var ModelVocabulary = Model.inherit({
         this.response(vc, "get", ev);
     },
     "insert": function(key, value) {
-        if (this._regestered) {
+        if (this._registered) {
             var vc = new Vocabulary();
             var insert = new Vocabulary();
             var erase = new Vector();
@@ -62,7 +62,8 @@ var ModelVocabulary = Model.inherit({
             if (this._data.has(key)) {
                 erase.push(new String(key));
             }
-            insert.insert(key, value);
+            this._data.insert(key, value);
+            insert.insert(key, value.clone());
             
             vc.insert("insert", insert);
             vc.insert("erase", erase);

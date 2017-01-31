@@ -23,6 +23,7 @@ namespace P {       //metaobject features are not supported in nested classes, s
     public:
         Node(const W::String& p_name);
         W::Socket* socket;
+        uint64_t socketId;
         W::String name;
         bool connected;
         bool outgoing;

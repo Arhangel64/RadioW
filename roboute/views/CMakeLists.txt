@@ -11,12 +11,14 @@ set(HEADERS
     mainview.h
     detailedview.h
     newappdialogue.h
+    commandform.h
 )
 
 set(SOURCES
     mainview.cpp
     detailedview.cpp
     newappdialogue.cpp
+    commandform.cpp
 )
 
 add_library(robouteViews STATIC ${HEADERS} ${SOURCES})

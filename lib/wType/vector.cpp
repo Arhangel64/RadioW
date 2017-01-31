@@ -10,8 +10,10 @@ W::Vector::Vector():
 
 W::Vector::Vector(const W::Vector& original):
     Object(),
-    data(new Vec(original.data->size()))
+    data(new Vec())
 {
+    data->reserve(original.data->capacity());
+    
     Vec::const_iterator itr = original.data->begin();
     Vec::const_iterator end = original.data->end();
     

@@ -2,6 +2,7 @@
 #define DISPATCHER_H
 
 #include <map>
+#include <list>
 
 #include <wType/string.h>
 #include <wType/address.h>

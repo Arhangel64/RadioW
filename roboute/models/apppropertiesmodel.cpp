@@ -40,7 +40,7 @@ bool AppPropertiesModel::insertRows(int row, int count, const QModelIndex& paren
     if (toInsert.size() != count) {
         return false;
     }
-    beginInsertRows(parent, row, count);
+    beginInsertRows(parent, row, row + count - 1);
     
     Index::const_iterator target = index.begin() + row;
     for (int i = 0; i < count; ++i) {
@@ -60,7 +60,7 @@ bool AppPropertiesModel::removeRows(int row, int count, const QModelIndex& paren
     if (row + count > index.size()) {
         return false;
     }
-    beginRemoveRows(parent, row, count);
+    beginRemoveRows(parent, row, row + count - 1);
     Index::iterator itr;
     Index::iterator beg = index.begin() + row;
     Index::iterator end = beg + count;

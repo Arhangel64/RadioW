@@ -67,9 +67,14 @@ var Dispatcher = Class.inherit({
             
             var o_beg = ord.begin();
             var o_end = ord.end();
+            var hands = [];
             
             for (; !o_beg["=="](o_end); o_beg["++"]()) {
-                o_beg["*"]().pass(event);
+                hands.push(o_beg["*"]());
+            }
+            
+            for (var i = 0; i < hands.length; ++i) {
+                hands[i].pass(event)
             }
         } else {
             var dhitr = this._defautHandlers.begin();

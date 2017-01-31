@@ -57,6 +57,7 @@ void W::Socket::close()
 
 void W::Socket::send(const W::Event& ev) const
 {
+    //std::cout << "Sending event: " << ev.toString() << std::endl;
     ByteArray *wba = new ByteArray();
     *wba << ev;
     QByteArray *ba = WtoQ(*wba);
@@ -126,6 +127,7 @@ void W::Socket::onBinaryMessageReceived(const QByteArray& ba)
     }
     else
     {
+        //std::cout << "Received event: " << ev->toString() << std::endl;
         emit message(*ev);
         
 //         const Address& addr = ev->getDestination();

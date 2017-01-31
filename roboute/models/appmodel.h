@@ -2,6 +2,7 @@
 #define APPMODEL_H
 
 #include "apppropertiesmodel.h"
+#include "appcommandsmodel.h"
 
 #include <QtCore/QObject>
 #include <list>
@@ -24,6 +25,7 @@ public:
 public:
     const uint64_t id;
     AppPropertiesModel props;
+    AppCommandsModel commands;
     
 signals:
     void newLogMessage(const QString& msg);

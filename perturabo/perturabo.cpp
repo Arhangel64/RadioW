@@ -1,28 +1,28 @@
-#include "corax.h"
+#include "perturabo.h"
 
 #include <iostream>
 
 using std::cout;
 using std::endl;
 
-Corax* Corax::corax = 0;
+Perturabo* Perturabo::perturabo = 0;
 
-Corax::Corax(QObject *parent):
+Perturabo::Perturabo(QObject *parent):
     QObject(parent),
-    server(new W::Server(W::String(u"Corax"), this)),
+    server(new W::Server(W::String(u"Perturabo"), this)),
     logger(new W::Logger()),
     attributes(new M::Attributes(W::Address({u"attributes"}))),
     commands(new U::Commands(W::Address{u"management"})),
     connector(0),
     dispatcher(new W::Dispatcher())
 {
-    if (corax != 0) 
+    if (perturabo != 0) 
     {
         throw SingletonError();
     }
-    Corax::corax = this;
+    Perturabo::perturabo = this;
     
-    connector = new U::Connector(W::String(u"Corax"), dispatcher, server, commands);
+    connector = new U::Connector(W::String(u"Perturabo"), dispatcher, server, commands);
     
     connect(attributes, SIGNAL(serviceMessage(const QString&)), SLOT(onModelServiceMessage(const QString&)));
     connect(commands, SIGNAL(serviceMessage(const QString&)), SLOT(onModelServiceMessage(const QString&)));
@@ -32,14 +32,14 @@ Corax::Corax(QObject *parent):
     dispatcher->registerDefaultHandler(logger);
     
     connector->addNode(W::String(u"Magnus"));
-    connector->addNode(W::String(u"Perturabo"));
+    connector->addNode(W::String(u"Corax"));
     
     attributes->addAttribute(W::String(u"connectionsCount"), new M::String(W::String(u"0"), W::Address({u"attributes", u"connectionCount"})));
-    attributes->addAttribute(W::String(u"name"), new M::String(W::String(u"Corax"), W::Address({u"attributes", u"name"})));
+    attributes->addAttribute(W::String(u"name"), new M::String(W::String(u"Perturabo"), W::Address({u"attributes", u"name"})));
     attributes->addAttribute(W::String(u"version"), new M::String(W::String(u"0.0.1"), W::Address({u"attributes", u"version"})));
 }
 
-Corax::~Corax()
+Perturabo::~Perturabo()
 {
     delete connector;
     
@@ -51,33 +51,33 @@ Corax::~Corax()
     delete logger;
     delete dispatcher;
     
-    Corax::corax = 0;
+    Perturabo::perturabo = 0;
 }
 
-void Corax::onConnectionCountChanged(uint64_t count)
+void Perturabo::onConnectionCountChanged(uint64_t count)
 {
     attributes->setAttribute(W::String(u"connectionsCount"), new W::String(std::to_string(count)));
 }
 
-void Corax::start()
+void Perturabo::start()
 {
-    cout << "Starting corax..." << endl;
-    server->listen(8080);
+    cout << "Starting perturabo..." << endl;
+    server->listen(8082);
     cout << "Registering models..." << endl;
     attributes->registerModel(dispatcher, server);
     commands->registerModel(dispatcher, server);
-    cout << "Corax is ready" << endl;
+    cout << "Perturabo is ready" << endl;
 }
 
-void Corax::stop()
+void Perturabo::stop()
 {
-    cout << "Stopping corax..." << endl;
+    cout << "Stopping perturabo..." << endl;
     commands->unregisterModel();
     attributes->unregisterModel();
     server->stop();
 }
 
-void Corax::onModelServiceMessage(const QString& msg)
+void Perturabo::onModelServiceMessage(const QString& msg)
 {
     cout << msg.toStdString() << endl;
 }

@@ -1,5 +1,5 @@
-#ifndef CORAX_H
-#define CORAX_H
+#ifndef PERTURABO_H
+#define PERTURABO_H
 
 #include <QtCore/QObject>
 #include <QtCore/QString>
@@ -24,15 +24,15 @@
 #include <wServerUtils/commands.h>
 #include <wServerUtils/connector.h>
 
-class Corax: public QObject
+class Perturabo: public QObject
 {
     Q_OBJECT
     
 public:
-    Corax(QObject *parent = 0);
-    ~Corax();
+    Perturabo(QObject *parent = 0);
+    ~Perturabo();
     
-    static Corax* corax;
+    static Perturabo* perturabo;
     
 private:
     W::Server *server;
@@ -60,8 +60,8 @@ private:
     public:
         SingletonError():Exception(){}
         
-        std::string getMessage() const{return "Corax is a singleton, there was an attempt to construct it at the second time";}
+        std::string getMessage() const{return "Perturabo is a singleton, there was an attempt to construct it at the second time";}
     };
 };
 
-#endif // CORAX_H
+#endif // PERTURABO_H

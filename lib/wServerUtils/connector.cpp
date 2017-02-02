@@ -1,6 +1,6 @@
 #include "connector.h"
 
-Connector::Connector(const W::String& pnk, W::Dispatcher* dp, W::Server* srv, Commands* cmds, QObject* parent):
+U::Connector::Connector(const W::String& pnk, W::Dispatcher* dp, W::Server* srv, U::Commands* cmds, QObject* parent):
     QObject(parent),
     parentNodeKey(pnk),
     dispatcher(dp),
@@ -13,7 +13,7 @@ Connector::Connector(const W::String& pnk, W::Dispatcher* dp, W::Server* srv, Co
     connect(server, SIGNAL(newConnection(const W::Socket&)), SLOT(onNewConnection(const W::Socket&)));
 }
 
-Connector::~Connector()
+U::Connector::~Connector()
 {
     Map::const_iterator beg = nodes.begin();
     Map::const_iterator end = nodes.end();
@@ -30,17 +30,17 @@ Connector::~Connector()
     }
 }
 
-void Connector::addNode(const W::String& name)
+void U::Connector::addNode(const W::String& name)
 {
     Map::const_iterator itr = nodes.find(name);
     if (itr != nodes.end()) {
         throw 1;
     }
-    P::Node* node = new P::Node(name);
+    U::P::Node* node = new U::P::Node(name);
     W::String cn = W::String(u"connect") + name;
     W::String dn = W::String(u"disconnect") + name;
-    W::Handler* connect = W::Handler::create(commands->getAddress() + W::Address({cn}), node, &P::Node::_h_connect);
-    W::Handler* disconnect = W::Handler::create(commands->getAddress() + W::Address({dn}), node, &P::Node::_h_disconnect);
+    W::Handler* connect = W::Handler::create(commands->getAddress() + W::Address({cn}), node, &U::P::Node::_h_connect);
+    W::Handler* disconnect = W::Handler::create(commands->getAddress() + W::Address({dn}), node, &U::P::Node::_h_disconnect);
     QObject::connect(node, SIGNAL(connect(const W::String&, const W::String&, const W::Uint64&)),
                      SLOT(connectTo(const W::String&, const W::String&, const W::Uint64&)));
     QObject::connect(node, SIGNAL(disconnect(const W::String&)),
@@ -54,7 +54,7 @@ void Connector::addNode(const W::String& name)
     commands->enableCommand(cn, true);
 }
 
-void Connector::sendTo(const W::String& name, const W::Event& event)
+void U::Connector::sendTo(const W::String& name, const W::Event& event)
 {
     Map::const_iterator itr = nodes.find(name);
     if (itr != nodes.end()) {
@@ -72,7 +72,7 @@ void Connector::sendTo(const W::String& name, const W::Event& event)
     }
 }
 
-void Connector::onNewConnection(const W::Socket& socket)
+void U::Connector::onNewConnection(const W::Socket& socket)
 {
     
     emit serviceMessage(QString("New connection, id: ") + socket.getId().toString().c_str());
@@ -95,7 +95,7 @@ void Connector::onNewConnection(const W::Socket& socket)
     }
 }
 
-void Connector::onSocketDisconnected()
+void U::Connector::onSocketDisconnected()
 {
     W::Socket* socket = static_cast<W::Socket*>(sender());
     
@@ -125,7 +125,7 @@ void Connector::onSocketDisconnected()
     emit connectionCountChange(getConnectionCount());
 }
 
-void Connector::connectTo(const W::String& name, const W::String& address, const W::Uint64& port)
+void U::Connector::connectTo(const W::String& name, const W::String& address, const W::Uint64& port)
 {
     Map::const_iterator itr = nodes.find(name);
     if (itr == nodes.end()) {
@@ -149,7 +149,7 @@ void Connector::connectTo(const W::String& name, const W::String& address, const
     }
 }
 
-void Connector::disconnectNode(const W::String& name)
+void U::Connector::disconnectNode(const W::String& name)
 {
     Map::const_iterator itr = nodes.find(name);
     if (itr == nodes.end()) {
@@ -171,7 +171,7 @@ void Connector::disconnectNode(const W::String& name)
 }
 
 
-void Connector::outgoingSocketConnected()
+void U::Connector::outgoingSocketConnected()
 {
     W::Socket* socket = static_cast<W::Socket*>(sender());
     Voc::const_iterator itr = pending.find(socket);
@@ -204,7 +204,7 @@ void Connector::outgoingSocketConnected()
     }
 }
 
-void Connector::outgoingSocketError(W::Socket::SocketError err, const QString& msg)
+void U::Connector::outgoingSocketError(W::Socket::SocketError err, const QString& msg)
 {
     W::Socket* socket = static_cast<W::Socket*>(sender());
     Voc::const_iterator itr = pending.find(socket);
@@ -223,12 +223,12 @@ void Connector::outgoingSocketError(W::Socket::SocketError err, const QString& m
     socket->deleteLater();
 }
 
-uint64_t Connector::getConnectionCount() const
+uint64_t U::Connector::getConnectionCount() const
 {
     return server->getConnectionsCount() + occ;
 }
 
-P::Node::Node(const W::String& p_name):
+U::P::Node::Node(const W::String& p_name):
     QObject(),
     socket(0),
     socketId(0),
@@ -240,7 +240,7 @@ P::Node::Node(const W::String& p_name):
 }
 
 
-void P::Node::h_connect(const W::Event& ev)
+void U::P::Node::h_connect(const W::Event& ev)
 {
     const W::Vocabulary& vc = static_cast<const W::Vocabulary&>(ev.getData());
     const W::String& addr = static_cast<const W::String&>(vc.at(u"address"));
@@ -248,7 +248,7 @@ void P::Node::h_connect(const W::Event& ev)
     emit connect(name, addr, port);
 }
 
-void P::Node::h_disconnect(const W::Event& ev)
+void U::P::Node::h_disconnect(const W::Event& ev)
 {
     emit disconnect(name);
 }

@@ -1,12 +1,12 @@
 #include "commands.h"
 
-Commands::Commands(const W::Address& address, QObject* parent):
+U::Commands::Commands(const W::Address& address, QObject* parent):
     M::Vocabulary(address, parent),
     commands(new Map())
 {
 }
 
-Commands::~Commands()
+U::Commands::~Commands()
 {
     Map::iterator beg = commands->begin();
     Map::iterator end = commands->end();
@@ -23,7 +23,7 @@ Commands::~Commands()
     delete commands;
 }
 
-void Commands::addCommand(const W::String& key, W::Handler* handler, const W::Vocabulary& args)
+void U::Commands::addCommand(const W::String& key, W::Handler* handler, const W::Vocabulary& args)
 {
     Map::const_iterator itr = commands->find(key);
     if (itr != commands->end()) {
@@ -33,7 +33,7 @@ void Commands::addCommand(const W::String& key, W::Handler* handler, const W::Vo
     commands->insert(std::make_pair(cmd->name, cmd));
 }
 
-void Commands::enableCommand(const W::String& key, bool value)
+void U::Commands::enableCommand(const W::String& key, bool value)
 {
     Map::const_iterator itr = commands->find(key);
     if (itr == commands->end()) {
@@ -50,7 +50,7 @@ void Commands::enableCommand(const W::String& key, bool value)
     }
 }
 
-void Commands::enableCommand(Commands::Command* cmd)
+void U::Commands::enableCommand(U::Commands::Command* cmd)
 {
     addHandler(cmd->handler);
     cmd->enabled = true;
@@ -61,7 +61,7 @@ void Commands::enableCommand(Commands::Command* cmd)
     insert(cmd->name, vc);
 }
 
-void Commands::disableCommand(Commands::Command* cmd)
+void U::Commands::disableCommand(U::Commands::Command* cmd)
 {
     removeHandler(cmd->handler);
     cmd->enabled = false;

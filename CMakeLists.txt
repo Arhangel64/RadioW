@@ -30,11 +30,13 @@ set(ROBOUTE_DIR ${CMAKE_BINARY_DIR}/roboute)
 set(CORAX_DIR ${CMAKE_BINARY_DIR}/corax)
 set(MAGNUS_DIR ${CMAKE_BINARY_DIR}/magnus)
 set(LORGAR_DIR ${MAGNUS_DIR}/public)
+set(PERTURABO_DIR ${CMAKE_BINARY_DIR}/perturabo)
 
 add_subdirectory(lib)
 add_subdirectory(corax ${CORAX_DIR})
 add_subdirectory(magnus ${MAGNUS_DIR})
 add_subdirectory(lorgar ${LORGAR_DIR})
 add_subdirectory(roboute ${ROBOUTE_DIR})
+add_subdirectory(perturabo ${PERTURABO_DIR})
 
 add_subdirectory(test)

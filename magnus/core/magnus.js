@@ -49,6 +49,7 @@ var Magnus = Subscribable.inherit({
         this._connector.on("connectionsCountChange", this._onConnectionsCountChange, this);
         
         this._connector.addNode("Corax");
+        this._connector.addNode("Perturabo");
     },
     "_initCoraxSocket": function() {
         this.coraxSocket = new Socket("Magnus");

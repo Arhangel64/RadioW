@@ -43,6 +43,7 @@ namespace W{
         void deserialize(ByteArray& in);
         
         String& operator+=(int);
+        String& operator+=(const String& other);
         String operator+(const String& other) const;
         
     private:

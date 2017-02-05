@@ -14,6 +14,7 @@ Perturabo::Perturabo(QObject *parent):
     attributes(new M::Attributes(W::Address({u"attributes"}))),
     commands(new U::Commands(W::Address{u"management"})),
     connector(0),
+    test(new Database(W::String(u"test"))),
     dispatcher(new W::Dispatcher())
 {
     if (perturabo != 0) 
@@ -27,6 +28,8 @@ Perturabo::Perturabo(QObject *parent):
     connect(attributes, SIGNAL(serviceMessage(const QString&)), SLOT(onModelServiceMessage(const QString&)));
     connect(commands, SIGNAL(serviceMessage(const QString&)), SLOT(onModelServiceMessage(const QString&)));
     connect(connector, SIGNAL(serviceMessage(const QString&)), SLOT(onModelServiceMessage(const QString&)));
+    connect(test, SIGNAL(serviceMessage(const QString&)), SLOT(onModelServiceMessage(const QString&)));
+    
     connect(connector, SIGNAL(connectionCountChange(uint64_t)), SLOT(onConnectionCountChanged(uint64_t)));
     
     dispatcher->registerDefaultHandler(logger);
@@ -41,6 +44,7 @@ Perturabo::Perturabo(QObject *parent):
 
 Perturabo::~Perturabo()
 {
+    delete test;
     delete connector;
     
     dispatcher->unregisterDefaultHandler(logger);
@@ -63,15 +67,22 @@ void Perturabo::start()
 {
     cout << "Starting perturabo..." << endl;
     server->listen(8082);
+    
     cout << "Registering models..." << endl;
     attributes->registerModel(dispatcher, server);
     commands->registerModel(dispatcher, server);
+    test->registerModel(dispatcher, server);
+    
+    cout << "Opening databases..." << endl;
+    test->open();
+    
     cout << "Perturabo is ready" << endl;
 }
 
 void Perturabo::stop()
 {
     cout << "Stopping perturabo..." << endl;
+    test->unregisterModel();
     commands->unregisterModel();
     attributes->unregisterModel();
     server->stop();

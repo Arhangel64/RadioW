@@ -24,6 +24,8 @@
 #include <wServerUtils/commands.h>
 #include <wServerUtils/connector.h>
 
+#include "database.h"
+
 class Perturabo: public QObject
 {
     Q_OBJECT
@@ -41,6 +43,8 @@ private:
     M::Attributes* attributes;
     U::Commands* commands;
     U::Connector* connector;
+    
+    Database* test;
     
 public:
     W::Dispatcher *dispatcher;

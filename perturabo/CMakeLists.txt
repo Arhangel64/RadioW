@@ -9,11 +9,13 @@ set(CMAKE_AUTOMOC ON)
 
 set(HEADERS
     perturabo.h
+    database.h
 )
 
 set(SOURCES
     main.cpp
     perturabo.cpp
+    database.cpp
 )
 
 add_executable(perturabo ${HEADERS} ${SOURCES})
@@ -26,5 +28,6 @@ target_link_libraries(perturabo wDispatcher)
 target_link_libraries(perturabo utils)
 target_link_libraries(perturabo wModel)
 target_link_libraries(perturabo wServerUtils)
+target_link_libraries(perturabo lmdb)
 
 install(TARGETS perturabo RUNTIME DESTINATION bin)

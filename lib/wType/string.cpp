@@ -174,3 +174,10 @@ W::String W::String::operator+(const W::String& other) const
 {
     return W::String((*data) + *(other.data));
 }
+
+W::String & W::String::operator+=(const W::String& other)
+{
+    (*data) += *(other.data);
+    return *this;
+}
+

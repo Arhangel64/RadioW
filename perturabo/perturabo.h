@@ -44,7 +44,11 @@ private:
     U::Commands* commands;
     U::Connector* connector;
     
-    Database* test;
+    Database* artists;
+    Database* albums;
+    Database* songs;
+    
+    handler(parseDirectory);
     
 public:
     W::Dispatcher *dispatcher;

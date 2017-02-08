@@ -132,7 +132,7 @@ void W::Vector::push(W::Object* value)
     data->push_back(value);
 }
 
-const W::Object& W::Vector::at(uint32_t index) const
+const W::Object& W::Vector::at(uint64_t index) const
 {
     if (index >= size()) {
         throw NoElement(index);
@@ -140,7 +140,7 @@ const W::Object& W::Vector::at(uint32_t index) const
     return *(data->at(index));
 }
 
-W::Vector::NoElement::NoElement(uint32_t index):
+W::Vector::NoElement::NoElement(uint64_t index):
     Exception(),
     key(index)
 {

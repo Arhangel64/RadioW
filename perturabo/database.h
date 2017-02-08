@@ -6,12 +6,12 @@
 #include <map>
 #include <set>
 
-#include <wModel/vocabulary.h>
+#include <wModel/list.h>
 
 #include <wType/string.h>
 #include <wType/address.h>
 
-class Database: public M::Vocabulary
+class Database: public M::List
 {
     Q_OBJECT
     class AbstractIndex;
@@ -21,6 +21,8 @@ public:
     
     void open();
     void addIndex(const W::String& fieldName, W::Object::objectType fieldType);
+    void addRecord(const W::Vocabulary& record);
+    W::Vocabulary* getRecord(uint64_t id);
     
 private:
     void checkDirAndOpenEnvironment();

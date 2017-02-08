@@ -28,7 +28,7 @@ namespace W
         void clear();
         void push(const Object& value);
         void push(Object* value);
-        const Object& at(uint32_t index) const;
+        const Object& at(uint64_t index) const;
         
         static const objectType type = vector;
         
@@ -39,12 +39,12 @@ namespace W
             Utils::Exception
         {
         public:
-            NoElement(uint32_t index);
+            NoElement(uint64_t index);
             
             std::string getMessage() const;
             
         private:
-            uint32_t key;
+            uint64_t key;
         };
         
     private:

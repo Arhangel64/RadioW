@@ -6,7 +6,7 @@
 #include <wType/bytearray.h>
 
 Database::Database(const W::String& dbName, QObject* parent):
-    M::Vocabulary(W::Address({dbName}), parent),
+    M::List(W::Address({dbName}), parent),
     name(dbName),
     opened(false),
     environment(lmdb::env::create()),
@@ -79,6 +79,33 @@ void Database::addIndex(const W::String& fieldName, W::Object::objectType fieldT
     }
 }
 
+void Database::addRecord(const W::Vocabulary& record)
+{
+    IndexMap::const_iterator itr = indexes.begin();
+    IndexMap::const_iterator end = indexes.end();
+    
+    ++lastIndex;
+    
+    for (; itr != end; ++itr) {
+        itr->second->add(record.at(itr->first), lastIndex);
+    }
+    
+    W::ByteArray ba;
+    ba << record;
+    int length = ba.size();
+    uint8_t data[length];
+    for (int i = 0; i < length; ++i) {
+        data[i] = ba.pop();
+    }
+    lmdb::val key((uint8_t*) &lastIndex, 8);
+    lmdb::val value(data, length);
+    lmdb::txn wTrans = lmdb::txn::begin(environment);
+    dbi.put(wTrans, key, value);
+    wTrans.commit();
+    
+    push(W::Uint64(lastIndex));
+}
+
 
 void Database::checkDirAndOpenEnvironment()
 {
@@ -127,6 +154,7 @@ void Database::index()
             itr->second->add(wVal->at(itr->first), iKey);
         }
         
+        push(W::Uint64(iKey));
         if (iKey > lastIndex) {
             lastIndex = iKey;
         }
@@ -135,4 +163,28 @@ void Database::index()
     }
     cursor.close();
     rtxn.abort();
+}
+
+W::Vocabulary* Database::getRecord(uint64_t id)
+{
+    lmdb::txn rtxn = lmdb::txn::begin(environment, nullptr, MDB_RDONLY);
+    lmdb::val key((uint8_t*) &id, 8);
+    lmdb::val value;
+    
+    if (dbi.get(rtxn, key, value)) {
+        W::ByteArray ba;
+        char* bdata = value.data();
+        for (std::size_t i = 0; i < value.size(); ++i) {
+            ba.push(bdata[i]);
+        }
+        
+        rtxn.abort();
+        
+        W::Vocabulary* wVal = static_cast<W::Vocabulary*>(W::Object::fromByteArray(ba));
+        
+        return wVal;
+    } else {
+        rtxn.abort();
+        throw 3;
+    }
 }

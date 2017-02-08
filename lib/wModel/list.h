@@ -18,6 +18,9 @@ namespace M {
         void push(W::Object* obj);
         void clear();
         
+        uint64_t size() const;
+        const W::Object& at(uint64_t index) const;
+        
         void set(const W::Object & value) override;
         void set(W::Object * value) override;
         

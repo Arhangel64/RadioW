@@ -87,3 +87,14 @@ void M::List::set(W::Object* value)
     
     broadcast(vc, W::Address({u"get"}));
 }
+
+uint64_t M::List::size() const
+{
+    return data->size();
+}
+
+const W::Object & M::List::at(uint64_t index) const
+{
+    return data->at(index);
+}
+

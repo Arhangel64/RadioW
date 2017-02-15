@@ -22,7 +22,7 @@ namespace W {
             vector
         };
         
-        typedef uint32_t size_type;
+        typedef uint64_t size_type;
         typedef std::string StdStr;
     
         Object();

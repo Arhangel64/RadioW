@@ -31,7 +31,9 @@ void W::Dispatcher::pass(const W::Event& ev) const
         
         for (; itr != end; ++itr) 
         {
-            (*itr)->call(ev);
+            if ((*itr)->call(ev)){
+                break;
+            }
         }
     }
 }

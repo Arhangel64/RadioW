@@ -4,6 +4,7 @@
 #include <sys/types.h>
 
 #include <wType/bytearray.h>
+#include <algorithm>
 
 Database::Database(const W::String& dbName, QObject* parent):
     M::List(W::Address({dbName}), parent),
@@ -35,6 +36,49 @@ void Database::open()
         opened = true;
     }
 }
+
+const std::set<uint64_t> & Database::find(const W::String& indexName, const W::Object& value) const
+{
+    IndexMap::const_iterator itr = indexes.find(indexName);
+    if (itr == indexes.end()) {
+        throw 4;
+    }
+    
+    return itr->second->find(value);
+}
+
+std::set<uint64_t> Database::find(const W::Vocabulary& value) const
+{
+    W::Vector keys = value.keys();
+    int size = keys.size();
+    
+    std::set<uint64_t> result;
+    bool first = true;
+    
+    for (int i = 0; i < size; ++i) {
+        const W::String& key = static_cast<const W::String&>(keys.at(i));
+        IndexMap::const_iterator itr = indexes.find(key);
+        if (itr == indexes.end()) {
+            throw 4;
+        }
+        if (first) {
+            result = itr->second->find(value.at(key));
+            first = false;
+        } else {
+            std::set<uint64_t> copy = result;
+            result.clear();
+            const std::set<uint64_t>& current = itr->second->find(value.at(key));
+            std::set_intersection(copy.begin(), copy.end(), current.begin(), current.end(), std::inserter(result, result.end()));
+        }
+        
+        if (result.size() == 0) {
+            break;
+        }
+    }
+    
+    return result;
+}
+
 
 void Database::addIndex(const W::String& fieldName, W::Object::objectType fieldType)
 {
@@ -79,7 +123,7 @@ void Database::addIndex(const W::String& fieldName, W::Object::objectType fieldT
     }
 }
 
-void Database::addRecord(const W::Vocabulary& record)
+uint64_t Database::addRecord(const W::Vocabulary& record)
 {
     IndexMap::const_iterator itr = indexes.begin();
     IndexMap::const_iterator end = indexes.end();
@@ -104,6 +148,8 @@ void Database::addRecord(const W::Vocabulary& record)
     wTrans.commit();
     
     push(W::Uint64(lastIndex));
+    
+    return lastIndex;
 }
 
 

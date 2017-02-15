@@ -46,6 +46,11 @@ namespace W{
         String& operator+=(const String& other);
         String operator+(const String& other) const;
         
+        size_type findLastOf(const W::String& str) const;
+        size_type findFirstOf(const W::String& str) const;
+        
+        String substr(size_type start, size_type length = u16string::npos) const;
+        
     private:
         u16string* data;
         

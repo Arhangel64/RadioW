@@ -11,6 +11,7 @@ set(HEADERS
     handler.h
     defaulthandler.h
     logger.h
+    parentreporter.h
 )
 
 set(SOURCES
@@ -18,6 +19,7 @@ set(SOURCES
     handler.cpp
     defaulthandler.cpp
     logger.cpp
+    parentreporter.cpp
 )
 
 add_library(wDispatcher ${HEADERS} ${SOURCES})

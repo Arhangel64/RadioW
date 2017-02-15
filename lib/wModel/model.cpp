@@ -186,6 +186,7 @@ void M::Model::h_subscribe(const W::Event& ev)
     
     response(nvc, W::Address({u"properties"}), ev);
     emit serviceMessage(QString("Model ") + address.toString().c_str() + ": now has " + std::to_string(subscribersCount).c_str() + " subscribers");
+    emit subscribersCountChange(subscribersCount);
 }
 
 void M::Model::onSocketDisconnected()
@@ -205,6 +206,7 @@ void M::Model::onSocketDisconnected()
     subscribers->erase(itr);
     
     emit serviceMessage(QString("Model ") + address.toString().c_str() + ": now has " + std::to_string(subscribersCount).c_str() + " subscribers");
+    emit subscribersCountChange(subscribersCount);
 }
 
 void M::Model::h_unsubscribe(const W::Event& ev)
@@ -238,6 +240,7 @@ void M::Model::h_unsubscribe(const W::Event& ev)
     --subscribersCount;
     
     emit serviceMessage(QString("Model ") + address.toString().c_str() + ": now has " + std::to_string(subscribersCount).c_str() + " subscribers");
+    emit subscribersCountChange(subscribersCount);
 }
 
 void M::Model::response(W::Vocabulary* vc, const W::Address& handlerAddress, const W::Event& src)

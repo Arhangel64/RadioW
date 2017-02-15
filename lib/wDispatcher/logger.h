@@ -14,7 +14,7 @@ namespace W
         Logger();
         ~Logger();
         
-        void call(const W::Event& ev) const;
+        bool call(const W::Event& ev) const;
     };
 }
 

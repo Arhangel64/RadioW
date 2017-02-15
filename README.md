@@ -9,6 +9,8 @@
 3. nodejs
 4. npm
 5. libssh
+6. lmdb
+7. taglib
 
 ## Building
 

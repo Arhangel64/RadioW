@@ -10,13 +10,16 @@ set(HEADERS
     defines.h
     exception.h
     signalcatcher.h
+    file.h
 )
 
 set(SOURCES
     exception.cpp
     signalcatcher.cpp
+    file.cpp
 )
 
 add_library(utils ${HEADERS} ${SOURCES})
 
+target_link_libraries(utils wType)
 target_link_libraries(utils Qt5::Core)

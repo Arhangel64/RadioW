@@ -181,3 +181,18 @@ W::String & W::String::operator+=(const W::String& other)
     return *this;
 }
 
+W::String::size_type W::String::findFirstOf(const W::String& str) const
+{
+    return data->find_first_of(*(str.data));
+}
+
+W::String::size_type W::String::findLastOf(const W::String& str) const
+{
+    return data->find_last_of(*(str.data));
+}
+
+W::String W::String::substr(size_type start, size_type length) const
+{
+    return W::String(data->substr(start, length));
+}
+

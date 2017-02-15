@@ -44,7 +44,7 @@ void QSshSocket::connect(QString host, int port)
         session = ssh_new();
         int verbosity = SSH_LOG_PROTOCOL;
         ssh_options_set(session, SSH_OPTIONS_LOG_VERBOSITY, &verbosity);
-        ssh_options_set(session, SSH_OPTIONS_HOST, host.toLatin1().data());
+        ssh_options_set(session, SSH_OPTIONS_HOST, host.toUtf8().data());
         ssh_options_set(session, SSH_OPTIONS_PORT, &port);
 
         int connectionResponse = ssh_connect(session);
@@ -65,7 +65,7 @@ void QSshSocket::connect(QString host, int port)
 void QSshSocket::login(QString user, QString password)
 {
     if (m_connected && !loggedIn) {
-        int worked = ssh_userauth_password(session, user.toLatin1().data(), password.toLatin1().data());
+        int worked = ssh_userauth_password(session, user.toUtf8().data(), password.toUtf8().data());
 
         if (worked == SSH_OK) {
             loggedIn = true;
@@ -92,7 +92,7 @@ void QSshSocket::executeCommand(QString p_command)
     }
     int success;
     do {
-        success = ssh_channel_request_exec(channel, p_command.toLatin1().data());
+        success = ssh_channel_request_exec(channel, p_command.toUtf8().data());
     } while (success == SSH_AGAIN);
     
     if (success != SSH_OK) {

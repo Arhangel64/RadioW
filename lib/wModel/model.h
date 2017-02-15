@@ -52,6 +52,7 @@ namespace M {
         
     signals:
         void serviceMessage(const QString& msg);
+        void subscribersCountChange(uint64_t count);
         
     protected:
         W::Address address;

@@ -29,6 +29,12 @@ public:
         W::String str(u"hello world!");
         TS_ASSERT_EQUALS(str.toString(), "hello world!");
     }
+    
+    void testStringToString2()
+    {
+        W::String str(u"Сраные стандарты стингов!");
+        TS_ASSERT_EQUALS(str.toString(), "Сраные стандарты стингов!");
+    }
     void testStringCopying()
     {
         W::String str(u"string");
@@ -48,6 +54,23 @@ public:
         TS_ASSERT_EQUALS(bytes.size(), 0);
         TS_ASSERT_EQUALS(str.toString(), "serialization");
         TS_ASSERT_EQUALS(str2->toString(), "serialization");
+        
+        delete obj;
+    }
+    void testStringSerialization2()
+    {
+        W::String str(u"разве сложно сразу сделать все нормально?!");
+        W::ByteArray bytes;
+        bytes << str;
+        TS_ASSERT_EQUALS(bytes.size(), 42*2 + 1*4 + 1);
+        
+        W::Object *obj = W::Object::fromByteArray(bytes);
+        W::String *str2 = static_cast<W::String*>(obj);
+        
+        TS_ASSERT_EQUALS(bytes.size(), 0);
+        TS_ASSERT_EQUALS(str.toString(), "разве сложно сразу сделать все нормально?!");
+        TS_ASSERT_EQUALS(str2->toString(), "разве сложно сразу сделать все нормально?!");
+        TS_ASSERT_EQUALS(str, *str2);
         
         delete obj;
     }

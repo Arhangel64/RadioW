@@ -11,7 +11,7 @@ namespace W
         DefaultHandler();
         virtual ~DefaultHandler();
         
-        virtual void call(const W::Event& ev) const = 0;
+        virtual bool call(const W::Event& ev) const = 0;
     };
 }
 

@@ -21,8 +21,10 @@ public:
     
     void open();
     void addIndex(const W::String& fieldName, W::Object::objectType fieldType);
-    void addRecord(const W::Vocabulary& record);
+    uint64_t addRecord(const W::Vocabulary& record);
     W::Vocabulary* getRecord(uint64_t id);
+    const std::set<uint64_t>& find(const W::String& indexName, const W::Object& value) const;
+    std::set<uint64_t> find(const W::Vocabulary& value) const;
     
 private:
     void checkDirAndOpenEnvironment();

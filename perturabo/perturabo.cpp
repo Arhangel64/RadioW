@@ -26,7 +26,7 @@ Perturabo::Perturabo(QObject *parent):
     Perturabo::perturabo = this;
     
     connector = new U::Connector(W::String(u"Perturabo"), dispatcher, server, commands);
-    W::Handler* parseDirectory = W::Handler::create(W::Address({u"management", u"get"}), this, &Perturabo::_h_parseDirectory);
+    W::Handler* parseDirectory = W::Handler::create(W::Address({u"management", u"parseDirectory"}), this, &Perturabo::_h_parseDirectory);
     
     connect(attributes, SIGNAL(serviceMessage(const QString&)), SLOT(onModelServiceMessage(const QString&)));
     connect(commands, SIGNAL(serviceMessage(const QString&)), SLOT(onModelServiceMessage(const QString&)));
@@ -128,6 +128,68 @@ void Perturabo::onModelServiceMessage(const QString& msg)
 
 void Perturabo::h_parseDirectory(const W::Event& ev)
 {
+    const W::Vocabulary& vc = static_cast<const W::Vocabulary&>(ev.getData());
+    const W::String& path = static_cast<const W::String&>(vc.at(u"path"));
     
+    cout << "Starting to parse directory " << path.toString() << endl;
+    
+    std::list<W::File> *list = new std::list<W::File>();
+    bool success = W::File::readDirectoryRecursive(path, list);
+    int songsAdded(0);
+    int albumsAdded(0);
+    int artistsAdded(0);
+    
+    if (success) {
+        std::list<W::File>::const_iterator itr = list->begin();
+        std::list<W::File>::const_iterator end = list->end();
+        
+        for (; itr != end; ++itr) {
+            if (itr->suffix() == u"mp3") {
+                AudioTag tag(*itr);
+                const std::set<uint64_t>& art = artists->find(W::String(u"name"), tag.getArtist());
+                uint64_t artistId;
+                if (art.size() == 0) {
+                    W::Vocabulary avc;
+                    avc.insert(u"name", tag.getArtist());
+                    artistId = artists->addRecord(avc);
+                    ++artistsAdded;
+                } else {
+                    artistId = *(art.begin());
+                }
+                
+                W::Vocabulary albvc;
+                albvc.insert(u"name", tag.getAlbum());
+                albvc.insert(u"artist", W::Uint64(artistId));
+                std::set<uint64_t> alb = albums->find(albvc);
+                uint64_t albumId;
+                if (alb.size() == 0) {
+                    albumId = albums->addRecord(albvc);
+                    ++albumsAdded;
+                } else {
+                    albumId = *(alb.begin());
+                }
+                
+                W::Vocabulary svc;
+                svc.insert(u"name", tag.getTitle());
+                svc.insert(u"artist", W::Uint64(artistId));
+                svc.insert(u"album", W::Uint64(albumId));
+                
+                std::set<uint64_t> sng = songs->find(svc);
+                if (sng.size() == 0) {
+                    songs->addRecord(svc);
+                    ++songsAdded;
+                }
+            }
+        }
+    } else {
+        cout << "Error: a problem with reading directory" << endl;
+    }
+    
+    cout << "Parsing complete!" << endl;
+    cout << artistsAdded << " artists added" << endl;
+    cout << albumsAdded << " albums added" << endl;
+    cout << songsAdded << " songs added" << endl;
+    
+    delete list;
 }
 

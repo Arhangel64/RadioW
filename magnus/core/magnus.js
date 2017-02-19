@@ -47,6 +47,8 @@ var Magnus = Subscribable.inherit({
         
         this._connector.on("serviceMessage", this._onModelServiceMessage, this);
         this._connector.on("connectionsCountChange", this._onConnectionsCountChange, this);
+        this._connector.on("connectedNode", this._onConnectedNode, this);
+        this._connector.on("disconnectedNode", this._onDisconnectedNode, this);
         
         this._connector.addNode("Corax");
         this._connector.addNode("Perturabo");
@@ -96,18 +98,25 @@ var Magnus = Subscribable.inherit({
         var test = new TestPage(new Address(["pages", "/test"]));
         this._ps.addPage(test, ["/test", "/test/", "/test.html"]);
         this._gc.addNav("Testing...", test.getAddress());
-        
-        music.addBand("Avenged sevenfold");
-        music.addBand("Megadeth");
-        music.addBand("Iron Maiden");
-        music.addBand("As I Lay Dying");
     },
     "_initServer": function() {
         this.server = new Server("Magnus");
         this.server.on("ready", this._onServerReady, this)
     },
+    "_onConnectedNode": function(nodeName) {
+        switch (nodeName) {
+            case "Perturabo":
+                break;
+        }
+    },
     "_onConnectionsCountChange": function(count) {
         this._attributes.setAttribute("connectionsAmount", count);
+    },
+    "_onDisconnectedNode": function(nodeName) {
+        switch (nodeName) {
+            case "Perturabo":
+                break;
+        }
     },
     "_onModelServiceMessage": function(msg, severity) {
         var fn;

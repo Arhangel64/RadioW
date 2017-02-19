@@ -196,3 +196,9 @@ W::String W::String::substr(size_type start, size_type length) const
     return W::String(data->substr(start, length));
 }
 
+uint64_t W::String::toUint64() const
+{
+    return std::stoull(toString());
+}
+
+

@@ -100,7 +100,7 @@ Page.deserializeOptions = function(vc) {
         } else {
             value = value.valueOf();
         }
-        opts[key[i]] = value;
+        opts[keys[i]] = value;
     }
     
     return opts;

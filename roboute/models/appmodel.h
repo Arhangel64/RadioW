@@ -21,6 +21,7 @@ public:
     bool getConnected() const;
     bool getLaunchable() const;
     bool getLaunched() const;
+    void clearLog();
     
 public:
     const uint64_t id;
@@ -33,6 +34,7 @@ signals:
     void changedConnected(bool value);
     void changedLaunchable(bool value);
     void changedLaunched(bool value);
+    void clearedLog();
     
 public slots:
     void setConnectable(bool value);

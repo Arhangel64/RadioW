@@ -15,6 +15,7 @@
 
 #include <wDispatcher/dispatcher.h>
 #include <wDispatcher/logger.h>
+#include <wDispatcher/parentreporter.h>
 
 #include <wModel/modelstring.h>
 #include <wModel/attributes.h>
@@ -41,6 +42,7 @@ public:
 private:
     W::Server *server;
     W::Logger *logger;
+    W::ParentReporter* parentReporter;
     
     M::Attributes* attributes;
     U::Commands* commands;

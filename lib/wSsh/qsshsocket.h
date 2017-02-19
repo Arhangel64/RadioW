@@ -48,6 +48,7 @@ public slots:
     void disconnect();
     void executeCommand(QString command);
     void login(QString user, QString password);
+    void interrupt();
 
 private:
     struct Command

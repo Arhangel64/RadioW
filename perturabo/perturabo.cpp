@@ -11,6 +11,7 @@ Perturabo::Perturabo(QObject *parent):
     QObject(parent),
     server(new W::Server(W::String(u"Perturabo"), this)),
     logger(new W::Logger()),
+    parentReporter(new W::ParentReporter()),
     attributes(new M::Attributes(W::Address({u"attributes"}))),
     commands(new U::Commands(W::Address{u"management"})),
     connector(0),
@@ -37,6 +38,11 @@ Perturabo::Perturabo(QObject *parent):
     
     connect(connector, SIGNAL(connectionCountChange(uint64_t)), SLOT(onConnectionCountChanged(uint64_t)));
     
+    parentReporter->registerParent(artists->getAddress(), artists->subscribeMember);
+    parentReporter->registerParent(albums->getAddress(), albums->subscribeMember);
+    parentReporter->registerParent(songs->getAddress(), songs->subscribeMember);
+    
+    dispatcher->registerDefaultHandler(parentReporter);
     dispatcher->registerDefaultHandler(logger);
     
     connector->addNode(W::String(u"Magnus"));
@@ -69,10 +75,12 @@ Perturabo::~Perturabo()
     delete connector;
     
     dispatcher->unregisterDefaultHandler(logger);
+    dispatcher->unregisterDefaultHandler(parentReporter);
     
     delete commands;
     delete attributes;
     
+    delete parentReporter;
     delete logger;
     delete dispatcher;
     
@@ -128,6 +136,7 @@ void Perturabo::onModelServiceMessage(const QString& msg)
 
 void Perturabo::h_parseDirectory(const W::Event& ev)
 {
+    commands->enableCommand(W::String(u"parseDirectory"), false);
     const W::Vocabulary& vc = static_cast<const W::Vocabulary&>(ev.getData());
     const W::String& path = static_cast<const W::String&>(vc.at(u"path"));
     
@@ -142,6 +151,8 @@ void Perturabo::h_parseDirectory(const W::Event& ev)
     if (success) {
         std::list<W::File>::const_iterator itr = list->begin();
         std::list<W::File>::const_iterator end = list->end();
+        int i = 0;
+        int total = list->size();
         
         for (; itr != end; ++itr) {
             if (itr->suffix() == u"mp3") {
@@ -180,6 +191,8 @@ void Perturabo::h_parseDirectory(const W::Event& ev)
                     ++songsAdded;
                 }
             }
+            ++i;
+            cout << "Finished " << i << " out of " << total << endl;
         }
     } else {
         cout << "Error: a problem with reading directory" << endl;
@@ -191,5 +204,7 @@ void Perturabo::h_parseDirectory(const W::Event& ev)
     cout << songsAdded << " songs added" << endl;
     
     delete list;
+    
+    commands->enableCommand(W::String(u"parseDirectory"), true);
 }
 

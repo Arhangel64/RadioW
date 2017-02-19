@@ -2,6 +2,8 @@
 #define PARENTREPORTER_H
 
 #include "defaulthandler.h"
+#include "handler.h"
+#include <map>
 
 namespace W {
     
@@ -10,6 +12,13 @@ namespace W {
     public:
         ParentReporter();
         ~ParentReporter();
+        
+        bool call(const W::Event& ev) const;
+        void registerParent(const W::Address& address, W::Handler* handler);
+        
+    private:
+        typedef std::map<W::Address, W::Handler*> Hmap;
+        Hmap handlers;
     };
 }
 

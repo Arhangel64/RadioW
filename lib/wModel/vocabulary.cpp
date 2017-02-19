@@ -8,6 +8,15 @@ M::Vocabulary::Vocabulary(const W::Address p_address, QObject* parent):
     addHandler(get);
 }
 
+M::Vocabulary::Vocabulary(W::Vocabulary* p_data, const W::Address p_address, QObject* parent):
+    M::Model(p_address, parent),
+    data(p_data)
+{
+    W::Handler* get = W::Handler::create(address + W::Address({u"get"}), this, &M::Vocabulary::_h_get);
+    addHandler(get);
+}
+
+
 M::Vocabulary::~Vocabulary()
 {
     delete data;

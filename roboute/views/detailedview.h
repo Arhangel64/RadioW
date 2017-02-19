@@ -41,6 +41,7 @@ private:
     QListView* commands;
     QPushButton* connectBtn;
     QPushButton* launchBtn;
+    QPushButton* clearBtn;
     QPushButton* removeBtn;
     
     bool connected;
@@ -58,6 +59,7 @@ public slots:
     void setLaunchable(bool value);
     void setLaunched(bool value);
     void setRemovable(bool value);
+    void clearedLog();
     
 signals:
     void connect(uint64_t id);
@@ -66,10 +68,12 @@ signals:
     void stop(uint64_t id);
     void remove(uint64_t id);
     void launchCommand(uint64_t id, const QString& name);
+    void clearLog(uint64_t id);
     
 private slots:
     void onConnectClick();
     void onLaunchClick();
+    void onClearClick();
     void onRemoveClick();
     void checkDock();
     void onCommandDoubleClicked(const QModelIndex& index);

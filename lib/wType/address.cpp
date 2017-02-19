@@ -224,12 +224,13 @@ W::Address& W::Address::operator+=(const W::Address& other)
 W::Address& W::Address::operator+=(const W::String& other)
 {
     data->push_back(other);
+    return *this;
 }
 
 W::Address& W::Address::operator+=(const W::String::u16string& other)
 {
     String hop(other);
-    operator+=(hop);
+    return operator+=(hop);
 }
 
 W::Address W::Address::operator>>(W::Object::size_type count) const

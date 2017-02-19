@@ -38,6 +38,7 @@ namespace W{
         static const objectType type = string;
         
         operator u16string() const;
+        uint64_t toUint64() const;
         
         void serialize(ByteArray& out) const;
         void deserialize(ByteArray& in);

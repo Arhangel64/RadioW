@@ -166,3 +166,7 @@ void AppListModel::clearCommands(uint64_t id)
     map[id]->commands.clear();
 }
 
+void AppListModel::clearLog(uint64_t id)
+{
+    map[id]->clearLog();
+}

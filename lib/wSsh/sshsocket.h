@@ -26,6 +26,7 @@ namespace W {
         void open(const QString& address, uint16_t port = 22);
         void close();
         void execute(const QString& command);
+        void interrupt();
         bool isReady() const;
         
     signals:

@@ -33,7 +33,7 @@ namespace M {
         };
         
         Model(const W::Address p_address, QObject* parent = 0);
-        //i'm not sure about copy constructor, it just doesn't make sence, because the address in parameter supposed to be unique
+        //i'm not sure about copy constructor, it just doesn't make sence, because the address is the parameter which is supposed to be unique
         virtual ~Model();
         
         virtual ModelType getType() const = 0;
@@ -49,16 +49,18 @@ namespace M {
         
         void removeHandler(W::Handler* handler);
         void removeModel(M::Model* model);
+        void passToHandler(const W::Event& event) const;
         
     signals:
-        void serviceMessage(const QString& msg);
-        void subscribersCountChange(uint64_t count);
+        void serviceMessage(const QString& msg) const;
+        void subscribersCountChange(uint64_t count) const;
         
     protected:
         W::Address address;
         bool registered;
         
         void response(W::Vocabulary* vc, const W::Address& handlerAddress, const W::Event& src);
+        void fakeResponse(W::Vocabulary* vc, const W::Address& handlerAddress, const W::Address& sourceAddress, const W::Event& src);
         void broadcast(W::Vocabulary* vc, const W::Address& handlerAddress);
         
         handler(subscribe)

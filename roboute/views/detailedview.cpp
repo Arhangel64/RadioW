@@ -13,6 +13,7 @@ DetailedView::DetailedView(QWidget* parent):
     commands(new QListView(dock)),
     connectBtn(new QPushButton(QIcon::fromTheme("state-ok"), "", this)),
     launchBtn(new QPushButton(QIcon::fromTheme("kt-start"), "", this)),
+    clearBtn(new QPushButton(QIcon::fromTheme("trash-empty"), "", this)),
     removeBtn(new QPushButton(QIcon::fromTheme("remove"), "", this)),
     connected(false),
     launched(false),
@@ -48,15 +49,19 @@ DetailedView::DetailedView(QWidget* parent):
     connectBtn->setEnabled(false);
     launchBtn->setToolTip(tr("Launch"));
     launchBtn->setEnabled(false);
+    clearBtn->setToolTip(tr("Clear log"));
+    clearBtn->setEnabled(false);
     removeBtn->setToolTip(tr("Remove"));
     removeBtn->setEnabled(false);
     QObject::connect(connectBtn, SIGNAL(clicked()), this, SLOT(onConnectClick()));
     QObject::connect(launchBtn, SIGNAL(clicked()), this, SLOT(onLaunchClick()));
+    QObject::connect(clearBtn, SIGNAL(clicked()), this, SLOT(onClearClick()));
     QObject::connect(removeBtn, SIGNAL(clicked()), this, SLOT(onRemoveClick()));
     QObject::connect(commands, SIGNAL(doubleClicked(const QModelIndex)), SLOT(onCommandDoubleClicked(const QModelIndex)));
     
     topPanel->addWidget(connectBtn);
     topPanel->addWidget(launchBtn);
+    topPanel->addWidget(clearBtn);
     topPanel->addStretch();
     topPanel->addWidget(removeBtn);
     
@@ -85,6 +90,7 @@ void DetailedView::clear()
     launchBtn->setToolTip(tr("Launch"));
     launchBtn->setEnabled(false);
     launchBtn->setIcon(QIcon::fromTheme("kt-start"));
+    clearBtn->setEnabled(false);
     removeBtn->setEnabled(false);
     connected = false;
     launched = false;
@@ -179,12 +185,14 @@ void DetailedView::setModel(AppModel* p_model)
     setLaunchable(model->getLaunchable());
     setLaunched(model->getLaunched());
     setRemovable(model->id != 0);
+    clearBtn->setEnabled(true);
     delete history;
     QObject::connect(model, SIGNAL(newLogMessage(const QString&)), this, SLOT(appendMessage(const QString&)));
     QObject::connect(model, SIGNAL(changedConnectable(bool)), this, SLOT(setConnectable(bool)));
     QObject::connect(model, SIGNAL(changedConnected(bool)), this, SLOT(setConnected(bool)));
     QObject::connect(model, SIGNAL(changedLaunchable(bool)), this, SLOT(setLaunchable(bool)));
     QObject::connect(model, SIGNAL(changedLaunched(bool)), this, SLOT(setLaunched(bool)));
+    QObject::connect(model, SIGNAL(clearedLog()), this, SLOT(clearedLog()));
     
     QItemSelectionModel *m1 = props->selectionModel();
     props->setModel(&model->props);
@@ -204,6 +212,7 @@ void DetailedView::clearModel()
         QObject::disconnect(model, SIGNAL(changedConnected(bool)), this, SLOT(setConnected(bool)));
         QObject::disconnect(model, SIGNAL(changedLaunchable(bool)), this, SLOT(setLaunchable(bool)));
         QObject::disconnect(model, SIGNAL(changedLaunched(bool)), this, SLOT(setLaunched(bool)));
+        QObject::disconnect(model, SIGNAL(clearedLog()), this, SLOT(clearedLog()));
 
         model = 0;
     }
@@ -275,4 +284,17 @@ uint64_t DetailedView::getModelId()
         throw 1;
     }
     return model->id;
+}
+
+void DetailedView::onClearClick()
+{
+    if (model == 0) {
+        return;
+    }
+    emit clearLog(model->id);
+}
+
+void DetailedView::clearedLog()
+{
+    logArea->clear();
 }

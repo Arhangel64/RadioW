@@ -75,6 +75,7 @@ private slots:
     void attrsToggled(bool checked);
     void commandsToggled(bool checked);
     void onLaunchedCommand(uint64_t id, const QString& name);
+    void clearServiceLog(uint64_t id);
 };
 
 #endif // MAINWINDOW_H

@@ -31,6 +31,7 @@ MainWindow::MainWindow():
     connect(widget->details, SIGNAL(launch(uint64_t)), this, SIGNAL(launchService(uint64_t)));
     connect(widget->details, SIGNAL(stop(uint64_t)), this, SIGNAL(stopService(uint64_t)));
     connect(widget->details, SIGNAL(remove(uint64_t)), this, SIGNAL(removeService(uint64_t)));
+    connect(widget->details, SIGNAL(clearLog(uint64_t)), this, SLOT(clearServiceLog(uint64_t)));
     connect(widget->details, SIGNAL(launchCommand(uint64_t, const QString&)), this, SLOT(onLaunchedCommand(uint64_t, const QString&)));
     
     restoreSettings();
@@ -287,3 +288,7 @@ void MainWindow::commandFormRejected()
     commandForm = 0;
 }
 
+void MainWindow::clearServiceLog(uint64_t id)
+{
+    apps->clearLog(id);
+}

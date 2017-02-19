@@ -7,6 +7,7 @@
 #include <set>
 
 #include <wModel/list.h>
+#include <wModel/vocabulary.h>
 
 #include <wType/string.h>
 #include <wType/address.h>
@@ -26,9 +27,18 @@ public:
     const std::set<uint64_t>& find(const W::String& indexName, const W::Object& value) const;
     std::set<uint64_t> find(const W::Vocabulary& value) const;
     
+    W::Handler* subscribeMember;
+    handler(subscribeMember);
+    
+    void addModel(M::Model* model);
+    void removeModel(M::Model* model);
+    
 private:
     void checkDirAndOpenEnvironment();
     void index();
+    
+private slots:
+    void onChildSubscribersCountChange(uint64_t count);
     
 private:
     typedef std::map<W::String, AbstractIndex*> IndexMap;

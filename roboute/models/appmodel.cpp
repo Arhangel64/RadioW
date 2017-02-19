@@ -91,3 +91,9 @@ void AppModel::setLaunched(bool value)
         emit changedLaunched(launched);
     }
 }
+
+void AppModel::clearLog()
+{
+    log.clear();
+    emit clearedLog();
+}

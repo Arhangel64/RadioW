@@ -170,6 +170,14 @@ bool W::SshSocket::isReady() const
     return state == Authorized;
 }
 
+void W::SshSocket::interrupt()
+{
+    if (state == Authorized) {
+        QMetaObject::invokeMethod(socket, "interrupt", Qt::QueuedConnection);
+    } else {
+        //TODO;
+    }
+}
 
 
 

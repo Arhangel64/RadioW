@@ -114,6 +114,7 @@ var Connector = Subscribable.inherit({
                 node.connected = true;
                 this._commands.enableCommand("connect" + node.name.toString(), false);
                 this._commands.enableCommand("disconnect" + node.name.toString(), true);
+                this.trigger("nodeConnected", node.name.toString());
                 if (!node.outgoing) {
                     node.socket = socket;
                 }
@@ -176,6 +177,8 @@ var Connector = Subscribable.inherit({
                 
                 this._commands.enableCommand("disconnect" + node.name.toString(), false);
                 this._commands.enableCommand("connect" + node.name.toString(), true);
+                
+                this.trigger("disconnectedNode", node.name.toString());
             } else {
                 throw new Error("Something went wrong in connector");;
             }

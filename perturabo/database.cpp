@@ -8,6 +8,7 @@
 
 Database::Database(const W::String& dbName, QObject* parent):
     M::List(W::Address({dbName}), parent),
+    subscribeMember(W::Handler::create(W::Address({}), this, &Database::_h_subscribeMember)),
     name(dbName),
     opened(false),
     environment(lmdb::env::create()),
@@ -15,7 +16,6 @@ Database::Database(const W::String& dbName, QObject* parent):
     indexes(),
     lastIndex(0)
 {
-    
 }
 
 Database::~Database()
@@ -26,6 +26,8 @@ Database::~Database()
     for (; itr != end; ++itr) {
         delete itr->second;
     }
+    
+    delete subscribeMember;
 }
 
 void Database::open()
@@ -234,3 +236,64 @@ W::Vocabulary* Database::getRecord(uint64_t id)
         throw 3;
     }
 }
+
+void Database::h_subscribeMember(const W::Event& ev)
+{
+    const W::Address& addr = ev.getDestination();
+    W::Address lastHops = addr << address.size();
+    
+    if (lastHops.size() == 2 && (lastHops.ends(W::Address{u"subscribe"}) || lastHops.ends(W::Address{u"get"}))) {
+        W::Vocabulary* record;
+        try {
+            record = getRecord(lastHops.front().toUint64());
+            M::Vocabulary* modelRecord = new M::Vocabulary(record, address + lastHops >> 1);
+            if (lastHops.ends(W::Address{u"subscribe"})) {
+                addModel(modelRecord);
+                //passToHandler(ev);  //not sure about this. May be it's better to make this class a friend of M::Model or M::Vocabulary, so i can call handler directly?
+                modelRecord->_h_subscribe(ev);
+            } else {
+                W::Vocabulary* vc = new W::Vocabulary;
+                vc->insert(u"data", record);
+    
+                fakeResponse(vc, W::Address({u"get"}), addr >> 1, ev);
+            }
+        } catch(int err) {
+            if (err == 3) {
+                emit serviceMessage(QString("An attempt to create and subscribe record model in database, but it is not found. Event: ") + ev.toString().c_str());
+            } else {
+                throw err;
+            }
+        }
+    } else {
+        emit serviceMessage(QString("Strange event in custom handler of database ") + ev.toString().c_str());
+    }
+    
+}
+
+void Database::addModel(M::Model* model)
+{
+    connect(model, SIGNAL(subscribersCountChange(uint64_t)), this, SLOT(onChildSubscribersCountChange(uint64_t)));
+    
+    M::List::addModel(model);
+}
+
+void Database::removeModel(M::Model* model)
+{
+    disconnect(model, SIGNAL(subscribersCountChange(uint64_t)), this, SLOT(onChildSubscribersCountChange(uint64_t)));
+    
+    M::List::removeModel(model);
+}
+
+
+void Database::onChildSubscribersCountChange(uint64_t count)
+{
+    if (count == 0) {
+        M::Model* model = static_cast<M::Model*>(sender());
+        
+        removeModel(model);
+        emit serviceMessage(QString("Unregistered model ") + model->getAddress().toString().c_str() + " because there no subscribers left");
+        
+        model->deleteLater();
+    }
+}
+

@@ -259,6 +259,21 @@ void M::Model::response(W::Vocabulary* vc, const W::Address& handlerAddress, con
     server->getConnection(id).send(ev);
 }
 
+void M::Model::fakeResponse(W::Vocabulary* vc, const W::Address& handlerAddress, const W::Address& sourceAddress, const W::Event& src)
+{
+    if (!registered) {
+        emit serviceMessage(QString("An attempt to send event from model ") + address.toString().c_str() + " which was not registered");
+        throw 8;
+    }
+    const W::Vocabulary& svc = static_cast<const W::Vocabulary&>(src.getData());
+    const W::Address& source = static_cast<const W::Address&>(svc.at(u"source"));
+    uint64_t id = src.getSenderId();
+    vc->insert(u"source", sourceAddress);
+    
+    W::Event ev(source + handlerAddress, vc);
+    ev.setSenderId(id);
+    server->getConnection(id).send(ev);
+}
 
 void M::Model::broadcast(W::Vocabulary* vc, const W::Address& handlerAddress)
 {
@@ -295,5 +310,14 @@ void M::Model::removeModel(M::Model* model)
     models->erase(model);
     if (registered) {
         model->unregisterModel();
+    }
+}
+
+void M::Model::passToHandler(const W::Event& event) const
+{
+    if (registered) {
+        dispatcher->pass(event);
+    } else {
+        emit serviceMessage(QString("An attempt to pass event to dispatcher from unregistered model\nModel address ") + address.toString().c_str());
     }
 }

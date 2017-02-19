@@ -35,6 +35,7 @@ public:
     void addCommand(uint64_t id, const QString& key, const QMap<QString, uint64_t>& arguments);
     void removeCommand(uint64_t id, const QString& key);
     void clearCommands(uint64_t id);
+    void clearLog(uint64_t id);
     
 private:
     typedef QMap<uint64_t, AppModel*> Map;

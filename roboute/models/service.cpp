@@ -266,6 +266,7 @@ void Service::disconnect()
         emit serviceMessage("disconnecting");
         emit disconnecting();
         emit stopped();
+        dataSsh->interrupt();
         dataSsh->close();
         commandSsh->close();
     }

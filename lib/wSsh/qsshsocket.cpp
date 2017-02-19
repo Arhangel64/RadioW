@@ -175,3 +175,11 @@ void QSshSocket::lib_ssh_init()
     ssh_threads_set_callbacks(ssh_threads_get_pthread());
     ssh_init();
 }
+
+void QSshSocket::interrupt()
+{
+    if (executing) {
+        ssh_channel_request_send_signal(command->channel, "INT");
+    }
+}
+

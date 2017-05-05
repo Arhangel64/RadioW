@@ -6,61 +6,39 @@ var NavigationPanel = require("./navigationPanel");
 var ThemeSelecter = require("./themeSelecter");
 var Theme = require("./theme");
 
-var ViewString = require("../../views/string");
-var ViewNavigationPanel = require("../../views/navigationPanel");
-
 var GlobalControls = List.inherit({
     "className": "GlobalControls",
-    "constructor": function(address, ml) {
+    "constructor": function(address) {
         List.fn.constructor.call(this, address);
-        
-        this._layout = ml;
     },
-    "_h_get": function(ev) {
-        List.fn._h_get.call(this, ev);
+    "addElement": function(vc) {
+        List.fn.addElement.call(this, vc);
         
-        var size = this._data.size();
-        for (var i = 0; i < size; ++i) {
-            this._createControl(this._data.at(i));
-        }
-    },
-    "_h_push": function(ev) {
-        List.fn._h_push.call(this, ev);
-        
-        var i = this._data.size() - 1;
-        this._createControl(this._data.at(i));
-    },
-    "_createControl": function(vc) {
         var name = vc.at("name").toString();
         var type = vc.at("type").toString();
         var addr = vc.at("address");
+        var ctrl;
+        var supported = true;
         
         switch (name) {
             case "version":
-                var vm = new String(addr.clone());
-                this.addController(vm);
-                var vv = new ViewString({maxHeight: 15});
-                vv.addProperty({p: "backgroundColor", k:"secondaryColor"});
-                vv.addProperty({p: "color", k:"secondaryFontColor"});
-                vv.addProperty({p: "fontFamily", k:"smallFont"});
-                vv.addProperty({p: "fontSize", k:"smallFontSize"});
-                this._layout.append(vv, 2, 0, 1, 3);
-                vm.addView(vv);
+                ctrl = new String(addr.clone());
                 break;
             case "navigationPanel":
-                var npm = new NavigationPanel(addr.clone());
-                this.addController(npm);
-                var vnp = new ViewNavigationPanel();
-                this._layout.append(vnp, 0, 0, 1, 3);
-                npm.addView(vnp);
+                ctrl = new NavigationPanel(addr.clone());
                 break;
             case "themes":
-                var ts = new ThemeSelecter(addr.clone());
-                this.addController(ts);
-                ts.on("selected", this._onThemeSelected, this);
+                ctrl = new ThemeSelecter(addr.clone());
+                ctrl.on("selected", this._onThemeSelected, this);
                 break;
             default:
-                this.trigger("Unsupported global control: " + name + " (" + type + ")", 1);
+                supported = false;
+                this.trigger("serviceMessage", "Unsupported global control: " + name + " (" + type + ")", 1);
+                break;
+        }
+        if (supported) {
+            ctrl.name = name;
+            this.addController(ctrl);
         }
     },
     "_onThemeReady": function(theme) {

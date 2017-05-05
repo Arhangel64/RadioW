@@ -4,26 +4,32 @@
     
     var defineArray = [];
     defineArray.push("views/gridLayout");
+    defineArray.push("views/nav");
     defineArray.push("views/view");
+    defineArray.push("lib/wController/localModel");
     
     define(moduleName, defineArray, function navigationPanel_module() {
         var GridLayout = require("views/gridLayout");
+        var Nav = require("views/nav");
         var View = require("views/view");
+        var LocalModel = require("lib/wController/localModel");
         
         var NavigationPanel = GridLayout.inherit({
             "className": "NavigationPanel",
-            "constructor": function(options) {
+            "constructor": function(controller, options) {
                 var base = {
                     minHeight: 50,
                     maxHeight: 50
                 };
                 W.extend(base, options)
-                GridLayout.fn.constructor.call(this, base);
+                GridLayout.fn.constructor.call(this, controller, base);
                 
-                this._spacer = new View();
+                this._spacerHelper = new LocalModel();
+                this._spacer = new View(this._spacerHelper);
             },
             "destructor": function() {
                 this._spacer.destructor();
+                this._spacerHelper.destructor();
                 
                 GridLayout.fn.destructor.call(this);
             },
@@ -31,10 +37,16 @@
                 this._spacer.remove();
                 GridLayout.fn.clear.call(this);
             },
-            "push": function(element) {
+            "_onNewController": function(controller) {
                 this._spacer.remove();
-                this.append(element, 0, this._c.length, 1, 1);
+                var nav = new Nav(controller);
+                this.append(nav, 0, this._c.length, 1, 1);
                 this.append(this._spacer, 0, this._c.length, 1, 1);
+                
+                nav.on("activate", this._onNavActivate, this);
+            },
+            "_onNavActivate": function(address) {
+                lorgar.changePage(address);
             }
         });
         

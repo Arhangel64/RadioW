@@ -67,6 +67,11 @@ var Magnus = Subscribable.inherit({
         this._commands = new Commands(new Address(["management"]));
         
         var version = new ModelString(new Address(["version"]), this._cfg.get("version"));
+        version.addProperty("backgroundColor","secondaryColor");
+        version.addProperty("color", "secondaryFontColor");
+        version.addProperty("fontFamily", "smallFont");
+        version.addProperty("fontSize", "smallFontSize");
+        
         this._attributes = new Attributes(new Address(["attributes"]));
         this._gc = new GlobalControls(new Address(["magnus", "gc"]));
         this._ps = new PageStorage(new Address(["magnus", "ps"]))

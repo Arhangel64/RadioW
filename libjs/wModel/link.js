@@ -1,8 +1,12 @@
 "use strict";
 
 var Model = require("./model");
+var ModelString = require("./string")
+
 var String = require("../wType/string");
+
 var Vocabulary = require("../wType/vocabulary");
+var Address = require("../wType/address");
 
 var Link = Model.inherit({
     "className": "Link",
@@ -12,13 +16,22 @@ var Link = Model.inherit({
         this.addHandler("get");
         
         this._targetAddress = tAddress;
-        this._text = new String(text);
+        
+        var hop = new Address(["label"]);
+        this.label = new ModelString(addr["+"](hop), text);
+        this.addModel(this.label);
+        
+        hop.destructor();
+    },
+    "destructor": function() {
+        this._targetAddress.destructor();
+        
+        Model.fn.destructor.call(this);
     },
     "_h_get": function(ev) {
         var vc = new Vocabulary();
         
         vc.insert("targetAddress", this._targetAddress.clone());
-        vc.insert("text", this._text.clone());
         this.response(vc, "get", ev);
     },
     "_h_subscribe": function(ev) {

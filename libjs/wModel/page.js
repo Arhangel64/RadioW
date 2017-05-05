@@ -14,13 +14,14 @@ var Page = List.inherit({
         this.addProperty("backgroundColor", "mainColor");
         this.addProperty("color", "mainFontColor");
     },
-    "addItem": function(model, row, col, rowspan, colspan, aligment, viewOptions) {
+    "addItem": function(model, row, col, rowspan, colspan, aligment, viewType, viewOptions) {
         List.fn.addModel.call(this, model);
         
         var vc = new Vocabulary();
         viewOptions = viewOptions || new Vocabulary();
+        viewType = viewType || new UInt64(Page.getModelTypeId(model))
         
-        vc.insert("type", new String(model.className));
+        vc.insert("type", new UInt64(Page.getModelTypeId(model)));
         vc.insert("address", model.getAddress());
         vc.insert("row", new UInt64(row || 0));
         vc.insert("col", new UInt64(col || 0));
@@ -28,6 +29,7 @@ var Page = List.inherit({
         vc.insert("colspan", new UInt64(colspan || 1));
         vc.insert("aligment", new UInt64(aligment || Page.Aligment.LeftTop));
         vc.insert("viewOptions", viewOptions);
+        vc.insert("viewType", viewType);
         
         this.push(vc);
     }

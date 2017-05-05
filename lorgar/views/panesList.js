@@ -5,14 +5,16 @@
     var defineArray = [];
     defineArray.push("views/view");
     defineArray.push("views/layout");
+    defineArray.push("views/label");
     
     define(moduleName, defineArray, function panesList_module() {
         var View = require("views/view");
         var Layout = require("views/layout");
+        var Label = require("views/label");
         
         var PanesList = Layout.inherit({
             "className": "PanesList",
-            "constructor": function PanesListView(options) {
+            "constructor": function PanesListView(controller, options) {
                 var base = {
                     nestWidth: 100,
                     nestHeight: 100,
@@ -20,7 +22,7 @@
                     scrollable: Layout.Scroll.Vertical
                 };
                 W.extend(base, options);
-                Layout.fn.constructor.call(this, base);
+                Layout.fn.constructor.call(this, controller, base);
                 
                 this._overflown = false;
                 this._rows = 0;
@@ -47,6 +49,10 @@
                     this._positionElement(this._c.length - 1);
                     this._recalculateRows();
                 }
+            },
+            "_onNewController": function(ctrl) {
+                var label = new Label(ctrl);
+                this.append(label);
             },
             "_positionElement": function(index) {
                 var row = Math.floor(index / this._cols);

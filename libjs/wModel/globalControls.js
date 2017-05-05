@@ -47,9 +47,9 @@ var GlobalControls = List.inherit({
         var vc = new Vocabulary();
         
         var model = new ModelLink(this._np._address["+"](new Address(["" + this._np._data.size()])), name, address);
-        model.addProperty("fontSize", "largeFontSize");
-        model.addProperty("fontFamily", "largeFont");
-        model.addProperty("color", "primaryFontColor");
+        model.label.addProperty("fontSize", "largeFontSize");
+        model.label.addProperty("fontFamily", "largeFont");
+        model.label.addProperty("color", "primaryFontColor");
         this._np.addModel(model);
         
         vc.insert("address", model.getAddress());

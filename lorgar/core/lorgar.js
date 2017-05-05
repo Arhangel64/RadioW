@@ -17,12 +17,13 @@
     defineArray.push("lib/wController/globalControls");
     defineArray.push("lib/wController/pageStorage");
     defineArray.push("lib/wController/page");
-    defineArray.push("lib/wController/link");
+    defineArray.push("lib/wController/localModel");
     
     defineArray.push("views/view");
     defineArray.push("views/layout");
     defineArray.push("views/gridLayout");
     defineArray.push("views/page");
+    defineArray.push("views/mainLayout");
     
     define(moduleName, defineArray, function lorgar_module() {
         var Class = require("lib/utils/class");
@@ -39,12 +40,13 @@
         var GlobalControls = require("lib/wController/globalControls");
         var PageStorage = require("lib/wController/pageStorage");
         var PageController = require("lib/wController/page");
-        var LinkController = require("lib/wController/link");
+        var LocalModel = require("lib/wController/localModel");
         
         var View = require("views/view");
         var Layout = require("views/layout");
         var GridLayout = require("views/gridLayout");
         var Page = require("views/page");
+        var MainLayout = require("views/mainLayout");
         
         var Lorgar = Class.inherit({
             "className": "Lorgar",
@@ -52,25 +54,27 @@
                 Class.fn.constructor.call(this);
                 
                 this._currentPageCtl = undefined;
-                this._currentTheme = {};
                 
                 this._initDispatcher();
                 this._initMagnusSocket();
                 this._initCoraxSocket();
-                this._initViews();
                 this._initModels();
-                
-                LinkController.registerChangePageHandler(this.changePage, this);
+                this._initViews();
                 
                 this.connectMagnus();
                 //this.connectCorax();
             },
             "destructor": function() {
                 if (this._currentPageCtl) {
+                    this._currentPage.destructor();
                     this._currentPageCtl.destructor();
                 }
                 
                 this._gc.destructor();
+                this._ps.destructor();
+                this._mainColorHelper.destructor();
+                this._emptyHelper.destructor();
+                
                 this._body.destructor();
                 
                 this.coraxSocket.close();
@@ -84,7 +88,7 @@
                 Class.fn.destructor.call(this);
             },
             "changePage": function(addr) {
-                this._initPageController(addr);
+                this._initPageController(addr.clone());
             },
             "connectCorax": function() {
                 this.coraxSocket.open("localhost", 8080);
@@ -122,8 +126,11 @@
                 this.magnusSocket.on("message", this.dispatcher.pass, this.dispatcher);
             },
             "_initModels": function() {
-                this._gc = new GlobalControls(new Address(["magnus", "gc"]), this._mainLayout);
+                this._gc = new GlobalControls(new Address(["magnus", "gc"]));
                 this._ps = new PageStorage(new Address(["magnus", "ps"]));
+                
+                this._mainColorHelper = new LocalModel({backgroundColor: "mainColor"});
+                this._emptyHelper = new LocalModel();
                 
                 this._gc.on("themeSelected", this.setTheme, this);
                 
@@ -132,18 +139,18 @@
             },
             "_initPageController": function(addr) {
                 if (this._currentPageCtl) {
+                    this._currentPage.destructor();
                     this._currentPageCtl.destructor();
                 }
-                this._currentPage.clear();
                 this._currentPageCtl = new PageController(addr);
                 this._currentPageCtl.register(this.dispatcher, this.magnusSocket);
-                this._currentPageCtl.addView(this._currentPage);
+                this._currentPage = new Page(this._currentPageCtl);
                 this._currentPageCtl.subscribe();
+                this._mainLayout.append(this._currentPage, 1, 1, 1, 1);
             },
             "_initViews": function() {
-                this._body = new Layout();
-                this._currentPage = new Page();
-                this._mainLayout = new GridLayout(this._currentTheme);
+                this._body = new Layout(this._emptyHelper);
+                this._mainLayout = new MainLayout(this._gc);
                 
                 document.body.innerHTML = "";
                 document.body.appendChild(this._body._e);
@@ -151,16 +158,13 @@
                 
                 this._body.setSize(document.body.offsetWidth, document.body.offsetHeight);
                 this._body.append(this._mainLayout);
-                var spacerL = new View({
+                var spacerL = new View(this._mainColorHelper, {
                     maxWidth: 50
                 });
-                spacerL.addProperty({p: "backgroundColor", k: "mainColor"});
-                var spacerR = new View({
+                var spacerR = new View(this._mainColorHelper, {
                     maxWidth: 50
                 });
-                spacerR.addProperty({p: "backgroundColor", k: "mainColor"});
                 this._mainLayout.append(spacerL, 1, 0, 1, 1);
-                this._mainLayout.append(this._currentPage, 1, 1, 1, 1);
                 this._mainLayout.append(spacerR, 1, 2, 1, 1);
             },
             "_magnusSocketConnected": function() {
@@ -182,8 +186,7 @@
                 this._body.setSize(document.body.offsetWidth, document.body.offsetHeight);
             },
             "setTheme": function(theme) {
-                this._currentTheme = theme;
-                this._mainLayout.applyTheme(theme);
+                View.setTheme(theme);
             }
         });
         

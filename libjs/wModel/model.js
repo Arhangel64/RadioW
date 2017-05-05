@@ -290,6 +290,10 @@ var Model = Subscribable.inherit({
     }
 });
 
+Model.getModelTypeId = function(model) {
+    return this.ModelType[model.className];
+}
+
 Model.addressOrder = AbstractOrder.template(Address);
 Model.ModelType = {
     String:     0,

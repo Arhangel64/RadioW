@@ -3,7 +3,6 @@ var List = require("./list");
 var String = require("./string");
 var PanesList = require("./panesList");
 
-var ViewString = require("../../views/string");
 var ViewPanesList = require("../../views/panesList");
 
 var Vocabulary = require("../wType/vocabulary");
@@ -13,77 +12,45 @@ var Page = List.inherit({
     "className": "Page",
     "constructor": function(addr) {
         List.fn.constructor.call(this, addr);
-    },
-    "addController": function(ctrl) {
-        List.fn.addController.call(this, ctrl);
         
-        if (this._views.length) {
-            var index = this._controllers.indexOf(ctrl);
-            var vc = this._data.at(index);
-        
-            var col = vc.at("col").valueOf();
-            var row = vc.at("row").valueOf();
-            var colspan = vc.at("colspan").valueOf();
-            var rowspan = vc.at("rowspan").valueOf();
-            var aligment = vc.at("aligment").valueOf();
-            var type = vc.at("type").valueOf();
-            var opts = Page.deserializeOptions(vc.at("viewOptions"));
-            
-            if (!collection[type]) {
-                throw new Error("Unsupported view element on the page");
-            }
-            var View = collection[type].view;
-        
-            for (var i = 0; i < this._views.length; ++i) {
-                var view = new View(opts);
-                ctrl.addView(view)
-                this._views[i].append(view, row, col, rowspan, colspan, aligment);
-            }
-        }
+        this.elements = [];
     },
     "addElement": function(element) {
+        List.fn.addElement.call(this, element);
+        
         var type = element.at("type").valueOf();
         var address = element.at("address").clone();
+        var col = element.at("col").valueOf();
+        var row = element.at("row").valueOf();
+        var colspan = element.at("colspan").valueOf();
+        var rowspan = element.at("rowspan").valueOf();
+        var aligment = element.at("aligment").valueOf();
+        var viewType = element.at("viewType").valueOf();
+        var opts = Page.deserializeOptions(element.at("viewOptions"));
         
-        
-        if (!collection[type]) {
-            throw new Error("Unsupported view element on the page");
-        }
-        var Controller = collection[type].controller;
-        var controller = new Controller(address);
+        var controller = Page.createByType(type, address);
         this.addController(controller);
         
-        List.fn.addElement.call(this, element);
-    },
-    "addView": function(view) {
-        List.fn.addView.call(this, view);
-        
-        for (var i = 0; i < this._controllers.length; ++i) {
-            var vc = this._data.at(i);
-            
-            var col = vc.at("col").valueOf();
-            var row = vc.at("row").valueOf();
-            var colspan = vc.at("colspan").valueOf();
-            var rowspan = vc.at("rowspan").valueOf();
-            var aligment = vc.at("aligment").valueOf();
-            var type = vc.at("type").valueOf();
-            var opts = Page.deserializeOptions(vc.at("viewOptions"));
-            
-            if (!collection[type]) {
-                throw new Error("Unsupported view element on the page");
-            }
-            var Element = collection[type].view;
-            var elem = new Element(opts);
-            this._controllers[i].addView(elem)
-            view.append(elem, row, col, rowspan, colspan, aligment);
+        var el = {
+            type: type,
+            col: col,
+            row: row,
+            colspan: colspan,
+            rowspan: rowspan,
+            aligment: aligment,
+            viewType: viewType,
+            viewOptions: opts,
+            controller: controller
         }
+        this.elements.push(el);
+        this.trigger("newPageElement", el);
+    },
+    "clear": function() {
+        this.elements = [];
+        
+        List.fn.clear.call(this);
     }
 });
-
-var collection = {
-    "String": {controller: String, view: ViewString},
-    "PanesList": {controller: PanesList, view: ViewPanesList}
-};
 
 
 Page.deserializeOptions = function(vc) {

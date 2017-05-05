@@ -12,13 +12,13 @@
         
         var Layout = View.inherit({
             "className": "Layout",
-            "constructor": function(options) {
+            "constructor": function(controller, options) {
                 var base = {
                     scrollable: Layout.Scroll.None
                 };
                 W.extend(base, options);
                 var element = document.createElement("div");
-                View.fn.constructor.call(this, base, element);
+                View.fn.constructor.call(this, controller, base, element);
                 
                 this._c = [];
                 
@@ -38,7 +38,6 @@
                 View.fn.destructor.call(this);
             },
             "_addChild": function(child, aligment) {
-                child.applyTheme(this._currentTheme);
                 aligment = aligment || 1;
                 this._c.push({
                     c: child,
@@ -64,13 +63,6 @@
                 
                 if (this._w !== undefined && this._h !== undefined) {
                     child.setSize(this._w, this._h);
-                }
-            },
-            "applyTheme": function(theme) {
-                View.fn.applyTheme.call(this, theme);
-                
-                for (var i = 0; i < this._c.length; ++i) {
-                    this._c[i].c.applyTheme(theme);
                 }
             },
             "clear": function() {

@@ -6,18 +6,16 @@ var String = Controller.inherit({
     "constructor": function(addr) {
         Controller.fn.constructor.call(this, addr);
         
-        this._data = "";
+        this.data = "";
         
         this.addHandler("get");
     },
     "_h_get": function(ev) {
         var data = ev.getData();
         
-        this._data = data.at("data").toString();
+        this.data = data.at("data").toString();
         
-        for (var i = 0; i < this._views.length; ++i) {
-            this._views[i].data(this._data);
-        }
+        this.trigger("data", this.data);
     }
 });
 

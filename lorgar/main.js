@@ -15,8 +15,10 @@
         var Test = require("test/test");
         var Lorgar = require("core/lorgar");
         var Controller = require("lib/wController/controller");
+        var View = require("views/view");
         
-        Controller.initialize(["String", "List", "Vocabulary"]);
+        Controller.initialize(["String", "List", "Vocabulary", "Page"]);
+        View.initialize(["Label", "Page"]);
         
         var test = new Test();
         test.run();

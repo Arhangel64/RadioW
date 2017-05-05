@@ -1,39 +1,34 @@
 "use strict";
 var Controller = require("./controller");
+var Vector = require("../wType/vector");
 
 var List = Controller.inherit({
     "className": "List",
     "constructor": function(addr) {
         Controller.fn.constructor.call(this, addr);
         
-        this._data = undefined;
+        this.data = new Vector();
         
         this.addHandler("get");
         this.addHandler("push");
         this.addHandler("clear");
     },
     "destructor": function() {
-        if (this._data) {
-            this._data.destructor();
-        }
+        this.data.destructor();
         
         Controller.fn.destructor.call(this);
     },
     "addElement": function(element) {
+        this.data.push(element);
         this.trigger("newElement", element);
     },
     "clear": function() {
-        if (this._data) {
-            this._data.destructor();
-        }
+        this.data.clear();
         
         while (this._controllers.length) {
             var controller = this._controllers[this._controllers.length - 1]
             this._removeController(controller);
             controller.destructor();
-        }
-        for (var i = 0; i < this._views.length; ++i) {
-            this._views[i].clear();
         }
         
         this.trigger("clear");
@@ -44,18 +39,16 @@ var List = Controller.inherit({
     "_h_get": function(ev) {
         this.clear();
         
-        var data = ev.getData();
-        this._data = data.at("data").clone();
-        var size = this._data.size();
+        var data = ev.getData().at("data");
+        var size = data.size();
         for (var i = 0; i < size; ++i) {
-            this.addElement(this._data.at(i));
+            this.addElement(data.at(i).clone());
         }
     },
     "_h_push": function(ev) {
         var data = ev.getData();
         
         var element = data.at("data").clone();
-        this._data.push(element);
         this.addElement(element);
     }
 });

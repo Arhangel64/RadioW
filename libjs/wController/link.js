@@ -1,55 +1,38 @@
 "use strict";
 
 var Controller = require("./controller");
+var String = require("./string");
+
+var Address = require("../wType/address");
 
 var Link = Controller.inherit({
     "className": "Link",
     "constructor": function(addr) {
         Controller.fn.constructor.call(this, addr);
         
-        this._targetAddress = undefined;
-        this._text = undefined;
+        var hop = new Address(["label"]);
+        
+        this.targetAddress = new Address([]);
+        this.label = new String(addr['+'](hop));
+        
+        this.addController(this.label);
         
         this.addHandler("get");
+        
+        hop.destructor();
     },
     "destructor": function() {
-        for (var i = 0; i < this._views.length; ++i) {
-            this._views[i].off("activate", this._onViewActivate, this);
-        }
+        this.targetAddress.destructor();
         
         Controller.fn.destructor.call(this);
     },
-    "addView": function(view) {
-        Controller.fn.addView.call(this, view);
-        
-        view.on("activate", this._onViewActivate, this);
-    },
     "_h_get": function(ev) {
         var data = ev.getData();
+
+        this.targetAddress = data.at("targetAddress").clone();
         
-        this._text = data.at("text").toString();
-        this._targetAddress = data.at("targetAddress").clone();
-        
-        for (var i = 0; i < this._views.length; ++i) {
-            this._views[i].data(this._text);
-        }
-    },
-    "_onViewActivate": function() {
-        var addr = this._targetAddress.clone();
-        setTimeout(function() {                             //TODO post triggering!
-            Link.changePage(addr);
-        }, 1);
+        this.trigger("data", this.targetAddress);
     }
 });
-
-Link.changePage = function(addr) {
-    for (var i = 0; i < this._changePageHandlers.length; ++i) {
-        this._changePageHandlers[i].mth.call(this._changePageHandlers[i].ctx, addr);
-    }
-}
-Link._changePageHandlers = [];
-Link.registerChangePageHandler = function(mth, ctx) {
-    this._changePageHandlers.push({mth: mth, ctx: ctx});
-}
 
 module.exports = Link;

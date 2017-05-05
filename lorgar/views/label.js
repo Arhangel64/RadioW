@@ -1,87 +1,64 @@
 "use strict";
-(function view_string_js() {
-    var moduleName = "views/string";
+(function view_label_js() {
+    var moduleName = "views/label";
     
     var defineArray = [];
     defineArray.push("views/view");
     
-    define(moduleName, defineArray, function view_string_module() {
+    define(moduleName, defineArray, function view_label_module() {
         var View = require("views/view");
         
-        var ViewString = View.inherit({
-            "className": "String",
-            "constructor": function(options) {
-                var base = {
-                    singleLine: false,
-                    
-                };
+        var Label = View.inherit({
+            "className": "Label",
+            "constructor": function(controller, options) {
+                var base = {};
                 W.extend(base, options)
-                View.fn.constructor.call(this, base);
+                View.fn.constructor.call(this, controller, base);
                 
-                if (this._o.singleLine) {
-                    this.on("measuresChanged", this._onMeasuresChanged, this);
-                }
+                this._timeout = undefined;
+                this._recalculationScheduled = false;
             },
-            "_applyProp": function(pair) {
-                var counter = 0;
-                var value = this._currentTheme[pair.k];
-                if (value) {
-                    if (this._e.style[pair.p] !== value) {
-                        this._e.style[pair.p] = value;
-                        if (pair.p === "fontSize" || pair.p === "fontFamily") {
-                            return true;
-                        }
-                    }
+            "destructor": function() {
+                if (this._recalculationScheduled) {
+                    clearTimeout(this._timeout);
                 }
-                return false;
-            },
-            "applyTheme": function(theme) {
-                this._currentTheme = theme;
-                var counter = 0;
                 
-                for (var i = 0; i < this._styleProperties.length; ++i) {
-                    if (this._applyProp(this._styleProperties[i])) {
-                        ++counter;
-                    }
-                }
-                if (counter > 0) {
-                    this.trigger("measuresChanged");
+                View.fn.destructor.call(this);
+            },
+            "_onAddProperty": function(key, propertyName) {
+                View.fn._onAddProperty.call(this, key, propertyName);
+                
+                if (sizeChangingProperties.indexOf(propertyName) !== -1) {
+                    this._scheduleRecalculation();
                 }
             },
-            "data": function(data) {
+            "_onData": function(data) {
                 if (this._e.innerText !== data) {
                     this._e.innerText = data;
-                    this.trigger("measuresChanged");
-                }
-                
-            },
-            "getFontSize": function() {
-                var fs = this._e.style.fontSize;
-                if (!fs) {
-                    return 16;
-                } else {
-                    return parseInt(fs);
+                    this._scheduleRecalculation();
                 }
             },
-            "_initElement": function() {
-                View.fn._initElement.call(this);
-                
-                if (this._o.singleLine) {
-                    this._e.style.whiteSpace = "nowrap";
-                }
-            },
-            "_onMeasuresChanged": function() {
+            "_recalculateSize": function() {
                 var fs = parseFloat(this._e.style.fontSize) || 16;
                 var fontFamily = this._e.style.fontFamily || "Liberation";
                 
                 var h = fs + 2;
-                var w = ViewString.calculateSingleString(fontFamily, fs, this._e.innerText || "");
+                var w = Label.calculateSingleString(fontFamily, fs, this._e.innerText || "");
                 this.setConstSize(w, h);
+                this._recalculationScheduled = false;
+            },
+            "_scheduleRecalculation": function() {
+                if (!this._recalculationScheduled) {
+                    this._timeout = setTimeout(this._recalculateSize.bind(this), 10);
+                    this._recalculationScheduled = true;
+                }
             }
         });
         
-        ViewString.calculateSingleString = function(family, size, string) {
-            var fontStorage = ViewString[family] || ViewString["Liberation"];
+        var sizeChangingProperties = ["fontSize", "fontFamily", "whiteSpace"];
+        
+        Label.calculateSingleString = function(family, size, string) {
+            var fontStorage = Label[family] || Label["Liberation"];
             
             var width = 0;
             
@@ -94,7 +71,7 @@
             return Math.ceil(width);
         };
         
-        ViewString.Liberation = {  //Sans, measured on 18px size, not sure about the space, and not sure, how to calculate interval between letters
+        Label.Liberation = {  //Sans, measured on 18px size, not sure about the space, and not sure, how to calculate interval between letters
             " ": 5, //?
             "!": 5,
             "\"": 7,
@@ -286,6 +263,6 @@
             "я": 9
         };
         
-        return ViewString;
+        return Label;
     });
 })();

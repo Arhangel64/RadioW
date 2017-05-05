@@ -17,21 +17,15 @@ var Controller = Subscribable.inherit({
         this._pairAddress = addr;
         this._address = new Address([this.className.toString() + counter++]);
         
-        this._views = [];
         this._handlers = [];
         this._controllers = [];
-        this._props = [];
+        this.properties = [];
         
         this.addHandler("properties");
     },
     "destructor": function() {
         var i;
-        var j;
-        for (i = 0; i < this._views.length; ++i) {
-            for (j = 0; j < this._props.length; ++j) {
-                this._views[i].removeProperty(this._props[j]);
-            }
-        }
+
         if (this._subscribed) {
             this.unsubscribe();
         }
@@ -77,36 +71,18 @@ var Controller = Subscribable.inherit({
             this._dp.registerHandler(handler);
         }
     },
-    "addView": function(view) {
-        this._views.push(view);
-        
-        for (var i = 0; i < this._props.length; ++i) {
-            view.addProperty(this._props[i]);
-        }
-    },
     "_h_properties": function(ev) {
-        var i;
-        var j;
-        for (i = 0; i < this._views.length; ++i) {
-            for (j = 0; j < this._props.length; ++j) {
-                this._views[i].removeProperty(this._props[j]);
-            }
-        }
-        this._props = [];
+        this.trigger("clearProperties");
+        this.properties = [];
         var data = ev.getData();
         var list = data.at("properties");
         var size = list.size();
-        for (i = 0; i < size; ++i) {
+        for (var i = 0; i < size; ++i) {
             var vc = list.at(i);
             var pair = {p: vc.at("property").toString(), k: vc.at("key").toString()};
-            this._props.push(pair);
+            this.properties.push(pair);
+            this.trigger("addProperty", pair.k, pair.p);
         }
-        for (i = 0; i < this._views.length; ++i) {
-            for (j = 0; j < this._props.length; ++j) {
-                this._views[i].addProperty(this._props[j]);
-            }
-        }
-        
     },
     "_onControllerServiceMessage": function(msg, severity) {
         this.trigger("serviceMessage", msg, severity);

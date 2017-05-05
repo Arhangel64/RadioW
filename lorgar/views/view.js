@@ -7,12 +7,13 @@
     defineArray.push("views/helpers/draggable");
     
     define(moduleName, defineArray, function view_module() {
+        var counter = 0;
         var Subscribable = require("lib/utils/subscribable");
         var Draggable = require("views/helpers/draggable");
         
         var View = Subscribable.inherit({
             "className": "View",
-            "constructor": function(options, element) {
+            "constructor": function(controller, options, element) {
                 Subscribable.fn.constructor.call(this);
                 
                 var base = {
@@ -24,30 +25,46 @@
                 };
                 W.extend(base, options);
                 
+                this._id = ++counter;
                 this._o = base;
+                this._f = controller;
                 if (element) {
                     this._e = element;
                 } else {
                     this._e = document.createElement("div");
                 }
-                this._styleProperties = [];
                 this._p = undefined;
                 this._w = undefined;
                 this._h = undefined;
-                this._currentTheme = {};
                 this._x = 0;
                 this._y = 0;
                 
                 this._initElement();
+                
                 if (this._o.draggable) {
                     this._initDraggable();
                 }
+                
+                this._f.on("data", this._onData, this);
+                this._f.on("clearProperties", this._onClearProperties, this);
+                this._f.on("addProperty", this._onAddProperty, this);
+                this._f.on("newController", this._onNewController, this);
+                
+                View.collection[this._id] = this;
+                this._applyProperties();
             },
             "destructor": function() {
+                this._f.off("data", this._onData, this);
+                this._f.off("clearProperties", this._onClearProperties, this);
+                this._f.off("addProperty", this._onAddProperty, this);
+                this._f.off("newController", this._onNewController, this);
+                
                 this.remove()
                 if (this._o.draggable) {
                     this._dg.destructor();
                 }
+                
+                delete View[this._id];
                 
                 Subscribable.fn.destructor.call(this);
             },
@@ -58,20 +75,10 @@
                     this._e.className = arr.join(" ");
                 }
             },
-            "addProperty": function(pair) {
-                this._styleProperties.push(pair);
-                this._applyProp(pair);
-            },
-            "_applyProp": function(pair) {
-                var value = this._currentTheme[pair.k];
-                if (value) {
-                    this._e.style[pair.p] = value;
-                }
-            },
-            "applyTheme": function(theme) {
-                this._currentTheme = theme;
-                for (var i = 0; i < this._styleProperties.length; ++i) {
-                    this._applyProp(this._styleProperties[i]);
+            "_applyProperties": function() {
+                for (var i = 0; i < this._f.properties.length; ++i) {
+                    var prop = this._f.properties[i];
+                    this._onAddProperty(prop.k, prop.p);
                 }
             },
             "constrainHeight": function(h) {
@@ -86,9 +93,6 @@
                 
                 return w;
             },
-            "data": function(data) {
-                
-            },
             "_initDraggable": function() {
                 this._dg = new Draggable(this, {});
             },
@@ -99,6 +103,26 @@
                 this._e.style.boxSizing = "border-box";
                 this._e.style.overflow = "hidden";
             },
+            "_onAddProperty": function(key, propertyName) {
+                var value = View.theme[key];
+                if (value) {
+                    this._e.style[propertyName] = value;
+                }
+            },
+            "_onClearProperties": function() {
+                for (var key in this._e.style) {
+                    if (this._e.style.hasOwnProperty(key)) {
+                        delete this._e.style[key];
+                    }
+                }
+                this._initElement();
+                this._e.style.left = this._x + "px";
+                this._e.style.top = this._y + "px";
+                this._e.style.width = this._w + "px";
+                this._e.style.height = this._h + "px";
+            },
+            "_onData": function() {},
+            "_onNewController": function() {},
             "remove": function() {
                 if (this._p) {
                     this._p.removeChild(this);
@@ -117,14 +141,9 @@
                     this._e.className = arr.join(" ");
                 }
             },
-            "removeProperty": function(pair) {
-                var index = this._styleProperties.indexOf(pair);
-                if (index !== -1) {
-                    this._styleProperties.splice(index, 1);
-                    this._e.style[pair.p] = "";
-                    this.applyTheme(this._currentTheme);
-                }
-                
+            "_resetTheme": function() {
+                this._onClearProperties();
+                this._applyProperties();
             },
             "setConstSize": function(w, h) {
                 this._o.maxWidth = w;
@@ -179,6 +198,69 @@
                 return !(w < this._o.minWidth || h < this._o.minHeight || w > this._o.maxWidth || h > this._o.maxHeight)
             }
         });
+        
+        View.theme = Object.create(null);
+        View.collection = Object.create(null);
+        View.setTheme = function(theme) {
+            this.theme = theme;
+            
+            for (var id in this.collection) {
+                this.collection[id]._resetTheme();
+            }
+        }
+        
+        View.createByType = function(type, ctrl, opts) {
+            var typeName = this.ReversedViewType[type];
+            if (typeName === undefined) {
+                throw new Error("Unknown ViewType: " + type);
+            }
+            var Type = this.constructors[typeName];
+            if (Type === undefined) {
+                throw new Error("Constructor is not loaded yet, something is wrong");
+            }
+            return new Type(ctrl, opts);
+        }
+
+        View.initialize = function(rc) {
+            var deps = [];
+            var types = [];
+            for (var key in this.ViewTypesPaths) {
+                if (this.ViewTypesPaths.hasOwnProperty(key)) {
+                    if (!rc || rc.indexOf(key) !== -1) {
+                        deps.push(this.ViewTypesPaths[key]);
+                        types.push(key);
+                    }
+                }
+            }
+            require(deps, function() {
+                for (var i = 0; i < types.length; ++i) {
+                    View.constructors[types[i]] = arguments[i];
+                }
+            });
+        }
+
+        View.ViewType = {
+            Label:         0,
+            
+            Page:           102,
+            PanesList:      104
+        };
+
+        View.ReversedViewType = {
+            "0":        "Label",
+            
+            "102":      "Page",
+            "104":      "PanesList"
+        };
+
+        View.ViewTypesPaths = {
+            Label:         "views/label",
+            Page:           "views/page",
+            PanesList:      "views/panesList"
+        };
+
+        View.constructors = {};
+        
         
         return View;
     });

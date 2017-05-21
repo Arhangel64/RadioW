@@ -1,23 +1,34 @@
 "use strict";
-var List = require("./list");
-var String = require("./string");
-var PanesList = require("./panesList");
 
-var ViewPanesList = require("../../views/panesList");
+var Controller = require("./controller");
+var String = require("./string");
 
 var Vocabulary = require("../wType/vocabulary");
 var Address = require("../wType/address");
 
-var Page = List.inherit({
+var AbstractMap = require("../wContainer/abstractmap");
+var ContentMap = AbstractMap.template(Address, Object);
+
+var Page = Controller.inherit({
     "className": "Page",
     "constructor": function(addr) {
-        List.fn.constructor.call(this, addr);
+        Controller.fn.constructor.call(this, addr);
+        
+        this.data = new ContentMap(false);
+        
+        this.addHandler("get");
+        this.addHandler("addItem");
+        this.addHandler("removeItem");
+        this.addHandler("clear");
         
         this.elements = [];
     },
-    "addElement": function(element) {
-        List.fn.addElement.call(this, element);
+    "destructor": function() {
+        this.data.destructor();
         
+        Controller.fn.destructor.call(this);
+    },
+    "addItem": function(element) {
         var type = element.at("type").valueOf();
         var address = element.at("address").clone();
         var col = element.at("col").valueOf();
@@ -42,13 +53,52 @@ var Page = List.inherit({
             viewOptions: opts,
             controller: controller
         }
-        this.elements.push(el);
-        this.trigger("newPageElement", el);
+        this.data.insert(address, el);
+        this.trigger("addItem", address, el);
     },
     "clear": function() {
-        this.elements = [];
+        this.data.clear();
         
-        List.fn.clear.call(this);
+        while (this._controllers.length) {
+            var controller = this._controllers[this._controllers.length - 1]
+            this._removeController(controller);
+            controller.destructor();
+        }
+        
+        this.trigger("clear");
+    },
+    "_h_clear": function(ev) {
+        this.clear();
+    },
+    "_h_get": function(ev) {
+        this.clear();
+        
+        var data = ev.getData().at("data");
+        var size = data.size();
+        for (var i = 0; i < size; ++i) {
+            this.addItem(data.at(i).clone());
+        }
+    },
+    "_h_addItem": function(ev) {
+        var data = ev.getData().clone();
+        
+        this.addElement(data);
+    },
+    "_h_removeItem": function(ev) {
+        var data = ev.getData();
+        
+        var address = data.at("address").clone();
+        this.removeItem(address);
+    },
+    "removeItem": function(address) {
+        var itr = this.data.find(address);
+        this.data.erase(itr);
+        var pair = itr["*"]();
+        
+        this.trigger("removeItem", pair.first);
+        
+        this._removeController(pair.second.controller);
+        pair.second.controller.destructor();
     }
 });
 

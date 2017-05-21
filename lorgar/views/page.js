@@ -4,9 +4,15 @@
     
     var defineArray = [];
     defineArray.push("views/gridLayout");
+    defineArray.push("lib/wType/address");
+    defineArray.push("lib/wContainer/abstractmap");
     
     define(moduleName, defineArray, function() {
         var GridLayout = require("views/gridLayout");
+        var Address = require("lib/wType/address");
+        var AbstractMap = require("lib/wContainer/abstractmap");
+        
+        var ContentMap = AbstractMap.template(Address, Object);
         
         var Page = GridLayout.inherit({
             "className": "Page",
@@ -16,23 +22,50 @@
                 W.extend(base, options);
                 GridLayout.fn.constructor.call(this, f, base);
                 
-                this._f.on("newPageElement", this._onNewPageElement, this);
+                this._map = new ContentMap(false);
+                
+                this._f.on("addItem", this._onAddItem, this);
+                this._f.on("removeItem", this._onRemoveItem, this);
                 this._f.on("clear", this.clear, this);
                 
-                for (var i = 0; i < this._f.elements.length; ++i) {
-                    this._onNewPageElement(this._f.elements[i]);
+                var end = this._f.data.end();
+                for (var itr = this._f.data.begin(); !itr["=="](end); itr["++"]()) {
+                    var pair = itr["*"]();
+                    this._onAddItem(pair.first, pair.second);
                 }
             },
             "destructor": function() {
-                this._f.off("newPageElement", this._onNewPageElement, this);
+                this._f.off("addItem", this._onAddItem, this);
+                this._f.off("removeItem", this._onRemoveItem, this);
                 this._f.off("clear", this.clear, this);
+                
+                this._map.destructor();
+                delete this._map;
                 
                 GridLayout.fn.destructor.call(this);
             },
-            "_onNewPageElement": function(element) {
+            "clear": function() {
+                GridLayout.fn.clear.call(this);
+                
+                if (this._map) {
+                    this._map.clear();
+                }
+            },
+            "_onAddItem": function(address, element) {
                 var view = Page.createByType(element.viewType, element.controller, element.viewOptions);
                 
+                this._map.insert(address, view);
+                
                 this.append(view, element.row, element.col, element.rowSpan, element.colSpan, element.aligment);
+            },
+            "_onRemoveItem": function(address) {
+                var itr = this._map.find(address);
+                var pair = itr["*"]();
+                
+                this.removeChild(pair.second);
+                pair.second.destructor();
+                
+                this._map.erase(itr);
             }
         });
         

@@ -88,7 +88,7 @@ var Page = Model.inherit({
         var vc = new Vocabulary();
         vc.insert("address", addr);
         
-        this.broadcast("removeItem", vc);
+        this.broadcast(vc, "removeItem");
     }
 });
 

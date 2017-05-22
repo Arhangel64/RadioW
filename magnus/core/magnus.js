@@ -47,8 +47,8 @@ var Magnus = Subscribable.inherit({
         
         this._connector.on("serviceMessage", this._onModelServiceMessage, this);
         this._connector.on("connectionsCountChange", this._onConnectionsCountChange, this);
-        this._connector.on("connectedNode", this._onConnectedNode, this);
-        this._connector.on("disconnectedNode", this._onDisconnectedNode, this);
+        this._connector.on("nodeConnected", this._onNodeConnected, this);
+        this._connector.on("nodeDisconnected", this._onNodeDisconnected, this);
         
         this._connector.addNode("Corax");
         this._connector.addNode("Perturabo");
@@ -96,7 +96,7 @@ var Magnus = Subscribable.inherit({
         this._ps.addPage(root, ["/", "/index.html"]);
         this._gc.addNav("Home", root.getAddress());
         
-        var music = new MusicPage(new Address(["pages", "/music"]));
+        var music = this._musicPage = new MusicPage(new Address(["pages", "/music"]));
         this._ps.addPage(music, ["/music", "/music/", "/music.html"]);
         this._gc.addNav("Music", music.getAddress());
         
@@ -108,20 +108,8 @@ var Magnus = Subscribable.inherit({
         this.server = new Server("Magnus");
         this.server.on("ready", this._onServerReady, this)
     },
-    "_onConnectedNode": function(nodeName) {
-        switch (nodeName) {
-            case "Perturabo":
-                break;
-        }
-    },
     "_onConnectionsCountChange": function(count) {
         this._attributes.setAttribute("connectionsAmount", count);
-    },
-    "_onDisconnectedNode": function(nodeName) {
-        switch (nodeName) {
-            case "Perturabo":
-                break;
-        }
     },
     "_onModelServiceMessage": function(msg, severity) {
         var fn;
@@ -140,6 +128,24 @@ var Magnus = Subscribable.inherit({
         }
         
         fn(msg);
+    },
+    "_onNodeConnected": function(nodeName) {
+        switch (nodeName) {
+            case "Perturabo":
+                this._musicPage.showBandList(this._connector.getNodeSocket(nodeName));
+                break;
+            case "Corax":
+                break;
+        }
+    },
+    "_onNodeDisconnected": function(nodeName) {
+        switch (nodeName) {
+            case "Perturabo":
+                this._musicPage.showError();
+                break;
+            case "Corax":
+                break;
+        }
     },
     "_onServerReady": function() {
         log.info("Magnus is listening on port " + this._cfg.get("webSocketServerPort"));

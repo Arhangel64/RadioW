@@ -199,7 +199,7 @@ Controller.createByType = function(type, address) {
     return new Type(address);
 }
 
-Controller.initialize = function(rc) {
+Controller.initialize = function(rc, cb) {
     var deps = [];
     var types = [];
     for (var key in this.ModelTypesPaths) {
@@ -214,6 +214,7 @@ Controller.initialize = function(rc) {
         for (var i = 0; i < types.length; ++i) {
             Controller.constructors[types[i]] = arguments[i];
         }
+        cb();
     });
 }
 

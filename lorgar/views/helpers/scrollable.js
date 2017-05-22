@@ -4,9 +4,11 @@
     
     var defineArray = [];
     defineArray.push("views/view");
+    defineArray.push("lib/wController/localModel");
     
     define(moduleName, defineArray, function scrollable_module() {
         var View = require("views/view");
+        var LocalModel = require("lib/wController/localModel");
         
         var Scrollable = View.inherit({
             "className": "Scrollable",
@@ -16,8 +18,9 @@
                     horizontal: false,
                     draggable: true
                 };
+                var lm = new LocalModel();
                 W.extend(base, options);
-                View.fn.constructor.call(this, base);
+                View.fn.constructor.call(this, lm, base);
                 
                 this._l = layout;
                 this._l.on("resize", this.setSize, this);
@@ -26,6 +29,10 @@
                 this.on("dragStart", this._onDragStart, this);
                 this.on("drag", this._onDrag, this);
                 this.on("dragEnd", this._onDragEnd, this);
+                
+                this._uncyclic.push(function() {
+                    lm.destructor();
+                })
             },
             "destructor": function() {
                 this._l._e.removeChild(this._e);

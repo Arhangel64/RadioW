@@ -102,6 +102,16 @@ var Connector = Subscribable.inherit({
     "getConnectionsCount": function() {
         return this._server.getConnectionsCount() + this._occ;
     },
+    "getNodeSocket": function(key) {
+        var node = this._nodes[key];
+        if (!node) {
+            throw new Error("An attempt to access non existing node in connector");
+        }
+        if (!node.connected) {
+            this.trigger("serviceMessage", "Requested a socket to " +key+ ", but it's not connected", 1);
+        }
+        return node.socket;
+    },
     "_onNewConnection": function(socket) {
         var node = this._nodes[socket.getRemoteName().toString()];
         this.trigger("serviceMessage", "New connection, id: " + socket.getId().toString(), 0);
@@ -114,10 +124,12 @@ var Connector = Subscribable.inherit({
                 node.connected = true;
                 this._commands.enableCommand("connect" + node.name.toString(), false);
                 this._commands.enableCommand("disconnect" + node.name.toString(), true);
-                this.trigger("nodeConnected", node.name.toString());
                 if (!node.outgoing) {
                     node.socket = socket;
                 }
+                var name = node.name.toString();
+                this.trigger("serviceMessage", "Connected node: " + name);
+                this.trigger("nodeConnected", name);
             } else {
                 throw new Error("Connection duplicate for " + socket.getRemoteName().toString());
                 //TODO;
@@ -136,7 +148,7 @@ var Connector = Subscribable.inherit({
                 this._onNewConnection(node.socket);
             } else {
                 this.trigger("serviceMessage", "Error: outgoing socket to " + node.name.toString() +
-                                                " unexpectedly connected to " + node.socket.getRemoteName().toString());
+                                                " unexpectedly connected to " + node.socket.getRemoteName().toString(), 2);
                 node.socket.destructor();
                 node.connected = false;
                 node.outgoing = false;
@@ -178,7 +190,9 @@ var Connector = Subscribable.inherit({
                 this._commands.enableCommand("disconnect" + node.name.toString(), false);
                 this._commands.enableCommand("connect" + node.name.toString(), true);
                 
-                this.trigger("disconnectedNode", node.name.toString());
+                var name = node.name.toString();
+                this.trigger("serviceMessage", "Disconnected node: " + name);
+                this.trigger("nodeDisconnected", name);
             } else {
                 throw new Error("Something went wrong in connector");;
             }

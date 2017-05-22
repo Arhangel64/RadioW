@@ -17,12 +17,25 @@
         var Controller = require("lib/wController/controller");
         var View = require("views/view");
         
-        Controller.initialize(["String", "List", "Vocabulary", "Page"]);
-        View.initialize(["Label", "Page"]);
+        var waiter = {
+            views: false,
+            controllers: false,
+            check: function(key) {
+                this[key] = true;
+                this.launch()
+            },
+            launch: function() {
+                if (this.views && this.controllers) {
+                    window.lorgar = new Lorgar();
+                }
+            }
+        }
+        
+        Controller.initialize(["String", "List", "Vocabulary", "Page", "PanesList"], waiter.check.bind(waiter, "controllers"));
+        View.initialize(["Label", "Page", "PanesList"], waiter.check.bind(waiter, "views"));
         
         var test = new Test();
         test.run();
         
-        window.lorgar = new Lorgar();
     });
 })();

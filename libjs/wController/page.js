@@ -82,7 +82,7 @@ var Page = Controller.inherit({
     "_h_addItem": function(ev) {
         var data = ev.getData().clone();
         
-        this.addElement(data);
+        this.addItem(data);
     },
     "_h_removeItem": function(ev) {
         var data = ev.getData();
@@ -97,7 +97,7 @@ var Page = Controller.inherit({
         
         this.trigger("removeItem", pair.first);
         
-        this._removeController(pair.second.controller);
+        this.removeController(pair.second.controller);
         pair.second.controller.destructor();
     }
 });

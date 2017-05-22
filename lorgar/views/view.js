@@ -221,7 +221,7 @@
             return new Type(ctrl, opts);
         }
 
-        View.initialize = function(rc) {
+        View.initialize = function(rc, cb) {
             var deps = [];
             var types = [];
             for (var key in this.ViewTypesPaths) {
@@ -236,6 +236,7 @@
                 for (var i = 0; i < types.length; ++i) {
                     View.constructors[types[i]] = arguments[i];
                 }
+                cb();
             });
         }
 

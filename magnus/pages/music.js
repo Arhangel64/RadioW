@@ -57,7 +57,6 @@ var MusicPage = Page.inherit({
     },
     "showBandList": function(perturaboSocket) {
         if (!this._dbConnected) {
-            var index = this._data._data.indexOf(this._errMessageVC);
             this.removeItem(this._errMessage);
             this.addItem(this._list, 1, 0, 1, 1, Page.Aligment.CenterTop);
             this._dbConnected = true;

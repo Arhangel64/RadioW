@@ -277,7 +277,7 @@ var Model = Subscribable.inherit({
         for (;!itr["=="](end); itr["++"]()) {
             var socket = this._server.getConnection(itr["*"]().first);
             var ord = itr["*"]().second;
-            order.destructor();
+            ord.destructor();
             socket.off("disconnected", this._onSocketDisconnected, this);
         }
         this._subscribers.clear();

@@ -21,7 +21,6 @@ var MusicPage = Page.inherit({
         //var hvo = new Vocabulary();
         this.addItem(header, 0, 0, 1, 1, Page.Aligment.CenterTop);
         
-        this._list = new PanesList(this._address["+"](new Address(["list"])));
         this._errMessage = new String(this._address["+"](new Address(["message"])), "Database is not connected");
         this._errMessage.addProperty("fontFamily", "largeFont");
         this._errMessage.addProperty("fontSize", "largeFontSize");
@@ -33,10 +32,10 @@ var MusicPage = Page.inherit({
     "destructor": function() {
         if (this._dbConnected) {
             this.removeItem(this._list);
+            this._list.destructor();
         } else {
             this.removeItem(this._errMessage);
         }
-        this._list.destructor();
         this._errMessage.destructor();
         
         Page.fn.destructor.call(this);
@@ -51,6 +50,7 @@ var MusicPage = Page.inherit({
     "showError": function() {
         if (this._dbConnected) {
             this.removeItem(this._list);
+            this._list.destructor();
             this.addItem(this._errMessage, 1, 0, 1, 1, Page.Aligment.CenterTop);
             this._dbConnected = false;
         }
@@ -58,6 +58,7 @@ var MusicPage = Page.inherit({
     "showBandList": function(perturaboSocket) {
         if (!this._dbConnected) {
             this.removeItem(this._errMessage);
+            this._list = new ProxyListModel(this._address["+"](new Address(["list"])), perturaboSocket);
             this.addItem(this._list, 1, 0, 1, 1, Page.Aligment.CenterTop);
             this._dbConnected = true;
         }

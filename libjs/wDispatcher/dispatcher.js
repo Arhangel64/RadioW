@@ -80,7 +80,9 @@ var Dispatcher = Class.inherit({
             var dhitr = this._defautHandlers.begin();
             var dhend = this._defautHandlers.end();
             for (; !dhitr["=="](dhend); dhitr["++"]()) {
-                dhitr["*"]().call(event);
+                if (dhitr["*"]().call(event)) {
+                    break;
+                }
             }
         }
     }

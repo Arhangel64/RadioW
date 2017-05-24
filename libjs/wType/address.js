@@ -149,6 +149,40 @@ var Address = Object.inherit({
         str += "]";
         return str;
     },
+    "begins": function(other) {
+        var size = other._data.length);
+        if (size > this._data.length) {
+            return false;
+        }
+        
+        for (var i = 0; i < size; ++i) {
+            myHop = this._data[i];
+            othHop = other._data[i];
+            
+            if (!myHop["=="](othHop)) {
+                return false;
+            }
+        }
+        
+        return true;
+    },
+    "ends": function(other) {
+        var size = other._data.length);
+        if (size > this._data.length) {
+            return false;
+        }
+        
+        for (var i = 1; i <= size; ++i) {
+            myHop = this._data[this._data.length - i];
+            othHop = other._data[other._data.length - i];
+            
+            if (!myHop["=="](othHop)) {
+                return false;
+            }
+        }
+        
+        return true;
+    },
     "_parseSource": function(data) {
         for (var i = 0; i < data.length; ++i) {
             this._data.push(new String(data[i]));

@@ -10,6 +10,8 @@ var Logger = DefaultHandler.inherit({
         console.log("Event went to default handler");
         console.log("Destination: " + event.getDestination().toString());
         console.log("Data: " + event.getData().toString());
+        
+        return false;
     }
 });
 

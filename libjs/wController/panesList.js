@@ -9,10 +9,10 @@ var PanesList = List.inherit({
         List.fn.constructor.call(this, addr);
     },
     "addElement": function(element) {
-        var address = element.at("address").clone();
-        
-        var controller = new String(address);
-        this.addController(controller);
+//         var address = element.at("address").clone();
+//         
+//         var controller = new String(address);
+//         this.addController(controller);
         
         List.fn.addElement.call(this, element);
     }

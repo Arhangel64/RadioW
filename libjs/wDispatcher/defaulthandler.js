@@ -10,20 +10,20 @@ var DefaultHandler = Class.inherit({
         this._id = id++;
     },
     "==": function(other) {
-        if (!(other instanceof Handler)) {
-            throw new Error("Can compare only Handler with Handler");
+        if (!(other instanceof DefaultHandler)) {
+            throw new Error("Can compare only DefaultHandler with DefaultHandler");
         }
         return this._id === other._id;
     },
     ">": function(other) {
-        if (!(other instanceof Handler)) {
-            throw new Error("Can compare only Handler with Handler");
+        if (!(other instanceof DefaultHandler)) {
+            throw new Error("Can compare only DefaultHandler with DefaultHandler");
         }
         return this._id > other._id;
     },
     "<": function(other) {
-        if (!(other instanceof Handler)) {
-            throw new Error("Can compare only Handler with Handler");
+        if (!(other instanceof DefaultHandler)) {
+            throw new Error("Can compare only DefaultHandler with DefaultHandler");
         }
         return this._id < other._id;
     },

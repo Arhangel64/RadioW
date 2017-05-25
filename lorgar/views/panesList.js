@@ -6,11 +6,13 @@
     defineArray.push("views/view");
     defineArray.push("views/layout");
     defineArray.push("views/label");
+    defineArray.push("lib/wController/localModel");
     
     define(moduleName, defineArray, function panesList_module() {
         var View = require("views/view");
         var Layout = require("views/layout");
         var Label = require("views/label");
+        var LM = require("lib/wController/localModel");
         
         var PanesList = Layout.inherit({
             "className": "PanesList",
@@ -28,12 +30,19 @@
                 this._rows = 0;
                 this._cachedMinH = 0;
                 this._cols = 0;
+                
+                this._f.on("newElement", this._onNewElement, this);
+                var size = this._f.data.size();
+                for (var i = 0; i < size; ++i) {
+                    this._onNewElement(this._f.data.at(i));
+                }
             },
             "destructor": function() {
                 Layout.fn.destructor.call(this);
             },
             "append": function(child, aligment) {
-                var nest = new Layout({
+                var model = new LM();
+                var nest = new Layout(model, {
                     minHeight: this._o.nestHeight,
                     maxHeight: this._o.nestHeight,
                     minWidth: this._o.nestWidth,
@@ -54,13 +63,23 @@
                 var label = new Label(ctrl);
                 this.append(label);
             },
+            "_onNewElement": function(id) {
+                var model = new LM();
+                model.data = id.toString();
+                var label = new Label(model);
+                this.append(label);
+                
+                this._uncyclic.push(function() {
+                    model.destructor();
+                });
+            },
             "_positionElement": function(index) {
                 var row = Math.floor(index / this._cols);
                 var col = index % this._cols;
                 var e = this._c[index];
                 
-                e.c._e.style.left = (col * this._o.nestWidth + col * this._hSpace) + "px";
-                e.c._e.style.top = (row * this._o.nestHeight + row * this._o.verticalSpace) + "px";
+                e.c.setLeft(col * this._o.nestWidth + col * this._hSpace);
+                e.c.setTop(row * this._o.nestHeight + row * this._o.verticalSpace);
             },
             "_recalculateRows": function() {
                 var rows = Math.ceil(this._c.length / this._cols);

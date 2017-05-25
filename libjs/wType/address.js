@@ -150,7 +150,7 @@ var Address = Object.inherit({
         return str;
     },
     "begins": function(other) {
-        var size = other._data.length);
+        var size = other._data.length;
         if (size > this._data.length) {
             return false;
         }
@@ -167,7 +167,7 @@ var Address = Object.inherit({
         return true;
     },
     "ends": function(other) {
-        var size = other._data.length);
+        var size = other._data.length;
         if (size > this._data.length) {
             return false;
         }

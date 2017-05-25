@@ -17,6 +17,11 @@
                 
                 this._timeout = undefined;
                 this._recalculationScheduled = false;
+                
+                this._e.innerText = this._f.data;
+                if (this._f.data !== "") {
+                    this._scheduleRecalculation();
+                }
             },
             "destructor": function() {
                 if (this._recalculationScheduled) {

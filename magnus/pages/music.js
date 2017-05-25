@@ -7,14 +7,17 @@ var PanesList = require("../lib/wModel/panesList");
 var Address = require("../lib/wType/address");
 var Vocabulary = require("../lib/wType/vocabulary");
 var Boolean = require("../lib/wType/boolean");
+
+var ProxyListModel = require("../core/proxyListModel");
 var counter = 0;
 
 var MusicPage = Page.inherit({
     "className": "MusicPage",
-    "constructor": function(address) {
+    "constructor": function(address, parentReporter) {
         Page.fn.constructor.call(this, address);
         
         this._dbConnected = false;
+        this._pr = parentReporter;
         
         var header = new String(this._address["+"](new Address(["header"])), "Music");
         header.addProperty("fontFamily", "casualFont");
@@ -58,8 +61,10 @@ var MusicPage = Page.inherit({
     "showBandList": function(perturaboSocket) {
         if (!this._dbConnected) {
             this.removeItem(this._errMessage);
-            this._list = new ProxyListModel(this._address["+"](new Address(["list"])), perturaboSocket);
+            var ra = new Address(["artists"]);
+            this._list = new ProxyListModel(this._address["+"](new Address(["list"])), ra, perturaboSocket);
             this.addItem(this._list, 1, 0, 1, 1, Page.Aligment.CenterTop);
+            this._list.subscribe();
             this._dbConnected = true;
         }
     }

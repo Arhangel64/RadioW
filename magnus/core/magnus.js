@@ -6,6 +6,7 @@ var Address = require("../lib/wType/address");
 var String = require("../lib/wType/string");
 var Vocabulary = require("../lib/wType/vocabulary");
 var Dispatcher = require("../lib/wDispatcher/dispatcher");
+var ParentReporter = require("../lib/wDispatcher/parentreporter");
 var Logger = require("../lib/wDispatcher/logger");
 var log = require("../lib/log")(module);
 
@@ -61,6 +62,8 @@ var Magnus = Subscribable.inherit({
     "_initDispatcher": function() {
         this.dispatcher = new Dispatcher();
         this._logger = new Logger();
+        this._pr = new ParentReporter();
+        this.dispatcher.registerDefaultHandler(this._pr);
         this.dispatcher.registerDefaultHandler(this._logger);
     },
     "_initModels": function() {
@@ -96,7 +99,7 @@ var Magnus = Subscribable.inherit({
         this._ps.addPage(root, ["/", "/index.html"]);
         this._gc.addNav("Home", root.getAddress());
         
-        var music = this._musicPage = new MusicPage(new Address(["pages", "/music"]));
+        var music = this._musicPage = new MusicPage(new Address(["pages", "/music"], this._pr));
         this._ps.addPage(music, ["/music", "/music/", "/music.html"]);
         this._gc.addNav("Music", music.getAddress());
         

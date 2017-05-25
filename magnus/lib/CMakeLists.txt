@@ -5,6 +5,7 @@ add_subdirectory(utils)
 add_subdirectory(wDispatcher)
 add_subdirectory(wType)
 add_subdirectory(wContainer)
+add_subdirectory(wController)
 add_subdirectory(wTest)
 add_subdirectory(wModel)
 

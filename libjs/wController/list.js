@@ -44,6 +44,7 @@ var List = Controller.inherit({
         for (var i = 0; i < size; ++i) {
             this.addElement(data.at(i).clone());
         }
+        this.trigger("get");
     },
     "_h_push": function(ev) {
         var data = ev.getData();

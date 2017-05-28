@@ -160,7 +160,7 @@ var Connector = Subscribable.inherit({
             //TODO;
         }
     },
-    "_onOutgoingSocketError": function() {
+    "_onOutgoingSocketError": function(node) {
         var index = this._pending.indexOf(node);
         if (index !== -1) {
             node.pending = false;

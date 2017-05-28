@@ -8,7 +8,8 @@ var Address = require("../lib/wType/address");
 var Vocabulary = require("../lib/wType/vocabulary");
 var Boolean = require("../lib/wType/boolean");
 
-var ProxyListModel = require("../core/proxyListModel");
+var ProxyListModel = require("../lib/wModel/proxy/list");
+var ProxyVCModel = require("../lib/wModel/proxy/vocabulary");
 var counter = 0;
 
 var MusicPage = Page.inherit({
@@ -63,6 +64,8 @@ var MusicPage = Page.inherit({
             this.removeItem(this._errMessage);
             var ra = new Address(["artists"]);
             this._list = new ProxyListModel(this._address["+"](new Address(["list"])), ra, perturaboSocket);
+            this._list.className = "PanesList";
+            this._list.setCildrenClass(ProxyVCModel);
             this.addItem(this._list, 1, 0, 1, 1, Page.Aligment.CenterTop);
             this._list.subscribe();
             this._dbConnected = true;

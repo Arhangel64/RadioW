@@ -41,6 +41,14 @@ var ParentReporter = DefaultHandler.inherit({
     },
     "registerparent": function(parentAddr, handler) {
         this._handlers.insert(parentAddr, handler);
+    },
+    "unregisterParent": function(parentAddr) {
+        var itr = this._handlers.find(parentAddr);
+        if (!itr["=="](this._handlers.end())) {
+            this._handlers.erase(itr);
+        } else {
+            throw new Error("An attempt to unregister unregistered parent in ParentReporter");
+        }
     }
 });
 

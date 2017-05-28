@@ -100,6 +100,20 @@ var Address = Object.inherit({
         
         return this;
     },
+    "<<": function(n) {
+        var res = new Address();
+        for (var i = n; i < this._data.length; ++i) {
+            res._data.push(this._data[i].clone());
+        }
+        return res;
+    },
+    ">>": function(n) {
+        var res = new Address();
+        for (var i = 0; i < this._data.length - n; ++i) {
+            res._data.push(this._data[i].clone());
+        }
+        return res;
+    },
     "clear": function() {
         for (var i = 0; i < this._data.length; ++i) {
             this._data[i].destructor();
@@ -182,6 +196,12 @@ var Address = Object.inherit({
         }
         
         return true;
+    },
+    "back": function() {
+        return this._data[this._data.length - 1].clone();
+    }, 
+    "front": function() {
+        return this._data[0].clone();
     },
     "_parseSource": function(data) {
         for (var i = 0; i < data.length; ++i) {

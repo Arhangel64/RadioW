@@ -1,42 +1,38 @@
 "use strict";
 var Controller = require("./controller");
+var WVocabulary = require("../wType/vocabulary");
 
 var Vocabulary = Controller.inherit({
     "className": "Vocabulary",
     "constructor": function(addr) {
         Controller.fn.constructor.call(this, addr);
         
-        this._data = undefined;
+        this.data = new WVocabulary();
         
         this.addHandler("get");
         this.addHandler("change");
         this.addHandler("clear");
     },
     "destructor": function() {
-        if (this._data) {
-            this._data.destructor();
-        }
+        this.data.destructor();
         
         Controller.fn.destructor.call(this);
     },
     "addElement": function(key, element) {
+        this.data.insert(key, element);
         this.trigger("newElement", key, element);
     },
     "removeElement": function(key) {
+        this.data.erase(key);
         this.trigger("removeElement", key);
     },
     "clear": function() {
-        if (this._data) {
-            this._data.destructor();
-        }
+        this.data.clear();
         
         while (this._controllers.length) {
             var controller = this._controllers[this._controllers.length - 1]
             this._removeController(controller);
             controller.destructor();
-        }
-        for (var i = 0; i < this._views.length; ++i) {
-            this._views[i].clear();
         }
         
         this.trigger("clear");
@@ -50,17 +46,16 @@ var Vocabulary = Controller.inherit({
         
         var eSize = erase.size();
         for (var i = 0; i < eSize; ++i) {
-            key = erase.at(i);
+            key = erase.at(i).toString();;
             this.removeElement(key);
-            this._data.erase(key);
         }
         
         var keys = insert.getKeys();
         for (var j = 0; j < keys.length; ++j) {
-            key = kets[i];
-            this._data.isert(key, insert.at(key).clone());
-            this.newElement(key, this._data.at(key));
+            key = keys[i];
+            this.addElement(key, insert.at(key).clone());
         }
+        this.trigger("change", data.clone());
     },
     "_h_clear": function(ev) {
         this.clear();
@@ -68,14 +63,13 @@ var Vocabulary = Controller.inherit({
     "_h_get": function(ev) {
         this.clear();
         
-        var data = ev.getData();
-        this._data = data.at("data").clone();
-        var keys = this._data.getKeys();
-        var size = keys.length;
-        for (var i = 0; i < size; ++i) {
+        var data = ev.getData().at("data");
+        var keys = data.getKeys();
+        for (var i = 0; i < keys.length; ++i) {
             var key = keys[i];
-            this.addElement(key, this._data.at(key));
+            this.addElement(key, data.at(key).clone());
         }
+        this.trigger("get");
     }
 });
 

@@ -50,6 +50,11 @@
                 this._f.on("addProperty", this._onAddProperty, this);
                 this._f.on("newController", this._onNewController, this);
                 
+                for (var i = 0; i < this._f._controllers.length; ++i) {
+                    this._onNewController(this._f._controllers[i]);
+                }
+                this._onData(this._f);
+                
                 View.collection[this._id] = this;
                 this._applyProperties();
             },

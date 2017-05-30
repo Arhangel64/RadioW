@@ -99,7 +99,7 @@ var Magnus = Subscribable.inherit({
         this._ps.addPage(root, ["/", "/index.html"]);
         this._gc.addNav("Home", root.getAddress());
         
-        var music = this._musicPage = new MusicPage(new Address(["pages", "/music"], this._pr));
+        var music = this._musicPage = new MusicPage(new Address(["pages", "/music"]), this._pr);
         this._ps.addPage(music, ["/music", "/music/", "/music.html"]);
         this._gc.addNav("Music", music.getAddress());
         

@@ -151,24 +151,32 @@
                 }
             },
             "removeChild": function(child) {
-                this._c.splice(this._c.indexOf(child), 1);
-                child._p = undefined;
-                
-                if (this._o.scrollable) {
-                    this._scr.removeChild(child._e);
-                    var w = 0;
-                    var h = 0;
-                    for (var i = 0; i < this._c.length; ++i) {
-                        w = Math.max(this._c[i].c._o.minWidth, w);
-                        h = Math.max(this._c[i].c._o.minHeight, h);
+                var i;
+                for (i = 0; i < this._c.length; ++i) {
+                    if (this._c[i].c === child) {
+                        break;
                     }
-                    this._scr.setMinSize(w, h);
-                    this._scr.setSize(this._w, this._h);
-                } else {
-                    this._e.removeChild(child._e);
                 }
-                
-                child.off("changeLimits", this._onChildChangeLimits, this);
+                if (i !== this._c.length) {
+                    this._c.splice(i, 1);
+                    child._p = undefined;
+                    
+                    if (this._o.scrollable) {
+                        this._scr.removeChild(child._e);
+                        var w = 0;
+                        var h = 0;
+                        for (var i = 0; i < this._c.length; ++i) {
+                            w = Math.max(this._c[i].c._o.minWidth, w);
+                            h = Math.max(this._c[i].c._o.minHeight, h);
+                        }
+                        this._scr.setMinSize(w, h);
+                        this._scr.setSize(this._w, this._h);
+                    } else {
+                        this._e.removeChild(child._e);
+                    }
+                    
+                    child.off("changeLimits", this._onChildChangeLimits, this);
+                }
             },
             "setSize": function(w, h) {
                 View.fn.setSize.call(this, w, h);

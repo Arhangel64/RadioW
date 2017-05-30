@@ -18,7 +18,7 @@
                 this._timeout = undefined;
                 this._recalculationScheduled = false;
                 
-                this._e.innerText = this._f.data;
+                this._e.innerText = this._f.data || "";
                 if (this._f.data !== "") {
                     this._scheduleRecalculation();
                 }
@@ -37,9 +37,9 @@
                     this._scheduleRecalculation();
                 }
             },
-            "_onData": function(data) {
-                if (this._e.innerText !== data) {
-                    this._e.innerText = data;
+            "_onData": function() {
+                if (this._e.innerText !== this._f.data) {
+                    this._e.innerText = this._f.data || "";
                     this._scheduleRecalculation();
                 }
             },
@@ -48,7 +48,7 @@
                 var fontFamily = this._e.style.fontFamily || "Liberation";
                 
                 var h = fs + 2;
-                var w = Label.calculateSingleString(fontFamily, fs, this._e.innerText || "");
+                var w = Label.calculateSingleString(fontFamily, fs, this._f.data || "");
                 this.setConstSize(w, h);
                 this._recalculationScheduled = false;
             },

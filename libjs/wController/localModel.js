@@ -8,6 +8,7 @@ var LocalModel = Subscribable.inherit({
         Subscribable.fn.constructor.call(this);
         
         this.properties = [];
+        this._controllers = [];
         
         if (properties) {
             for (var key in properties) {

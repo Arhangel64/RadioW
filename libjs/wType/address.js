@@ -170,8 +170,8 @@ var Address = Object.inherit({
         }
         
         for (var i = 0; i < size; ++i) {
-            myHop = this._data[i];
-            othHop = other._data[i];
+            var myHop = this._data[i];
+            var othHop = other._data[i];
             
             if (!myHop["=="](othHop)) {
                 return false;
@@ -187,8 +187,8 @@ var Address = Object.inherit({
         }
         
         for (var i = 1; i <= size; ++i) {
-            myHop = this._data[this._data.length - i];
-            othHop = other._data[other._data.length - i];
+            var myHop = this._data[this._data.length - i];
+            var othHop = other._data[other._data.length - i];
             
             if (!myHop["=="](othHop)) {
                 return false;

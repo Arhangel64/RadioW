@@ -35,6 +35,7 @@ var MusicPage = Page.inherit({
     },
     "destructor": function() {
         if (this._dbConnected) {
+            this._pr.unregisterParent(this._list.getAddress());
             this.removeItem(this._list);
             this._list.destructor();
         } else {
@@ -44,15 +45,9 @@ var MusicPage = Page.inherit({
         
         Page.fn.destructor.call(this);
     },
-    "addBand": function(name) {
-        var c = counter++;
-        c += "";
-        var bandName = new String(this._address["+"](new Address([c])), name);
-        bandName.addProperty("fontFamily", "casualFont");
-        this._list.addItem(bandName);
-    },
     "showError": function() {
         if (this._dbConnected) {
+            this._pr.unregisterParent(this._list.getAddress());
             this.removeItem(this._list);
             this._list.destructor();
             this.addItem(this._errMessage, 1, 0, 1, 1, Page.Aligment.CenterTop);
@@ -63,10 +58,11 @@ var MusicPage = Page.inherit({
         if (!this._dbConnected) {
             this.removeItem(this._errMessage);
             var ra = new Address(["artists"]);
-            this._list = new ProxyListModel(this._address["+"](new Address(["list"])), ra, perturaboSocket);
+            this._list = new ProxyListModel(this._address["+"](new Address(["bands"])), ra, perturaboSocket);
             this._list.className = "PanesList";
-            this._list.setCildrenClass(ProxyVCModel);
+            this._list.setChildrenClass(ProxyVCModel);
             this.addItem(this._list, 1, 0, 1, 1, Page.Aligment.CenterTop);
+            this._pr.registerParent(this._list.getAddress(), this._list.reporterHandler);
             this._list.subscribe();
             this._dbConnected = true;
         }

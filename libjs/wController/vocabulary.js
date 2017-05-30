@@ -69,7 +69,7 @@ var Vocabulary = Controller.inherit({
             var key = keys[i];
             this.addElement(key, data.at(key).clone());
         }
-        this.trigger("get");
+        this.trigger("data");
     }
 });
 

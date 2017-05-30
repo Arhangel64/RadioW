@@ -15,7 +15,7 @@ var String = Controller.inherit({
         
         this.data = data.at("data").toString();
         
-        this.trigger("data", this.data);
+        this.trigger("data");
     }
 });
 

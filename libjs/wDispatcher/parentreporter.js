@@ -29,17 +29,17 @@ var ParentReporter = DefaultHandler.inherit({
         for (; !itr["=="](end); itr["++"]()) {
             var pair = itr["*"]();
             if (addr.begins(pair.first)) {
-                result[pair.first.length] = pair.second;        //it's a dirty javascript trick
+                result[pair.first.size()] = pair.second;        //it's a dirty javascript trick
             }                                                   //I need the longest of matching, and that's how I'm gonna get it
         }
-        
         if (result.length) {
             result[result.length - 1].pass(ev);
+            return true;
         } else {
             return false;
         }
     },
-    "registerparent": function(parentAddr, handler) {
+    "registerParent": function(parentAddr, handler) {
         this._handlers.insert(parentAddr, handler);
     },
     "unregisterParent": function(parentAddr) {

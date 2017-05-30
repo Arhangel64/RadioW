@@ -36,7 +36,7 @@ var Model = Subscribable.inherit({
         
         this._subscribers.destructor();
         
-        for (i = 0; i < this,_models.length; ++i) {
+        for (i = 0; i < this._models.length; ++i) {
             this._models[i].destructor();
         }
         
@@ -129,13 +129,13 @@ var Model = Subscribable.inherit({
             this._subscribers.insert(id.clone(), ord);
         } else {
             ord = itr["*"]().second;
-            var oItr = order.find(source);
-            if (!oItr["=="](order.end())) {
-                this.tigger("serviceMessage",   "id: " + id.toString() + ", " +
+            var oItr = ord.find(source);
+            if (!oItr["=="](ord.end())) {
+                this.trigger("serviceMessage",   "id: " + id.toString() + ", " +
                             "source: " + source.toString() + " " +
                             "is trying to subscribe on model " + this._address.toString() + " " +
                             "but it's already subscribed", 1);
-                return
+                return;
             }
         }
         

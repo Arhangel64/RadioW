@@ -2,6 +2,8 @@
 
 var Model = require("../model");
 var Handler = require("../../wDispatcher/handler");
+var Vocabulary = require("../../wType/vocabulary");
+var Address = require("../../wType/address");
 
 var Proxy = Model.inherit({
     "className": "Proxy",
@@ -17,6 +19,7 @@ var Proxy = Model.inherit({
         this._waitingEvents = [];
         
         this.addHandler("get");
+        this.reporterHandler = new Handler(this._address["+"](new Address(["subscribeMember"])), this, this._h_subscribeMember);
         
         this._uncyclic.push(function() {
             controller.destructor();
@@ -26,12 +29,15 @@ var Proxy = Model.inherit({
         for (var i = 0; i < this._waitingEvents.length; ++i) {
             this._waitingEvents[i].destructor();
         }
+        this.reporterHandler.destructor();
         Model.fn.destructor.call(this);
+        
+        this.destructor = function() {};        //to prevent double destruction;
     },
     "checkSubscribersAndDestroy": function() {
         if (this._subscribersCount === 0) {
             this.trigger("serviceMessage", this._address.toString() + " has no more subscribers, destroing model");
-            setTimeout(this.destructor.bind(this), 1);
+            setTimeout(this.unregisterAndDestroy.bind(this), 1);
         }
     },
     "dispatchWaitingEvents": function() {
@@ -39,6 +45,7 @@ var Proxy = Model.inherit({
             var ev = this._waitingEvents[i];
             var cmd =  "_h_" + ev.getDestination().back().toString();
             this[cmd](ev);
+            ev.destructor();
         }
         this._waitingEvents = [];
     },
@@ -49,7 +56,7 @@ var Proxy = Model.inherit({
             vc.insert("data", this.controller.data.clone());
             this.response(vc, "get", ev);
         } else {
-            this._waitingEvents.push(ev);
+            this._waitingEvents.push(ev.clone());
         }
     },
     "_h_unsubscribe": function(ev) {
@@ -59,7 +66,7 @@ var Proxy = Model.inherit({
             this.checkSubscribersAndDestroy()
         }
     },
-    "_subscribeMember": function(ev) {
+    "_h_subscribeMember": function(ev) {
         if (!this.childrenPossible) {
             return;
         }
@@ -70,13 +77,15 @@ var Proxy = Model.inherit({
             var command = lastHops.back().toString();
             var id = lastHops[">>"](1);
             if (command === "subscribe" || command === "get") {
-                var child = new this._childClass(this._address["+"](id), this._controller._pairAddress["+"](id), this._socket);
+                var child = new this._childClass(this._address["+"](id), this.controller._pairAddress["+"](id), this._socket);
                 this.addModel(child);
                 child._destroyOnLastUnsubscription = true;
                 child["_h_" + command](ev);
                 if (command === "get") {
                     child.on("ready", child.checkSubscribersAndDestroy, child);
                 }
+                child.subscribe();
+                child.on("destroying", this.removeModel.bind(this, child));     //to remove model from children if it autodestroys by the lack of subscribers
             } else {
                 this.trigger("serviceMessage", "Proxy model got a strange event: " + ev.toString());
             }
@@ -92,6 +101,9 @@ var Proxy = Model.inherit({
     "unregister": function() {
         Model.fn.unregister.call(this);
         
+        if (this.controller._subscribed) {
+            this.controller.unsubscribe();
+        }
         this.controller.unregister();
     },
     "setChildrenClass": function(Class) {
@@ -118,6 +130,10 @@ var Proxy = Model.inherit({
     },
     "subscribe": function() {
         this.controller.subscribe();
+    },
+    "unregisterAndDestroy": function() {
+        this.trigger("destroying");
+        this.destructor();
     },
     "unsetChildrenClass": function() {
         if (!this.childrenPossible) {

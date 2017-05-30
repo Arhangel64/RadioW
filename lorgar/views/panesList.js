@@ -7,12 +7,14 @@
     defineArray.push("views/layout");
     defineArray.push("views/label");
     defineArray.push("lib/wController/localModel");
+    defineArray.push("views/pane");
     
     define(moduleName, defineArray, function panesList_module() {
         var View = require("views/view");
         var Layout = require("views/layout");
         var Label = require("views/label");
         var LM = require("lib/wController/localModel");
+        var Pane = require("views/pane");
         
         var PanesList = Layout.inherit({
             "className": "PanesList",
@@ -30,15 +32,6 @@
                 this._rows = 0;
                 this._cachedMinH = 0;
                 this._cols = 0;
-                
-                this._f.on("newElement", this._onNewElement, this);
-                var size = this._f.data.size();
-                for (var i = 0; i < size; ++i) {
-                    this._onNewElement(this._f.data.at(i));
-                }
-            },
-            "destructor": function() {
-                Layout.fn.destructor.call(this);
             },
             "append": function(child, aligment) {
                 var model = new LM();
@@ -49,6 +42,7 @@
                     minWidth: this._o.nestWidth,
                     scrollable: Layout.Scroll.Both
                 });
+                nest._uncyclic.push(function() {model.destructor()});
                 nest.append(child, aligment);
                 this._addChild(nest, 0);
                 
@@ -60,18 +54,8 @@
                 }
             },
             "_onNewController": function(ctrl) {
-                var label = new Label(ctrl);
+                var label = new Pane(ctrl);
                 this.append(label);
-            },
-            "_onNewElement": function(id) {
-                var model = new LM();
-                model.data = id.toString();
-                var label = new Label(model);
-                this.append(label);
-                
-                this._uncyclic.push(function() {
-                    model.destructor();
-                });
             },
             "_positionElement": function(index) {
                 var row = Math.floor(index / this._cols);

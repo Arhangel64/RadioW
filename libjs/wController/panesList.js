@@ -1,7 +1,8 @@
 "use strict";
 var List = require("./list");
+var Vocabulary = require("./vocabulary");
 
-var String = require("./string");
+var Address = require("../wType/address");
 
 var PanesList = List.inherit({
     "className": "PanesList",
@@ -9,10 +10,8 @@ var PanesList = List.inherit({
         List.fn.constructor.call(this, addr);
     },
     "addElement": function(element) {
-//         var address = element.at("address").clone();
-//         
-//         var controller = new String(address);
-//         this.addController(controller);
+        var controller = new Vocabulary(this._pairAddress["+"](new Address([element.toString()])));
+        this.addController(controller);
         
         List.fn.addElement.call(this, element);
     }

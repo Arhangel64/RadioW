@@ -179,7 +179,8 @@ var Connector = Subscribable.inherit({
         if (node) {
             if (node.connected) {
                 if (node.outgoing) {
-                    socket.destructor();
+                    setTimeout(socket.destructor.bind(socket), 1);
+                    //socket.destructor();
                     --this._occ;
                 }
                 node.connected = false;

@@ -203,6 +203,13 @@ var Address = Object.inherit({
     "front": function() {
         return this._data[0].clone();
     },
+    "toArray": function() {
+        var arr = [];
+        for (var i = 0; i < this._data.length; ++i) {
+            arr.push(this._data[i].toString());
+        }
+        return arr;
+    },
     "_parseSource": function(data) {
         for (var i = 0; i < data.length; ++i) {
             this._data.push(new String(data[i]));

@@ -43,6 +43,9 @@ var PageStorage = Model.inherit({
         this._rMap.insert(page.getAddress(), new String(urls[0]));
         this.addModel(page)
     },
+    "hasPage": function(name) {
+        return this._urls[name] !== undefined;
+    },
     "_h_getPageAddress": function(ev) {
         var data = ev.getData();
         

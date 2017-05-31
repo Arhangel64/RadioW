@@ -111,7 +111,7 @@ var Proxy = Model.inherit({
             this.trigger("serviceMessage", "An attempt to set another class for children in Proxy", 1);
         }
         if (!Class instanceof Proxy) {
-            this.trigger("serviceMessage", "An attempt to set not inherited chidren class from Proxy to a Proxy", 2)
+            this.trigger("serviceMessage", "An attempt to set not inherited chidren class from Proxy to a Proxy", 2);
         }
         this.childrenPossible = true;
         this._childClass = Class;

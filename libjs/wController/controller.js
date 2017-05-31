@@ -71,6 +71,9 @@ var Controller = Subscribable.inherit({
             this._dp.registerHandler(handler);
         }
     },
+    "getPairAddress": function() {
+        return this._pairAddress.clone();
+    },
     "_h_properties": function(ev) {
         this.trigger("clearProperties");
         this.properties = [];
@@ -178,8 +181,10 @@ var Controller = Subscribable.inherit({
         }
         this._subscribed = false;
         
-        var vc = new Vocabulary();
-        this.send(vc, "unsubscribe");
+        if (this._socket.isOpened()) {
+            var vc = new Vocabulary();
+            this.send(vc, "unsubscribe");
+        }
         
         for (var i = 0; i < this._controllers.length; ++i) {
             this._controllers[i].unsubscribe();

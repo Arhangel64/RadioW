@@ -111,6 +111,9 @@ var Magnus = Subscribable.inherit({
         this.server = new Server("Magnus");
         this.server.on("ready", this._onServerReady, this)
     },
+    "hasPage": function(name) {
+        return this._ps.hasPage(name);
+    },
     "_onConnectionsCountChange": function(count) {
         this._attributes.setAttribute("connectionsAmount", count);
     },

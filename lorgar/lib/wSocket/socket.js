@@ -59,6 +59,9 @@
             "getId": function() {
                 return this._id;
             },
+            "isOpened": function() {
+                return this._state !== undefined && this._state === CONNECTED;
+            },
             "open": function(addr, port) {
                 var that = this;
                 

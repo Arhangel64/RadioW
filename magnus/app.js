@@ -31,6 +31,7 @@ app.use(require("./middleware/reply"));
 
 app.use(express.static(__dirname + '/public'));
 
+app.use(require("./middleware/pageInMagnus"));
 app.use(require("./middleware/notFound"));
 app.use(require("./middleware/errorHandler"));
 
@@ -41,5 +42,5 @@ var server = app.listen(config.get("webServerPort"), "127.0.0.1", function () {
  log.info("Webserver is listening on port " + port);
 
 });
-var magnus = new Magnus(config);
+var magnus = global.magnus = new Magnus(config);
 

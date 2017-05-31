@@ -75,6 +75,9 @@ var Socket = Subscribable.inherit({
             onMessage: this._onMessage.bind(this)
         };
     },
+    "isOpened": function() {
+        return this._state !== undefined && this._state === CONNECTED;
+    },
     "_onClose": function(ev) {
         this.trigger("disconnected", ev, this);
     },

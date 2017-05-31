@@ -88,6 +88,7 @@
                 Class.fn.destructor.call(this);
             },
             "changePage": function(addr) {
+                this._ps.getPageName(addr);
                 this._initPageController(addr.clone());
             },
             "connectCorax": function() {
@@ -136,6 +137,8 @@
                 
                 this._gc.register(this.dispatcher, this.magnusSocket);
                 this._ps.register(this.dispatcher, this.magnusSocket);
+                
+                this._ps.on("pageName", this._onPageName, this);
             },
             "_initPageController": function(addr) {
                 if (this._currentPageCtl) {
@@ -181,6 +184,9 @@
             "_magnusSocketError": function(e) {
                 console.log("magnus socket error: ");
                 console.log(e);
+            },
+            "_onPageName": function(name) {
+                window.history.pushState({}, "", name);
             },
             "_onWindowResize": function() {
                 this._body.setSize(document.body.offsetWidth, document.body.offsetHeight);

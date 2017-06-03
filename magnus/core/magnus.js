@@ -77,7 +77,8 @@ var Magnus = Subscribable.inherit({
         
         this._attributes = new Attributes(new Address(["attributes"]));
         this._gc = new GlobalControls(new Address(["magnus", "gc"]));
-        this._ps = new PageStorage(new Address(["magnus", "ps"]))
+        var root = this._rootPage = new HomePage(new Address(["pages", "root"]), "root");
+        this._ps = new PageStorage(new Address(["magnus", "ps"]), root, this._pr);
         
         this._commands.on("serviceMessage", this._onModelServiceMessage, this);
         this._gc.on("serviceMessage", this._onModelServiceMessage, this);
@@ -95,16 +96,14 @@ var Magnus = Subscribable.inherit({
         this._attributes.register(this.dispatcher, this.server);
     },
     "_initPages": function() {
-        var root = new HomePage(new Address(["pages", "/"]));
-        this._ps.addPage(root, ["/", "/index.html"]);
-        this._gc.addNav("Home", root.getAddress());
+        this._gc.addNav("Home", this._rootPage.getAddress());
         
-        var music = this._musicPage = new MusicPage(new Address(["pages", "/music"]), this._pr);
-        this._ps.addPage(music, ["/music", "/music/", "/music.html"]);
+        var music = this._musicPage = new MusicPage(new Address(["pages", "/music"]), "music");
+        this._rootPage.addPage(music);
         this._gc.addNav("Music", music.getAddress());
         
-        var test = new TestPage(new Address(["pages", "/test"]));
-        this._ps.addPage(test, ["/test", "/test/", "/test.html"]);
+        var test = new TestPage(new Address(["pages", "/test"]), "test");
+        this._rootPage.addPage(test);
         this._gc.addNav("Testing...", test.getAddress());
     },
     "_initServer": function() {

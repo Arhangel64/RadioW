@@ -5,6 +5,5 @@ module.exports = function(req, res, next) {
     } else {
         next();
     }
-    next();
 };
 

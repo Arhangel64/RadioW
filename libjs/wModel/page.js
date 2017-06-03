@@ -12,10 +12,15 @@ var ContentMap = AbstractMap.template(Address, Vocabulary);
 
 var Page = Model.inherit({
     "className": "Page",
-    "constructor": function(address) {
+    "constructor": function(address, name) {
         Model.fn.constructor.call(this, address);
         
         this._data = new ContentMap(true);
+        this.name = name;
+        this.urlAddress = [name];
+        this._hasParentReporter = false;
+        this._pr = undefined;
+        this._childPages = {};
         
         this.addHandler("get");
         
@@ -50,10 +55,23 @@ var Page = Model.inherit({
         
         this.broadcast(evc, "addItem");
     },
+    "addPage": function(page) {
+        this.addModel(page);
+        var addr = this.urlAddress.slice();
+        addr.push(page.name);
+        page.setUrlAddress(addr)
+        page.on("newPage", this._onNewPage, this);
+        this._childPages[page.name] = page;
+        
+        this.trigger("newPage", page);
+    },
     "clear": function() {
         this._data.clear();
         
         this.broadcast(new Vocabulary(), "clear");
+    },
+    "getChildPage": function(name) {
+        return this._childPages[name];
     },
     "_h_get": function(ev) {
         var data = new Vocabulary();
@@ -70,6 +88,7 @@ var Page = Model.inherit({
             vector.push(vc);
         }
         
+        data.insert("name", new String(this.name));
         data.insert("data", vector);
         this.response(data, "get", ev);
     },
@@ -77,6 +96,9 @@ var Page = Model.inherit({
         Model.fn._h_subscribe.call(this, ev);
         
         this._h_get(ev);
+    },
+    "_onNewPage": function(page) {
+        this.trigger("newPage", page);
     },
     "removeItem": function(model) {
         Model.fn.removeModel.call(this, model);
@@ -89,6 +111,16 @@ var Page = Model.inherit({
         vc.insert("address", addr);
         
         this.broadcast(vc, "removeItem");
+    },
+    "setParentReporter": function(pr) {
+        if (this._hasParentReporter) {
+            throw new Error("An attempt to set parent reporter to page, while another one already exists");
+        }
+        this._pr = pr;
+        this._hasParentReporter = true;
+    },
+    "setUrlAddress": function(address) {
+        this.urlAddress = address;
     }
 });
 

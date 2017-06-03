@@ -7,8 +7,8 @@ var Address = require("../lib/wType/address");
 
 var TestPage = Page.inherit({
     "className": "TestPage",
-    "constructor": function(address) {
-        Page.fn.constructor.call(this, address);
+    "constructor": function(address, name) {
+        Page.fn.constructor.call(this, address, name);
         
         var header = new String(this._address["+"](new Address(["message"])), "This is a test page");
         header.addProperty("fontFamily", "casualFont");

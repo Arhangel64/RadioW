@@ -12,13 +12,16 @@ var AddressMap = AbstractMap.template(Address, String);
 
 var PageStorage = Model.inherit({
     "className": "PageStorage",
-    "constructor": function(addr) {
+    "constructor": function(addr, rootPage, pr) {
         Model.fn.constructor.call(this, addr);
         
         this._urls = {};
         this._specialPages = {};
         this._rMap = new AddressMap(true);
+        this._root = rootPage;
+        this._pr = pr;
         
+        this._initRootPage();
         this._initNotFoundPage();
         
         this.addHandler("getPageAddress");
@@ -29,27 +32,26 @@ var PageStorage = Model.inherit({
         
         Model.fn.destructor.call(this);
     },
-    "addPage": function(page, urls) {
-        if (!(urls instanceof Array)) {
-            throw new Error("To add page you need to pass an array of urls");
-        }
-        for (var i = 0; i < urls.length; ++i) {
-            if (this._urls[urls[i]]) {
-                throw new Error("An attempt to add page with an existing url");
+    "getPageByUrl": function(url) {
+        var addr = url.split("/");
+        var page = this._root;
+        for (var i = 0; i < addr.length; ++i) {
+            if (addr[i] !== "") {
+                page = page.getChildPage(addr[i]);
+                if (page === undefined) {
+                    return this._specialPages.notFound;
+                }
             }
-            
-            this._urls[urls[i]] = page;
         }
-        this._rMap.insert(page.getAddress(), new String(urls[0]));
-        this.addModel(page)
+        return page;
     },
     "hasPage": function(name) {
-        return this._urls[name] !== undefined;
+        return this.getPageByUrl(name) !== this._specialPages.notFound
     },
     "_h_getPageAddress": function(ev) {
         var data = ev.getData();
         
-        var page = this._urls[data.at("url").valueOf()];
+        var page = this.getPageByUrl(data.at("url").valueOf());
         
         var vc = new Vocabulary();
         if (page) {
@@ -78,6 +80,22 @@ var PageStorage = Model.inherit({
         this.addModel(nf);
         var msg = new ModelString(nf._address["+"](new Address(["errorMessage"])), "Error: page not found");
         nf.addItem(msg, 0, 0, 1, 1);
+    },
+    "_initRootPage": function() {
+        this.addModel(this._root);
+        
+        this._root.on("newPage", this._onNewPage, this);
+    },
+    "_onNewPage": function(page) {
+        var addr = page.urlAddress.join("/").slice(this._root.name.length);
+        this.trigger("serviceMessage", "Adding new page: " + page.urlAddress);
+        
+        if (this._urls[addr]) {
+            throw new Error("An attempt to add page with an existing url");
+        }
+        this._urls[addr] = page;
+        this._rMap.insert(page.getAddress(), new String(addr));
+        page.setParentReporter(this._pr);
     }
 });
 

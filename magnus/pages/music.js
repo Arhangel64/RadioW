@@ -14,11 +14,10 @@ var counter = 0;
 
 var MusicPage = Page.inherit({
     "className": "MusicPage",
-    "constructor": function(address, parentReporter) {
-        Page.fn.constructor.call(this, address);
+    "constructor": function(address, name) {
+        Page.fn.constructor.call(this, address, name);
         
         this._dbConnected = false;
-        this._pr = parentReporter;
         
         var header = new String(this._address["+"](new Address(["header"])), "Music");
         header.addProperty("fontFamily", "casualFont");
@@ -34,7 +33,7 @@ var MusicPage = Page.inherit({
         //this.addItem(this._list, 1, 0, 1, 1, Page.Aligment.centerTop);
     },
     "destructor": function() {
-        if (this._dbConnected) {
+        if (this._dbConnected && this._hasParentReporter) {
             this._pr.unregisterParent(this._list.getAddress());
             this.removeItem(this._list);
             this._list.destructor();
@@ -47,6 +46,9 @@ var MusicPage = Page.inherit({
     },
     "showError": function() {
         if (this._dbConnected) {
+            if (!this._hasParentReporter) {
+                throw new Error("Parent reporter is required in music page");
+            }
             this._pr.unregisterParent(this._list.getAddress());
             this.removeItem(this._list);
             this._list.destructor();
@@ -55,6 +57,9 @@ var MusicPage = Page.inherit({
         }
     },
     "showBandList": function(perturaboSocket) {
+        if (!this._hasParentReporter) {
+            throw new Error("Parent reporter is required in music page");
+        }
         if (!this._dbConnected) {
             this.removeItem(this._errMessage);
             var ra = new Address(["artists"]);

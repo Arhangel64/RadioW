@@ -255,12 +255,14 @@
         View.ReversedViewType = {
             "0":        "Label",
             
+            "101":      "Nav",
             "102":      "Page",
             "104":      "PanesList"
         };
 
         View.ViewTypesPaths = {
-            Label:         "views/label",
+            Label:          "views/label",
+            Nav:            "views/nav",
             Page:           "views/page",
             PanesList:      "views/panesList"
         };

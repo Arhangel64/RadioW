@@ -32,8 +32,10 @@ var TAbsctractMap = WTest.inherit({
     "testSize": function() {
         this._map.insert(new Address(["addr1", "hop1"]), new String("hello"));
         this._map.insert(new Address(["addr2", "hop2"]), new String("world"));
+        this._map.insert(new Address(["addr2", "/hop2"]), new String("world2"));
+        this._map.insert(new Address(["addr2", "/hop2", "hop4"]), new String("world3"));
         
-        if (this._map.size() !== 2) {
+        if (this._map.size() !== 4) {
             throw new Error("problem with insertion!");
         }
     },
@@ -48,15 +50,20 @@ var TAbsctractMap = WTest.inherit({
             throw new Error("wrong element found");
         }
         itr["++"]();
-        if (itr["*"]().second.toString() !== "world") {
+        if (itr["*"]().second.toString() !== "world2") {
             throw new Error("iterator dereferenced into wrong element after incrementetion");
         }
         
         this._map.erase(itr);
-        itr = this._map.find(new Address(["addr2", "hop2"]));
+        itr = this._map.find(new Address(["addr2", "/hop2"]));
         
         if (!itr["=="](this._map.end())) {
             throw new Error("problem with erasing!");
+        }
+        
+        itr = this._map.find(new Address(["addr2", "/hop2", "hop4"]));
+        if (itr["=="](this._map.end()) || itr["*"]().second.toString() !== "world3") {
+            throw new Error("Something is wrong with finding");
         }
     },
     "testClear": function() {

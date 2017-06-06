@@ -39,7 +39,7 @@
                 }
             },
             "_onClick": function(e) {
-                this.trigger("activate", this._f.targetAddress);
+                lorgar.changePage(this._f.targetAddress);
             }
         });
         

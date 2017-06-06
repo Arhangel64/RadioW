@@ -16,8 +16,8 @@ var Page = Model.inherit({
         Model.fn.constructor.call(this, address);
         
         this._data = new ContentMap(true);
-        this.name = name;
-        this.urlAddress = [name];
+        this.name = name.toLowerCase();
+        this.urlAddress = [this.name];
         this._hasParentReporter = false;
         this._pr = undefined;
         this._childPages = {};
@@ -61,6 +61,7 @@ var Page = Model.inherit({
         addr.push(page.name);
         page.setUrlAddress(addr)
         page.on("newPage", this._onNewPage, this);
+        page.on("removePage", this._onRemovePage, this);
         this._childPages[page.name] = page;
         
         this.trigger("newPage", page);
@@ -100,6 +101,9 @@ var Page = Model.inherit({
     "_onNewPage": function(page) {
         this.trigger("newPage", page);
     },
+    "_onRemovePage": function(page) {
+        this.trigger("removePage", page);
+    },
     "removeItem": function(model) {
         Model.fn.removeModel.call(this, model);
         var addr = model.getAddress();
@@ -112,15 +116,31 @@ var Page = Model.inherit({
         
         this.broadcast(vc, "removeItem");
     },
+    "removePage": function(page) {
+        Model.fn.removeModel.call(this, page);
+        
+        delete this._childPages[page.name];
+        page.off("newPage", this._onNewPage, this);
+        page.off("removePage", this._onRemovePage, this);
+        
+        this.trigger("removePage", page);
+    },
     "setParentReporter": function(pr) {
         if (this._hasParentReporter) {
-            throw new Error("An attempt to set parent reporter to page, while another one already exists");
+            throw new Error("An attempt to set parent reporter to page while another one already exists");
         }
         this._pr = pr;
         this._hasParentReporter = true;
     },
     "setUrlAddress": function(address) {
         this.urlAddress = address;
+    },
+    "unsetParentReporter": function() {
+        if (!this._hasParentReporter) {
+            throw new Error("An attempt to unset parent reporter from page which doesn't have one");
+        }
+        delete this._pr;
+        this._hasParentReporter = false;
     }
 });
 

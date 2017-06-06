@@ -27,7 +27,7 @@ var Address = Object.inherit({
             hopOt = other._data[i];
             
             if (hopOt === undefined) {
-                return false;
+                return true;
             }
             
             if (hopMe["<"](hopOt)) {
@@ -37,7 +37,7 @@ var Address = Object.inherit({
                 return false;
             }
         }
-        return false;
+        return this._data.length < other._data.length;
     },
     ">": function(other) {
         if (!(other instanceof Address)) {
@@ -51,7 +51,7 @@ var Address = Object.inherit({
             hopOt = other._data[i];
             
             if (hopOt === undefined) {
-                return true;
+                return false;
             }
             
             if (hopMe[">"](hopOt)) {
@@ -61,7 +61,7 @@ var Address = Object.inherit({
                 return false;
             }
         }
-        return false;
+        return this._data.length > other._data.length;
     },
     "==": function(other) {
         if (!(other instanceof Address)) {

@@ -100,14 +100,14 @@ var Iterator = Class.inherit({
     },
     "++": function() {
         if ((this._itr._cursor === null)) {
-            throw new Error("An attempt to increment an iterator pointing to the end of the list");
+            throw new Error("An attempt to increment an iterator pointing to the end of the map");
         }
         this._itr.next();
     },
     "--": function() {
         this._itr.prev();
         if ((this._itr._cursor === null)) {
-            throw new Error("An attempt to decrement an iterator pointing to the beginning of the list");
+            throw new Error("An attempt to decrement an iterator pointing to the beginning of the map");
         }
     },
     "==": function(other) {
@@ -115,7 +115,7 @@ var Iterator = Class.inherit({
     },
     "*": function() {
         if ((this._itr._cursor === null)) {
-            throw new Error("An attempt to dereference an iterator pointing to the end of the list");
+            throw new Error("An attempt to dereference an iterator pointing to the end of the map");
         }
         return this._itr.data();
     }

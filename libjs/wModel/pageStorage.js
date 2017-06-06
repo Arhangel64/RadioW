@@ -75,7 +75,7 @@ var PageStorage = Model.inherit({
         this.response(vc, "pageName", ev);
     },
     "_initNotFoundPage": function() {
-        var nf = new Page(this._address["+"](new Address(["special", "notFound"])));
+        var nf = new Page(this._address["+"](new Address(["special", "notFound"])), "Not found");
         this._specialPages["notFound"] = nf;
         this.addModel(nf);
         var msg = new ModelString(nf._address["+"](new Address(["errorMessage"])), "Error: page not found");
@@ -85,10 +85,12 @@ var PageStorage = Model.inherit({
         this.addModel(this._root);
         
         this._root.on("newPage", this._onNewPage, this);
+        this._root.on("removePage", this._onRemovePage, this);
     },
     "_onNewPage": function(page) {
         var addr = page.urlAddress.join("/").slice(this._root.name.length);
-        this.trigger("serviceMessage", "Adding new page: " + page.urlAddress);
+        this.trigger("serviceMessage", "Adding new page: " + addr);
+        this.trigger("serviceMessage", "Page address: " + page.getAddress().toString());
         
         if (this._urls[addr]) {
             throw new Error("An attempt to add page with an existing url");
@@ -96,6 +98,19 @@ var PageStorage = Model.inherit({
         this._urls[addr] = page;
         this._rMap.insert(page.getAddress(), new String(addr));
         page.setParentReporter(this._pr);
+    },
+    "_onRemovePage": function(page) {
+        var addr = page.urlAddress.join("/").slice(this._root.name.length);
+        this.trigger("serviceMessage", "Removing page: " + addr);
+        this.trigger("serviceMessage", "Page address: " + page.getAddress().toString());
+        
+        if (!this._urls[addr]) {
+            throw new Error("An attempt to remove a non existing page");
+        }
+        delete this._urls[addr];
+        var itr = this._rMap.find(page.getAddress());
+        this._rMap.erase(itr);
+        page.unsetParentReporter();
     }
 });
 

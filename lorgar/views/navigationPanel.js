@@ -42,11 +42,6 @@
                 var nav = new Nav(controller);
                 this.append(nav, 0, this._c.length, 1, 1);
                 this.append(this._spacer, 0, this._c.length, 1, 1);
-                
-                nav.on("activate", this._onNavActivate, this);
-            },
-            "_onNavActivate": function(address) {
-                lorgar.changePage(address);
             }
         });
         

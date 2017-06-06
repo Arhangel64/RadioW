@@ -31,8 +31,8 @@
             }
         }
         
-        Controller.initialize(["String", "List", "Vocabulary", "Page", "PanesList"], waiter.check.bind(waiter, "controllers"));
-        View.initialize(["Label", "Page", "PanesList"], waiter.check.bind(waiter, "views"));
+        Controller.initialize(["String", "List", "Vocabulary", "Page", "PanesList", "Link"], waiter.check.bind(waiter, "controllers"));
+        View.initialize(["Label", "Page", "PanesList", "Nav"], waiter.check.bind(waiter, "views"));
         
         var test = new Test();
         test.run();

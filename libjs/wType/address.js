@@ -27,7 +27,7 @@ var Address = Object.inherit({
             hopOt = other._data[i];
             
             if (hopOt === undefined) {
-                return true;
+                return false;
             }
             
             if (hopMe["<"](hopOt)) {
@@ -51,7 +51,7 @@ var Address = Object.inherit({
             hopOt = other._data[i];
             
             if (hopOt === undefined) {
-                return false;
+                return true;
             }
             
             if (hopMe[">"](hopOt)) {

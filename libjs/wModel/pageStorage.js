@@ -84,6 +84,7 @@ var PageStorage = Model.inherit({
     "_initRootPage": function() {
         this.addModel(this._root);
         
+        this._rMap.insert(this._root.getAddress(), new String("/"));
         this._root.on("newPage", this._onNewPage, this);
         this._root.on("removePage", this._onRemovePage, this);
     },

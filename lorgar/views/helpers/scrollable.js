@@ -71,6 +71,18 @@
             },
             "removeChild": function(e) {
                 this._e.removeChild(e);
+            },
+            "setLeft": function(x) {
+                if (this._x !== x) {
+                    View.fn.setLeft.call(this, x);
+                    this.trigger("scrollLeft", -x);
+                }
+            },
+            "setTop": function(y) {
+                if (this._y !== y) {
+                    View.fn.setTop.call(this, y);
+                    this.trigger("scrollTop", -y);
+                }
             }
         });
         

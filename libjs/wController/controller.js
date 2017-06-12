@@ -55,7 +55,7 @@ var Controller = Subscribable.inherit({
             controller.register(this._dp, this._socket);
         }
         if (this._subscribed && !controller._subscribed) {
-            controller.subscribe();
+            this._subscribeChildController(this._controllers.length - 1);
         }
         this.trigger("newController", controller);
     },
@@ -118,7 +118,7 @@ var Controller = Subscribable.inherit({
         var index = this._controllers.indexOf(ctrl);
         if (index !== -1) {
             if (this._subscribed) {
-                ctrl.unsubscribe();
+                this._unsubscribeChildController(index);
             }
             if (this._dp) {
                 ctrl.unregister();
@@ -154,8 +154,12 @@ var Controller = Subscribable.inherit({
         this.send(vc, "subscribe");
         
         for (var i = 0; i < this._controllers.length; ++i) {
-            this._controllers[i].subscribe();
+            this._subscribeChildController(i)
         }
+    },
+    "_subscribeChildController": function(index) {
+        var ctrl = this._controllers[index];
+        ctrl.subscribe();
     },
     "unregister": function() {
         if (!this._registered) {
@@ -187,8 +191,12 @@ var Controller = Subscribable.inherit({
         }
         
         for (var i = 0; i < this._controllers.length; ++i) {
-            this._controllers[i].unsubscribe();
+            this._unsubscribeChildController(i);
         }
+    },
+    "_unsubscribeChildController": function(index) {
+        var ctrl = this._controllers[index];
+        ctrl.unsubscribe();
     }
 });
 

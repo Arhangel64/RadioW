@@ -92,8 +92,8 @@ var Page = Controller.inherit({
     },
     "removeItem": function(address) {
         var itr = this.data.find(address);
-        this.data.erase(itr);
         var pair = itr["*"]();
+        this.data.erase(itr);
         
         this.trigger("removeItem", pair.first);
         

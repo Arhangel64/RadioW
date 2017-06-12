@@ -28,10 +28,15 @@
                 W.extend(base, options);
                 Layout.fn.constructor.call(this, controller, base);
                 
+                this._scr.on("scrollTop", this._onScrollTop, this);
+                
                 this._overflown = false;
                 this._rows = 0;
                 this._cachedMinH = 0;
                 this._cols = 0;
+                this._scrolled = 0;
+                
+                this._f.setSubscriptionRange(0, 0);
             },
             "append": function(child, aligment) {
                 var model = new LM();
@@ -57,6 +62,10 @@
                 var label = new Pane(ctrl);
                 this.append(label);
             },
+            "_onScrollTop": function(y) {
+                this._scrolled = y;
+                this._recalculateShown();
+            },
             "_positionElement": function(index) {
                 var row = Math.floor(index / this._cols);
                 var col = index % this._cols;
@@ -69,9 +78,17 @@
                 var rows = Math.ceil(this._c.length / this._cols);
                 if (rows !== this._rows) {
                     this._rows = rows;
-                    this._cachedMinH = (rows * this._o.nestWidth) + (rows - 1) * this._o.verticalSpace;
+                    this._cachedMinH = (rows * this._o.nestHeight) + (rows - 1) * this._o.verticalSpace;
                 }
                 this._scr.setMinSize(this._w, Math.max(this._cachedMinH, this._h));
+            },
+            "_recalculateShown": function() {
+                var possibleRows = Math.ceil(this._h / (this._o.nestHeight + this._o.verticalSpace));
+                var amount = this._cols * (possibleRows);
+                
+                var start = Math.floor(this._scrolled / this._o.nestHeight) * this._cols;
+                var end = start + amount;
+                this._f.setSubscriptionRange(start, end);
             },
             "setSize": function(w, h) {
                 View.fn.setSize.call(this, w, h);
@@ -82,7 +99,7 @@
                 if (this._o.scrollable) {
                     this._recalculateRows();
                 }
-                
+                this._recalculateShown();
                 for (var i = 0; i < this._c.length; ++i) {
                     this._positionElement(i);
                 }

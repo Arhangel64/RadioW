@@ -13,10 +13,13 @@ var PanesList = List.inherit({
         this._subscriptionEnd = Infinity;
     },
     "addElement": function(element) {
-        var controller = new Vocabulary(this._pairAddress["+"](new Address([element.toString()])));
-        this.addController(controller);
-        
+        var size = this.data.size();
         List.fn.addElement.call(this, element);
+        
+        if (size >= this._subscriptionStart && size < this._subscriptionEnd) {
+            var controller = new Vocabulary(this._pairAddress["+"](new Address([element.toString()])));
+            this.addController(controller);
+        }
     },
     "setSubscriptionRange": function(s, e) {
         var needStart = s !== this._subscriptionStart;
@@ -27,53 +30,45 @@ var PanesList = List.inherit({
             this._subscriptionStart = s;
             this._subscriptionEnd = e;
             if (this._subscribed) {
+                this.trigger("rangeStart");
                 if (needStart) {
                     if (s > os) {
-                        for (var i = os; i < s; ++i) {
+                        var limit = Math.min(s - os, this._controllers.length);
+                        for (var i = 0; i < limit; ++i) {
                             var ctrl = this._controllers[i];
-                            if (ctrl._subscribed) {
-                                ctrl.unsubscribe();
-                            }
+                            this._removeControllerByIndex(i);
+                            ctrl.destructor();
                         }
                     } else {
-                        for (var i = s; i < os; ++i) {
-                            var ctrl = this._controllers[i];
-                            if (!ctrl._subscribed) {
-                                ctrl.subscribe();
-                            }
+                        var limit = Math.min(os, e) - s;
+                        for (var i = 0; i < limit; ++i) {
+                            var ctrl = new Vocabulary(this._pairAddress["+"](new Address([this.data.at(i + s).toString()])));
+                            this.addController(ctrl, i);
                         }
                     }
                 }
                 if (needEnd) {
-                    var ce = Math.min(this._controllers.length, e);
-                    var coe = Math.min(this._controllers.length, oe);
+                    var ce = Math.min(this.data.size(), e);
+                    var coe = Math.min(this.data.size(), oe);
                     if (ce > coe) {
-                        for (var i = coe; i < ce; ++i) {
-                            var ctrl = this._controllers[i];
-                            if (!ctrl._subscribed) {
-                                ctrl.subscribe();
-                            }
+                        var start = Math.max(s, oe);
+                        var amount = ce - start;    //it can be negative, it's fine
+                        for (var i = 0; i < amount; ++i) {
+                            var ctrl = new Vocabulary(this._pairAddress["+"](new Address([this.data.at(start + i).toString()])));
+                            this.addController(ctrl);
                         }
                     } else if (ce < coe) {
-                        for (var i = ce; i < coe; ++i) {
-                            var ctrl = this._controllers[i];
-                            if (ctrl._subscribed) {
-                                ctrl.unsubscribe();
-                            }
+                        var amount = Math.min(coe - ce, coe - os);
+                        for (var i = 0; i < amount; ++i) {
+                            var index = this._controllers.length - 1 - i;
+                            var ctrl = this._controllers[index];
+                            this._removeControllerByIndex(index);
+                            ctrl.destructor();
                         }
                     }
                 }
+                this.trigger("rangeEnd");
             }
-        }
-    },
-    "_subscribeChildController": function(index) {
-        if (index >= this._subscriptionStart && index < this._subscriptionEnd) {
-            List.fn._subscribeChildController.call(this, index);
-        }
-    },
-    "_unsubscribeChildController": function(index) {
-        if (index >= this._subscriptionStart && index < this._subscriptionEnd) {
-            List.fn._unsubscribeChildController.call(this, index);
         }
     }
 });

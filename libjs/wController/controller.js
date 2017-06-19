@@ -12,6 +12,8 @@ var Controller = Subscribable.inherit({
     "constructor": function(addr) {
         Subscribable.fn.constructor.call(this);
         
+        this.initialized = false;
+        
         this._subscribed = false;
         this._registered = false;
         this._pairAddress = addr;
@@ -45,19 +47,25 @@ var Controller = Subscribable.inherit({
         
         Subscribable.fn.destructor.call(this);
     },
-    "addController": function(controller) {
+    "addController": function(controller, before) {
         if (!(controller instanceof Controller)) {
             throw new Error("An attempt to add not a controller into " + this.className);
         }
         controller.on("serviceMessage", this._onControllerServiceMessage, this);
-        this._controllers.push(controller);
+        var index = this._controllers.length;
+        if (before === undefined) {
+            this._controllers.push(controller);
+        } else {
+            index = before;
+            this._controllers.splice(before, 0, controller);
+        }
         if (this._registered) {
             controller.register(this._dp, this._socket);
         }
         if (this._subscribed && !controller._subscribed) {
-            this._subscribeChildController(this._controllers.length - 1);
+            this._subscribeChildController(index);
         }
-        this.trigger("newController", controller);
+        this.trigger("newController", controller, index);
     },
     "addHandler": function(name) {
         if (!(this["_h_" + name] instanceof Function)) {
@@ -117,18 +125,22 @@ var Controller = Subscribable.inherit({
         }
         var index = this._controllers.indexOf(ctrl);
         if (index !== -1) {
-            if (this._subscribed) {
-                this._unsubscribeChildController(index);
-            }
-            if (this._dp) {
-                ctrl.unregister();
-            }
-            this._controllers.splice(index, 1);
-        
-            this.trigger("removedController", ctrl);
+            this._removeControllerByIndex(index);
         } else {
             throw new Error("An attempt to remove not not existing controller from " + this.className);
         }
+    },
+    "_removeControllerByIndex": function(index) {
+        var ctrl = this._controllers[index];
+        if (this._subscribed) {
+            this._unsubscribeChildController(index);
+        }
+        if (this._dp) {
+            ctrl.unregister();
+        }
+        this._controllers.splice(index, 1);
+    
+        this.trigger("removedController", ctrl, index);
     },
     "send": function(vc, handler) {
         if (!this._registered) {

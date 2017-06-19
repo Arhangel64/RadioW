@@ -16,7 +16,8 @@
                 var base = {
                     vertical: false,
                     horizontal: false,
-                    draggable: true
+                    draggable: true,
+                    virtual: false
                 };
                 var lm = new LocalModel();
                 W.extend(base, options);
@@ -74,14 +75,45 @@
             },
             "setLeft": function(x) {
                 if (this._x !== x) {
-                    View.fn.setLeft.call(this, x);
-                    this.trigger("scrollLeft", -x);
+                    if (this._o.virtual) {
+                        this._x = x;
+                        this._e.style.left = "0px";
+                    } else {
+                        View.fn.setLeft.call(this, x);
+                    }
+                    if (x === 0) {
+                        this.trigger("scrollLeft", x);
+                    } else {
+                        this.trigger("scrollLeft", -x);
+                    }
+                }
+            },
+            "setSize": function(w, h) {
+                if (this._o.virtual) {
+                    this._w = this.constrainWidth(w);
+                    this._h = this.constrainHeight(h);
+                    
+                    this._e.style.width = this._l._w + "px";
+                    this._e.style.height = this._l._h + "px";
+                    
+                    this.trigger("resize", this._w, this._h);
+                } else {
+                    View.fn.setSize.call(this, w, h);
                 }
             },
             "setTop": function(y) {
                 if (this._y !== y) {
-                    View.fn.setTop.call(this, y);
-                    this.trigger("scrollTop", -y);
+                    if (this._o.virtual) {
+                        this._y = y;
+                        this._e.style.top = "0px";
+                    } else {
+                        View.fn.setTop.call(this, y);
+                    }
+                    if (y === 0) {
+                        this.trigger("scrollTop", 0);
+                    } else {
+                        this.trigger("scrollTop", -y);
+                    }
                 }
             }
         });

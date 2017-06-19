@@ -23,22 +23,29 @@
                     nestWidth: 100,
                     nestHeight: 100,
                     verticalSpace: 10,
-                    scrollable: Layout.Scroll.Vertical
+                    scrollable: Layout.Scroll.VirtualVertical
                 };
                 W.extend(base, options);
+                this._ctrlInitialized = false;
                 Layout.fn.constructor.call(this, controller, base);
                 
                 this._scr.on("scrollTop", this._onScrollTop, this);
                 
+                this._hbi = Object.create(null);
                 this._overflown = false;
                 this._rows = 0;
                 this._cachedMinH = 0;
                 this._cols = 0;
                 this._scrolled = 0;
+                this._scrollShift = 0;
+                this._rangeUpdate = false;
                 
+                this._f.on("removedController", this._onRemovedController, this);
+                this._f.on("rangeStart", this._onRangeStart, this);
+                this._f.on("rangeEnd", this._onRangeEnd, this);
                 this._f.setSubscriptionRange(0, 0);
             },
-            "append": function(child, aligment) {
+            "append": function(child, index) {
                 var model = new LM();
                 var nest = new Layout(model, {
                     minHeight: this._o.nestHeight,
@@ -48,19 +55,49 @@
                     scrollable: Layout.Scroll.Both
                 });
                 nest._uncyclic.push(function() {model.destructor()});
-                nest.append(child, aligment);
-                this._addChild(nest, 0);
+                nest.append(child);
+                this._addChild(nest, 0, index);
                 
                 nest.setSize(this._o.nestWidth, this._o.nestHeight);
                 
-                if (this._cols) {
-                    this._positionElement(this._c.length - 1);
+                if (this._cols && !this._rangeUpdate) {
+                    this._positionElement(index);
+                    if (index !== this._c.length - 1) {
+                        this._refreshPositions(index + 1);
+                    }
+                }
+            },
+            "_onAddElement": function() {
+                this._recalculateRows();
+            },
+            "_onData": function() {
+                if (this._f.initialized) {
+                    if (!this._ctrlInitialized) {
+                        this._f.on("addElement", this._onAddElement, this);
+                        this._ctrlInitialized = true;
+                    }
                     this._recalculateRows();
                 }
             },
-            "_onNewController": function(ctrl) {
+            "_onNewController": function(ctrl, index) {
                 var label = new Pane(ctrl);
-                this.append(label);
+                this.append(label, index);
+            },
+            "_onRangeEnd": function() {
+                this._rangeUpdate = false;
+                this._refreshPositions(0);
+            },
+            "_onRangeStart": function() {
+                this._rangeUpdate = true;
+            },
+            "_onRemovedController": function(ctrl, index) {
+                var obj = this._c[index];
+                this._removeChildByIndex(index);
+                obj.c.destructor();
+                
+                if (!this._rangeUpdate) {
+                    this._refreshPositions(index);
+                }
             },
             "_onScrollTop": function(y) {
                 this._scrolled = y;
@@ -72,10 +109,10 @@
                 var e = this._c[index];
                 
                 e.c.setLeft(col * this._o.nestWidth + col * this._hSpace);
-                e.c.setTop(row * this._o.nestHeight + row * this._o.verticalSpace);
+                e.c.setTop(row * this._o.nestHeight + row * this._o.verticalSpace - this._scrollShift);
             },
             "_recalculateRows": function() {
-                var rows = Math.ceil(this._c.length / this._cols);
+                var rows = Math.ceil(this._f.data.size() / this._cols);
                 if (rows !== this._rows) {
                     this._rows = rows;
                     this._cachedMinH = (rows * this._o.nestHeight) + (rows - 1) * this._o.verticalSpace;
@@ -86,9 +123,30 @@
                 var possibleRows = Math.ceil(this._h / (this._o.nestHeight + this._o.verticalSpace));
                 var amount = this._cols * (possibleRows);
                 
-                var start = Math.floor(this._scrolled / this._o.nestHeight) * this._cols;
+                this._scrollShift = this._scrolled % (this._o.nestHeight + this._o.verticalSpace);
+                var start = Math.floor(this._scrolled / (this._o.nestHeight + this._o.verticalSpace)) * this._cols;
                 var end = start + amount;
+                
                 this._f.setSubscriptionRange(start, end);
+                this._refreshPositions(0);
+            },
+            "_refreshPositions": function(start) {
+                for (var i = start; i < this._c.length; ++i) {
+                    this._positionElement(i);
+                }
+            },
+            "_removeChildByIndex": function(i) {
+                var child = this._c[i].c;
+                this._c.splice(i, 1);
+                child._p = undefined;
+                
+                if (this._o.scrollable) {
+                    this._scr.removeChild(child._e);
+                } else {
+                    this._e.removeChild(child._e);
+                }
+                
+                child.off("changeLimits", this._onChildChangeLimits, this);
             },
             "setSize": function(w, h) {
                 View.fn.setSize.call(this, w, h);
@@ -100,9 +158,7 @@
                     this._recalculateRows();
                 }
                 this._recalculateShown();
-                for (var i = 0; i < this._c.length; ++i) {
-                    this._positionElement(i);
-                }
+                this._refreshPositions(0);
             }
         });
         

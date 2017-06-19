@@ -25,7 +25,8 @@
                 if (this._o.scrollable) {
                     this._scr = new Scrollable({
                         vertical: !!(this._o.scrollable & 1),
-                        horizontal: !!(this._o.scrollable & 2)
+                        horizontal: !!(this._o.scrollable & 2),
+                        virtual: !!(this._o.scrollable & 4)
                     }, this);
                 }
             },
@@ -37,12 +38,17 @@
                 
                 View.fn.destructor.call(this);
             },
-            "_addChild": function(child, aligment) {
+            "_addChild": function(child, aligment, index) {
                 aligment = aligment || 1;
-                this._c.push({
+                var item = {
                     c: child,
                     a: aligment
-                });
+                }
+                if (index !== undefined) {
+                    this._c.splice(index, 0, item);
+                } else {
+                    this._c.push(item);
+                }
                 child.remove();
                 if (this._o.scrollable) {
                     this._scr.appendChild(child._e);
@@ -158,25 +164,29 @@
                     }
                 }
                 if (i !== this._c.length) {
-                    this._c.splice(i, 1);
-                    child._p = undefined;
-                    
-                    if (this._o.scrollable) {
-                        this._scr.removeChild(child._e);
-                        var w = 0;
-                        var h = 0;
-                        for (var i = 0; i < this._c.length; ++i) {
-                            w = Math.max(this._c[i].c._o.minWidth, w);
-                            h = Math.max(this._c[i].c._o.minHeight, h);
-                        }
-                        this._scr.setMinSize(w, h);
-                        this._scr.setSize(this._w, this._h);
-                    } else {
-                        this._e.removeChild(child._e);
-                    }
-                    
-                    child.off("changeLimits", this._onChildChangeLimits, this);
+                    this._removeChildByIndex(i);
                 }
+            },
+            "_removeChildByIndex": function(i) {
+                var child = this._c[i].c;
+                this._c.splice(i, 1);
+                child._p = undefined;
+                
+                if (this._o.scrollable) {
+                    this._scr.removeChild(child._e);
+                    var w = 0;
+                    var h = 0;
+                    for (var i = 0; i < this._c.length; ++i) {
+                        w = Math.max(this._c[i].c._o.minWidth, w);
+                        h = Math.max(this._c[i].c._o.minHeight, h);
+                    }
+                    this._scr.setMinSize(w, h);
+                    this._scr.setSize(this._w, this._h);
+                } else {
+                    this._e.removeChild(child._e);
+                }
+                
+                child.off("changeLimits", this._onChildChangeLimits, this);
             },
             "setSize": function(w, h) {
                 View.fn.setSize.call(this, w, h);
@@ -203,7 +213,11 @@
             "None": 0,
             "Vertical": 1,
             "Horizontal": 2,
-            "Both": 3
+            "Both": 3,
+            "Virtual": 4,
+            "VirtualVertical": 5,
+            "VirtualHorizontal": 6,
+            "VirtualBoth": 7
         }
         
         return Layout;

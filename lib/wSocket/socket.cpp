@@ -123,6 +123,7 @@ void W::Socket::onBinaryMessageReceived(const QByteArray& ba)
             {
                 setRemoteName();
             }
+            emit connected();
         }
     }
     else
@@ -199,7 +200,6 @@ void W::Socket::setName(const W::String& p_name)
     {
         remoteName = p_name;
         state = connected_s;
-        emit connected();
     }
     else
     {

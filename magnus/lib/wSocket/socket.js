@@ -102,10 +102,10 @@ var Socket = Subscribable.inherit({
                     break;
                 case "setName":
                     this._setName(ev._data.at("name"));
-                    this.trigger("connected");
                     if (this._serverCreated) {
                         this._setRemoteName();
                     }
+                    this.trigger("connected");
                     break;
                 default:
                     throw new Error("Unknown system command: " + cmd);

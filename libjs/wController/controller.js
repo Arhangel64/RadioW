@@ -79,6 +79,9 @@ var Controller = Subscribable.inherit({
             this._dp.registerHandler(handler);
         }
     },
+    "_createSubscriptionVC": function() {
+        return new Vocabulary();
+    },
     "getPairAddress": function() {
         return this._pairAddress.clone();
     },
@@ -162,7 +165,7 @@ var Controller = Subscribable.inherit({
         }
         this._subscribed = true;
         
-        var vc = new Vocabulary();
+        var vc = this._createSubscriptionVC();
         this.send(vc, "subscribe");
         
         for (var i = 0; i < this._controllers.length; ++i) {

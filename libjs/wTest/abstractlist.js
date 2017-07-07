@@ -17,6 +17,7 @@ var TAbsctractList = WTest.inherit({
         this._actions.push(this.testIterators);
         this._actions.push(this.testErasing);
         this._actions.push(this.testClear);
+        this._actions.push(this.testInsertion);
     },
     "destructor": function() {
         this._list.destructor();
@@ -33,6 +34,39 @@ var TAbsctractList = WTest.inherit({
         
         if (this._list.size() !== 1) {
             throw new Error("problem with size");
+        }
+    },
+    "testInsertion": function() {
+        var str1 = new String("one");
+        this._list.insert(str1, this._list.end());
+        
+        if (!this._list.begin()["*"]()["=="](str1)) {
+            throw new Error("Problem with insertion to an empty list");
+        }
+        
+        var str2 = new String("two");
+        this._list.insert(str2, this._list.begin());
+        
+        if (!this._list.begin()["*"]()["=="](str2)) {
+            throw new Error("Problem with insertion to the beginning of the list");
+        }
+        
+        var itr = this._list.begin();
+        itr["++"]();
+        var str3 = new String("oneAndAHalf");
+        this._list.insert(str3, itr);
+        
+        itr["--"]();
+        if (!itr["*"]()["=="](str3)) {
+            throw new Error("Problem with insertion to the middle of the list");
+        }
+        
+        var arr = [str2, str3, str1];
+        var itr1 = this._list.begin();
+        for (var i = 0; i < arr.length; ++i, itr1["++"]()) {
+            if (!itr1["*"]()["=="](arr[i])) {
+                throw new Error("Problem with the order of elements in list after insertion");
+            }
         }
     },
     "testIterators": function() {

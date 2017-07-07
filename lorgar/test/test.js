@@ -64,6 +64,7 @@
             "_onFail": function(name, current, error) {
                 console.warn("Test failed! Action " + current + ".");
                 console.warn("Error message:" + error.message);
+                console.warn("Error stack: \n" + error.stack);
             }
         });
         

@@ -12,6 +12,8 @@ set(HEADERS
     list.h
     vocabulary.h
     attributes.h
+    icatalogue.h
+    catalogue.h
 )
 
 set(SOURCES
@@ -20,6 +22,8 @@ set(SOURCES
     list.cpp
     vocabulary.cpp
     attributes.cpp
+    icatalogue.cpp
+    catalogue.cpp
 )
 
 add_library(wModel STATIC ${HEADERS} ${SOURCES})

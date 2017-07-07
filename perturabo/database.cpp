@@ -7,26 +7,18 @@
 #include <algorithm>
 
 Database::Database(const W::String& dbName, QObject* parent):
-    M::List(W::Address({dbName}), parent),
+    M::ICatalogue(W::Address({dbName}), parent),
     subscribeMember(W::Handler::create(W::Address({}), this, &Database::_h_subscribeMember)),
     name(dbName),
     opened(false),
     environment(lmdb::env::create()),
     dbi(0),
-    indexes(),
-    lastIndex(0)
+    elements()
 {
 }
 
 Database::~Database()
 {
-    IndexMap::const_iterator itr = indexes.begin();
-    IndexMap::const_iterator end = indexes.end();
-    
-    for (; itr != end; ++itr) {
-        delete itr->second;
-    }
-    
     delete subscribeMember;
 }
 
@@ -39,67 +31,9 @@ void Database::open()
     }
 }
 
-const std::set<uint64_t> & Database::find(const W::String& indexName, const W::Object& value) const
-{
-    IndexMap::const_iterator itr = indexes.find(indexName);
-    if (itr == indexes.end()) {
-        throw 4;
-    }
-    
-    return itr->second->find(value);
-}
-
-std::set<uint64_t> Database::find(const W::Vocabulary& value) const
-{
-    W::Vector keys = value.keys();
-    int size = keys.size();
-    
-    std::set<uint64_t> result;
-    bool first = true;
-    
-    for (int i = 0; i < size; ++i) {
-        const W::String& key = static_cast<const W::String&>(keys.at(i));
-        IndexMap::const_iterator itr = indexes.find(key);
-        if (itr == indexes.end()) {
-            throw 4;
-        }
-        if (first) {
-            result = itr->second->find(value.at(key));
-            first = false;
-        } else {
-            std::set<uint64_t> copy = result;
-            result.clear();
-            const std::set<uint64_t>& current = itr->second->find(value.at(key));
-            std::set_intersection(copy.begin(), copy.end(), current.begin(), current.end(), std::inserter(result, result.end()));
-        }
-        
-        if (result.size() == 0) {
-            break;
-        }
-    }
-    
-    return result;
-}
-
-
 void Database::addIndex(const W::String& fieldName, W::Object::objectType fieldType)
 {
-    IndexMap::const_iterator itr = indexes.find(fieldName);
-    if (itr != indexes.end()) {
-        throw 2;
-    }
-    
-    switch (fieldType) {
-        case W::Object::uint64:
-            indexes.insert(std::make_pair(fieldName, new Index<W::Uint64>()));
-            break;
-        case W::Object::string:
-            indexes.insert(std::make_pair(fieldName, new Index<W::String>()));
-            break;
-            
-        default:
-            throw 3;
-    }
+    ICatalogue::addIndex(fieldName, fieldType);
     
     if (opened) {
         lmdb::txn rtxn = lmdb::txn::begin(environment, nullptr, MDB_RDONLY);
@@ -125,16 +59,11 @@ void Database::addIndex(const W::String& fieldName, W::Object::objectType fieldT
     }
 }
 
-uint64_t Database::addRecord(const W::Vocabulary& record)
+uint64_t Database::addElement(const W::Vocabulary& record)
 {
-    IndexMap::const_iterator itr = indexes.begin();
-    IndexMap::const_iterator end = indexes.end();
+    uint64_t id = ICatalogue::addElement(record);
     
-    ++lastIndex;
-    
-    for (; itr != end; ++itr) {
-        itr->second->add(record.at(itr->first), lastIndex);
-    }
+    elements.insert(id);
     
     W::ByteArray ba;
     ba << record;
@@ -143,15 +72,13 @@ uint64_t Database::addRecord(const W::Vocabulary& record)
     for (int i = 0; i < length; ++i) {
         data[i] = ba.pop();
     }
-    lmdb::val key((uint8_t*) &lastIndex, 8);
+    lmdb::val key((uint8_t*) &id, 8);
     lmdb::val value(data, length);
     lmdb::txn wTrans = lmdb::txn::begin(environment);
     dbi.put(wTrans, key, value);
     wTrans.commit();
     
-    push(W::Uint64(lastIndex));
-    
-    return lastIndex;
+    return id;
 }
 
 
@@ -194,26 +121,16 @@ void Database::index()
             ba.push(bdata[i]);
         }
         W::Vocabulary* wVal = static_cast<W::Vocabulary*>(W::Object::fromByteArray(ba));
+        ICatalogue::addElement(*wVal);
         
-        IndexMap::const_iterator itr = indexes.begin();
-        IndexMap::const_iterator end = indexes.end();
-        
-        for (; itr != end; ++itr) {
-            itr->second->add(wVal->at(itr->first), iKey);
-        }
-        
-        push(W::Uint64(iKey));
-        if (iKey > lastIndex) {
-            lastIndex = iKey;
-        }
-        
+        elements.insert(iKey);
         delete wVal;
     }
     cursor.close();
     rtxn.abort();
 }
 
-W::Vocabulary* Database::getRecord(uint64_t id)
+W::Vocabulary* Database::getElement(uint64_t id)
 {
     lmdb::txn rtxn = lmdb::txn::begin(environment, nullptr, MDB_RDONLY);
     lmdb::val key((uint8_t*) &id, 8);
@@ -245,7 +162,7 @@ void Database::h_subscribeMember(const W::Event& ev)
     if (lastHops.size() == 2 && (lastHops.ends(W::Address{u"subscribe"}) || lastHops.ends(W::Address{u"get"}))) {
         W::Vocabulary* record;
         try {
-            record = getRecord(lastHops.front().toUint64());
+            record = getElement(lastHops.front().toUint64());
             M::Vocabulary* modelRecord = new M::Vocabulary(record, address + lastHops >> 1);
             if (lastHops.ends(W::Address{u"subscribe"})) {
                 addModel(modelRecord);
@@ -270,18 +187,37 @@ void Database::h_subscribeMember(const W::Event& ev)
     
 }
 
+std::set<uint64_t> Database::getAll()
+{
+    return elements;
+}
+
+void Database::removeElement(uint64_t id)
+{
+    if (!opened) {
+        throw 6;
+    }
+    ICatalogue::removeElement(id);
+    
+    lmdb::txn rtxn = lmdb::txn::begin(environment, nullptr, MDB_RDONLY);
+    lmdb::val key((uint8_t*) &id, 8);
+    dbi.del(rtxn, key);
+    elements.erase(id);
+}
+
+
 void Database::addModel(M::Model* model)
 {
     connect(model, SIGNAL(subscribersCountChange(uint64_t)), this, SLOT(onChildSubscribersCountChange(uint64_t)));
     
-    M::List::addModel(model);
+    M::ICatalogue::addModel(model);
 }
 
 void Database::removeModel(M::Model* model)
 {
     disconnect(model, SIGNAL(subscribersCountChange(uint64_t)), this, SLOT(onChildSubscribersCountChange(uint64_t)));
     
-    M::List::removeModel(model);
+    M::ICatalogue::removeModel(model);
 }
 
 

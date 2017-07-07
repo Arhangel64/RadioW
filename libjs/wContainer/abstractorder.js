@@ -56,6 +56,19 @@ var AbstractOrder = Class.inherit({
         }
         return itr["*"]().second;
     },
+    "insert": function(data, target) {
+        var itr = this._rmap.find(target);
+        
+        if (itr["=="](this._rmap.end())) {
+            throw new Error("An attempt to insert element before the non existing one");
+        }
+        
+        var pair = itr["*"]();
+        this._order.insert(data, pair.second);
+        
+        var pointer = pair.second.clone()["--"]();
+        this._rmap.insert(data, pointer);
+    },
     "push_back": function(data) {
         this._order.push_back(data);
         var itr = this._order.end();

@@ -162,7 +162,7 @@ void Perturabo::h_parseDirectory(const W::Event& ev)
                 if (art.size() == 0) {
                     W::Vocabulary avc;
                     avc.insert(u"name", tag.getArtist());
-                    artistId = artists->addRecord(avc);
+                    artistId = artists->addElement(avc);
                     ++artistsAdded;
                 } else {
                     artistId = *(art.begin());
@@ -174,7 +174,7 @@ void Perturabo::h_parseDirectory(const W::Event& ev)
                 std::set<uint64_t> alb = albums->find(albvc);
                 uint64_t albumId;
                 if (alb.size() == 0) {
-                    albumId = albums->addRecord(albvc);
+                    albumId = albums->addElement(albvc);
                     ++albumsAdded;
                 } else {
                     albumId = *(alb.begin());
@@ -187,7 +187,7 @@ void Perturabo::h_parseDirectory(const W::Event& ev)
                 
                 std::set<uint64_t> sng = songs->find(svc);
                 if (sng.size() == 0) {
-                    songs->addRecord(svc);
+                    songs->addElement(svc);
                     ++songsAdded;
                 }
             }

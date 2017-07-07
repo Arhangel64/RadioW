@@ -35,8 +35,8 @@ var PanesList = List.inherit({
                     if (s > os) {
                         var limit = Math.min(s - os, this._controllers.length);
                         for (var i = 0; i < limit; ++i) {
-                            var ctrl = this._controllers[i];
-                            this._removeControllerByIndex(i);
+                            var ctrl = this._controllers[0];
+                            this._removeControllerByIndex(0);
                             ctrl.destructor();
                         }
                     } else {
@@ -60,7 +60,7 @@ var PanesList = List.inherit({
                     } else if (ce < coe) {
                         var amount = Math.min(coe - ce, coe - os);
                         for (var i = 0; i < amount; ++i) {
-                            var index = this._controllers.length - 1 - i;
+                            var index = this._controllers.length - 1;
                             var ctrl = this._controllers[index];
                             this._removeControllerByIndex(index);
                             ctrl.destructor();

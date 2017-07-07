@@ -28,12 +28,13 @@ namespace M {
             string,
             list,
             vocabulary,
+            catalogue,
             
             attributes = 50
         };
         
         Model(const W::Address p_address, QObject* parent = 0);
-        //i'm not sure about copy constructor, it just doesn't make sence, because the address is the parameter which is supposed to be unique
+        //i'm not sure about copy constructor, it just doesn't make sense, because the address is the parameter which is supposed to be unique
         virtual ~Model();
         
         virtual ModelType getType() const = 0;
@@ -56,9 +57,13 @@ namespace M {
         void subscribersCountChange(uint64_t count) const;
         
     protected:
+        typedef std::map<W::Address, W::Vocabulary> SMap;
+        typedef std::map<uint64_t, SMap> Map;
         W::Address address;
         bool registered;
+        Map* subscribers;
         
+        void send(W::Vocabulary* vc, const W::Address& destination, uint64_t connectionId);
         void response(W::Vocabulary* vc, const W::Address& handlerAddress, const W::Event& src);
         void fakeResponse(W::Vocabulary* vc, const W::Address& handlerAddress, const W::Address& sourceAddress, const W::Event& src);
         void broadcast(W::Vocabulary* vc, const W::Address& handlerAddress);
@@ -67,13 +72,11 @@ namespace M {
         handler(unsubscribe)
         
     private:
-        typedef std::map<uint64_t, W::Order<W::Address>> Map;
         typedef W::Order<W::Handler*> HList;
         typedef W::Order<M::Model*> MList;
         
         W::Dispatcher* dispatcher;
         W::Server* server;
-        Map* subscribers;
         uint64_t subscribersCount;
         HList* handlers;
         W::Vector* properties;

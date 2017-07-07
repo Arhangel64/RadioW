@@ -4,9 +4,9 @@ M::Model::Model(const W::Address p_address, QObject* parent):
     QObject(parent),
     address(p_address),
     registered(false),
+    subscribers(new Map()),
     dispatcher(0),
     server(0),
-    subscribers(new Map()),
     subscribersCount(0),
     handlers(new HList()),
     properties(new W::Vector()),
@@ -157,11 +157,16 @@ void M::Model::h_subscribe(const W::Event& ev)
     uint64_t id = ev.getSenderId();
     const W::Vocabulary& vc = static_cast<const W::Vocabulary&>(ev.getData());
     const W::Address& source = static_cast<const W::Address&>(vc.at(u"source"));
+    W::Vocabulary params;
+    if (vc.has(u"params")) {
+        params = static_cast<const W::Vocabulary&>(vc.at(u"params"));
+    }
+    
     
     Map::iterator sItr = subscribers->find(id);
     
     if (sItr == subscribers->end()) {
-        std::pair<Map::iterator, bool> pair = subscribers->emplace(std::make_pair(id, W::Order<W::Address>()));
+        std::pair<Map::iterator, bool> pair = subscribers->emplace(std::make_pair(id, SMap()));
         if (!pair.second) {
             emit serviceMessage(QString("Model ") + address.toString().c_str() + ": something completely wrong happened");
             throw 3;
@@ -170,7 +175,7 @@ void M::Model::h_subscribe(const W::Event& ev)
         connect(&socket, SIGNAL(disconnected()), this, SLOT(onSocketDisconnected()));
         sItr = pair.first;
     }
-    W::Order<W::Address>::const_iterator oItr = sItr->second.find(source);
+    SMap::const_iterator oItr = sItr->second.find(source);
     if (oItr != sItr->second.end()) {
         emit serviceMessage(QString("Socket ") + id + 
                             " subscriber " + source.toString().c_str() + 
@@ -178,7 +183,7 @@ void M::Model::h_subscribe(const W::Event& ev)
         throw 4;
     }
     
-    sItr->second.push_back(source);
+    sItr->second.insert(std::make_pair(source, params));
     ++subscribersCount;
     
     W::Vocabulary* nvc = new W::Vocabulary();
@@ -222,17 +227,17 @@ void M::Model::h_unsubscribe(const W::Event& ev)
         throw 6;
     }
     
-    W::Order<W::Address>& ord = itr->second;
-    W::Order<W::Address>::const_iterator oItr = ord.find(source);
-    if (oItr == ord.end()) {
+    SMap& smap = itr->second;
+    SMap::const_iterator sItr = smap.find(source);
+    if (sItr == smap.end()) {
         emit serviceMessage(QString("Socket ") + id + 
                             " subscriber " + source.toString().c_str() + 
                             " is not subscribed to model " + source.toString().c_str());
         throw 7;
     }
 
-    ord.erase(source);
-    if (ord.size() == 0) {
+    smap.erase(sItr);
+    if (smap.size() == 0) {
         const W::Socket& socket = server->getConnection(itr->first);
         disconnect(&socket, SIGNAL(disconnected()), this, SLOT(onSocketDisconnected()));
         subscribers->erase(itr);
@@ -241,6 +246,17 @@ void M::Model::h_unsubscribe(const W::Event& ev)
     
     emit serviceMessage(QString("Model ") + address.toString().c_str() + ": now has " + std::to_string(subscribersCount).c_str() + " subscribers");
     emit subscribersCountChange(subscribersCount);
+}
+
+void M::Model::send(W::Vocabulary* vc, const W::Address& destination, uint64_t connectionId)
+{
+    if (!registered) {
+        emit serviceMessage(QString("An attempt to send event from model ") + address.toString().c_str() + " which was not registered");
+        throw 8;
+    }
+    W::Event ev(destination, vc);
+    ev.setSenderId(connectionId);
+    server->getConnection(connectionId).send(ev);
 }
 
 void M::Model::response(W::Vocabulary* vc, const W::Address& handlerAddress, const W::Event& src)
@@ -286,10 +302,10 @@ void M::Model::broadcast(W::Vocabulary* vc, const W::Address& handlerAddress)
     vc->insert(u"source", address);
     
     for (;itr != end; ++itr) {
-        W::Order<W::Address>::const_iterator oItr = itr->second.begin();
-        W::Order<W::Address>::const_iterator oEnd = itr->second.end();
+        SMap::const_iterator oItr = itr->second.begin();
+        SMap::const_iterator oEnd = itr->second.end();
         for (;oItr != oEnd; ++oItr) {
-            W::Event ev(*oItr + handlerAddress, vc->copy());
+            W::Event ev(oItr->first + handlerAddress, vc->copy());
             ev.setSenderId(itr->first);
             server->getConnection(itr->first).send(ev);
         }

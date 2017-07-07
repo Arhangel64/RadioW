@@ -49,11 +49,14 @@ var Proxy = Model.inherit({
         }
         this._waitingEvents = [];
     },
+    "_getAllData": function() {
+        return this.controller.data.clone();
+    },
     "_h_get": function(ev) {
         if (this.ready) {
             var vc = new Vocabulary();
             
-            vc.insert("data", this.controller.data.clone());
+            vc.insert("data", this._getAllData());
             this.response(vc, "get", ev);
         } else {
             this._waitingEvents.push(ev.clone());

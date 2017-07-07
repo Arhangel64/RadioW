@@ -11,7 +11,7 @@ var AbstractList = Class.inherit({
         }
         
         this._owning = owning !== false;
-        this._begin = new ListNode(this._owning);
+        this._begin = new ListNode(this);
         this._end = this._begin;
         this._size = 0;
         
@@ -60,6 +60,32 @@ var AbstractList = Class.inherit({
             node.destructor();
         }
     },
+    "insert": function(data, target) {
+        if (target._node._list !== this) {
+            throw new Error("An attempt to insert to list using iterator from another container");
+        }
+        if (!(data instanceof this.constructor.dataType)) {
+            throw new Error("An attempt to insert wrong data type into list");
+        }
+        var node = new ListNode(this);
+        node._data = data;
+        
+        if (target._node === this._begin) {
+            this._begin = node;
+        } else {
+            var bItr = target.clone();
+            bItr["--"]();
+            var before = bItr._node;
+            before._next = node;
+            node._prev = before;
+            bItr.destructor();
+        }
+        
+        node._next = target._node;
+        target._node._prev = node;
+        
+        ++this._size;
+    },
     "pop_back": function() {
         if (this._begin === this._end) {
             throw new Error("An attempt to pop from empty list");
@@ -82,7 +108,7 @@ var AbstractList = Class.inherit({
             throw new Error("An attempt to insert wrong data type into list");
         }
         
-        var node = new ListNode(this._owning);
+        var node = new ListNode(this);
         node._data = data;
         if (this._size === 0) {
             this._begin = node;
@@ -103,18 +129,20 @@ var AbstractList = Class.inherit({
 
 var ListNode = Class.inherit({
     "className": "ListNode",
-    "constructor": function(owning) {
+    "constructor": function(list) {
         Class.fn.constructor.call(this);
         
+        this._list = list
         this._data = null;
         this._next = null;
         this._prev = null;
-        this._owning = owning !== false;
+        this._owning = list._owning !== false;
     },
     "destructor": function() {
         if (this._owning && (this._data instanceof Class)) {
             this._data.destructor();
         }
+        delete this._list;
         
         Class.fn.destructor.call(this);
     }

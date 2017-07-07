@@ -3,11 +3,10 @@
 
 var Page = require("../lib/wModel/page");
 var String = require("../lib/wModel/string");
+var ProxyCatModel = require("../lib/wModel/proxy/catalogue");
+var ProxyVCModel = require("../lib/wModel/proxy/vocabulary");
 
 var Address = require("../lib/wType/address");
-
-var ProxyListModel = require("../lib/wModel/proxy/list");
-var ProxyVCModel = require("../lib/wModel/proxy/vocabulary");
 var counter = 0;
 
 var List = Page.inherit({
@@ -19,7 +18,14 @@ var List = Page.inherit({
         header.addProperty("fontFamily", "casualFont");
         this.addItem(header, 0, 0, 1, 1, Page.Aligment.CenterTop);
 
-        this._list = new ProxyListModel(this._address["+"](new Address(["list"])), remoteAddress, socket);
+        this._list = new ProxyCatModel(
+            this._address["+"](new Address(["list"])), 
+            remoteAddress, 
+            {
+                sorting: {ascending: true, field: "name"}
+            }, 
+            socket
+        );
         this._list.className = "PanesList";
         this._list.setChildrenClass(ProxyVCModel);
         this.addItem(this._list, 1, 0, 1, 1, Page.Aligment.CenterTop);

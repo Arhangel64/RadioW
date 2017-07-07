@@ -57,6 +57,7 @@ var Test = Class.inherit({
     "_onFail": function(name, current, error) {
         log.warn("Test failed! Action " + current + ".");
         log.warn("Error message:" + error.message);
+        log.warn("Error stack: \n" + error.stack);
     }
 });
 

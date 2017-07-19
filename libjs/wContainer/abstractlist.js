@@ -14,7 +14,6 @@ var AbstractList = Class.inherit({
         this._begin = new ListNode(this);
         this._end = this._begin;
         this._size = 0;
-        
     },
     "destructor": function() {
         this.clear();

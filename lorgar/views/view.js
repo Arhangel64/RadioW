@@ -13,8 +13,9 @@
         
         var View = Subscribable.inherit({
             "className": "View",
-            "constructor": function(controller, options, element) {
+            "constructor": function View (controller, options, element) {
                 Subscribable.fn.constructor.call(this);
+                this._destroying = false;
                 
                 var base = {
                     minWidth: 0,
@@ -59,6 +60,7 @@
                 this._applyProperties();
             },
             "destructor": function() {
+                this._destroying = true;
                 this._f.off("data", this._onData, this);
                 this._f.off("clearProperties", this._onClearProperties, this);
                 this._f.off("addProperty", this._onAddProperty, this);
@@ -99,7 +101,9 @@
                 return w;
             },
             "_initDraggable": function() {
-                this._dg = new Draggable(this, {});
+                this._dg = new Draggable(this, {
+                    snapDistance: this._o.snapDistance
+                });
             },
             "_initElement": function() {
                 this._e.style.position = "absolute";
@@ -115,11 +119,11 @@
                 }
             },
             "_onClearProperties": function() {
-                for (var key in this._e.style) {
-                    if (this._e.style.hasOwnProperty(key)) {
-                        delete this._e.style[key];
-                    }
-                }
+//                 for (var key in this._e.style) {
+//                     if (this._e.style.hasOwnProperty(key)) {
+//                         delete this._e.style[key];
+//                     }
+//                 }
                 this._initElement();
                 this._e.style.left = this._x + "px";
                 this._e.style.top = this._y + "px";

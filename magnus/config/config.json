@@ -1,8 +1,9 @@
 {
     "webServerPort": 3000,
     "webSocketServerPort": 8081,
-    "version": "0.0.1",
+    "version": "0.0.2",
     "build": "debug",
     "httpLog": false,
-    "testing": true
+    "testing": true,
+    "modelDestructionTimeout": 120000
 }

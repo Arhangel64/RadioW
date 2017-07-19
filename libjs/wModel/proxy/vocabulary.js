@@ -30,7 +30,7 @@ var MVocabulary = Proxy.inherit({
         this.setReady(true);
         
         var vc = new Vocabulary();
-        vc.insert("data", this.controller.data.clone())
+        vc.insert("data", this._getAllData());
         this.broadcast(vc, "get")
     },
     "_onRemoteChange": function(data) {

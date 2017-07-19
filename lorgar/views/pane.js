@@ -16,12 +16,16 @@
         var LM = require("lib/wController/localModel");
         
         var Pane = Layout.inherit({
-            "constructor": function(controller, options) {
+            "constructor": function PaneView (controller, options) {
                 var base = {
                     
                 };
                 W.extend(base, options);
                 Layout.fn.constructor.call(this, controller, options);
+                
+                this._initProxy();
+                this.addClass("hoverable");
+                this._e.addEventListener("click", this._proxy.onClick, false);
                 
                 var lm = this._labelModel = new LM();
                 var name = this._f.data.at("name");
@@ -36,6 +40,26 @@
                 this._uncyclic.push(function() {
                     lm.destructor();
                 });
+            },
+            "destructor": function() {
+                this._e.removeEventListener("click", this._proxy.onClick, false);
+                
+                Layout.fn.destructor.call(this);
+            },
+            "_applyProperties": function() {
+                this._onAddProperty("secondaryColor", "background");
+                
+                Layout.fn._applyProperties.call(this);
+            },
+            "_initProxy": function() {
+                this._proxy = {
+                    onClick: this._onClick.bind(this)
+                };
+            },
+            "_onClick": function() {
+                if (this._f.data.at("hasPageLink").valueOf() === true) {
+                    this.trigger("activate", this._f.data.at("pageLink").clone());
+                }
             },
             "_onLabelChangeLimits": function(label) {
                 this.setMinSize(label._o.minWidth, this._h);

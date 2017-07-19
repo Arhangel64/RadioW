@@ -40,9 +40,6 @@ var Magnus = Subscribable.inherit({
         
         global.magnus = this;
     },
-    "connectCorax": function() {
-        this.coraxSocket.open("localhost", 8080);
-    },
     "_initConnector": function() {
         this._connector = new Connector("Magnus", this.dispatcher, this.server, this._commands);
         
@@ -53,11 +50,6 @@ var Magnus = Subscribable.inherit({
         
         this._connector.addNode("Corax");
         this._connector.addNode("Perturabo");
-    },
-    "_initCoraxSocket": function() {
-        this.coraxSocket = new Socket("Magnus");
-        this.coraxSocket.on("connected", this._onCoraxConnected, this);
-        this.coraxSocket.on("message", this.dispatcher.pass, this.dispatcher);
     },
     "_initDispatcher": function() {
         this.dispatcher = new Dispatcher();

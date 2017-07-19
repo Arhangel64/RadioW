@@ -12,7 +12,7 @@
             "className": "Draggable",
             "constructor": function Draggable (view, options) {
                 var base = {
-                    "snapDistance": 0
+                    snapDistance: 0
                 };
                 W.extend(base, options);
                 Subscribable.fn.constructor.call(this, base);
@@ -40,8 +40,11 @@
                     window.removeEventListener("mousemove", this._proxy.onMouseMove);
                 }
                 
-                this._v.removeClass("draggable");
+                if (!this._v.destroying) {
+                    this._v.removeClass("draggable");
+                }
 
+                this._e.removeEventListener("mousedown", this._proxy.onMouseDown);
                 this._e.removeEventListener("touchstart", this._touch);
                 this._e.removeEventListener("touchmove", this._touch);
                 this._e.removeEventListener("touchend", this._touch);

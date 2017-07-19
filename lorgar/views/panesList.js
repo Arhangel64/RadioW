@@ -30,6 +30,8 @@
                 Layout.fn.constructor.call(this, controller, base);
                 
                 this._scr.on("scrollTop", this._onScrollTop, this);
+                this._scr.on("dragStart", this._onScrollDragStart, this);
+                this._scr.on("dragEnd", this._onScrollDragEnd, this);
                 
                 this._hbi = Object.create(null);
                 this._overflown = false;
@@ -39,6 +41,8 @@
                 this._scrolled = 0;
                 this._scrollShift = 0;
                 this._rangeUpdate = false;
+                this._skipPaneActivate = false;
+                this._proxyClearSkippingPaneActivate = this._clearSkippingPaneActivate.bind(this);
                 
                 this._f.on("removedController", this._onRemovedController, this);
                 this._f.on("rangeStart", this._onRangeStart, this);
@@ -52,10 +56,11 @@
                     maxHeight: this._o.nestHeight,
                     minWidth: this._o.nestWidth,
                     minWidth: this._o.nestWidth,
-                    scrollable: Layout.Scroll.Both
+                    scrollable: Layout.Scroll.None
                 });
                 nest._uncyclic.push(function() {model.destructor()});
                 nest.append(child);
+                child.on("activate", this._onChildActivate, this); //todo need to remove handler on deletion
                 this._addChild(nest, 0, index);
                 
                 nest.setSize(this._o.nestWidth, this._o.nestHeight);
@@ -67,8 +72,16 @@
                     }
                 }
             },
+            "_clearSkippingPaneActivate": function() {
+                this._skipPaneActivate = false;
+            },
             "_onAddElement": function() {
                 this._recalculateRows();
+            },
+            "_onChildActivate": function(address) {
+                if (!this._skipPaneActivate) {
+                    lorgar.changePage(address);
+                }
             },
             "_onData": function() {
                 if (this._f.initialized) {
@@ -98,6 +111,12 @@
                 if (!this._rangeUpdate) {
                     this._refreshPositions(index);
                 }
+            },
+            "_onScrollDragStart": function() {
+                this._skipPaneActivate = true;
+            },
+            "_onScrollDragEnd": function() {
+                setTimeout(this._proxyClearSkippingPaneActivate, 1);
             },
             "_onScrollTop": function(y) {
                 this._scrolled = y;

@@ -11,6 +11,8 @@ var Boolean = require("../lib/wType/boolean");
 var Link = require("../lib/wModel/link");
 
 var List = require("./list");
+var Artist = require("./artist");
+var Album = require("./album");
 
 var MusicPage = Page.inherit({
     "className": "MusicPage",
@@ -43,7 +45,7 @@ var MusicPage = Page.inherit({
     "_createLists": function(socket) {
         var ra = new Address(["artists"]);
         var pa = this._address["+"](ra);
-        this._artists = new List(pa, "Artists", ra, socket);
+        this._artists = new List(pa, "Artists", ra, socket, Artist);
         this._artistsLink = new Link(this._address["+"](new Address(["artistsLink"])), "Artists", pa.clone());
         this._artistsLink.label.addProperty("fontSize", "largeFontSize");
         this._artistsLink.label.addProperty("fontFamily", "largeFont");
@@ -53,7 +55,7 @@ var MusicPage = Page.inherit({
         
         var ral = new Address(["albums"]);
         var pal = this._address["+"](ral);
-        this._albums = new List(pal, "Albums", ral, socket);
+        this._albums = new List(pal, "Albums", ral, socket, Album);
         this._albumsLink = new Link(this._address["+"](new Address(["albumsLink"])), "Albums", pal.clone());
         this._albumsLink.label.addProperty("fontSize", "largeFontSize");
         this._albumsLink.label.addProperty("fontFamily", "largeFont");

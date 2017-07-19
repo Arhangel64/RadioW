@@ -14,34 +14,47 @@
             "className": "Scrollable",
             "constructor": function Scrollable(options, layout) {
                 var base = {
+                    draggable: true,
+                    snapDistance: 5,
                     vertical: false,
                     horizontal: false,
-                    draggable: true,
                     virtual: false
                 };
                 var lm = new LocalModel();
                 W.extend(base, options);
                 View.fn.constructor.call(this, lm, base);
                 
+                this._initProxy();
+                
                 this._l = layout;
                 this._l.on("resize", this.setSize, this);
                 this._l._e.appendChild(this._e);
                 
-                this.on("dragStart", this._onDragStart, this);
-                this.on("drag", this._onDrag, this);
-                this.on("dragEnd", this._onDragEnd, this);
+                this._e.addEventListener("mousewheel", this._proxy.onMouseWheel, false);
+                
+                if (this._o.draggable) {
+                    this.on("dragStart", this._onDragStart, this);
+                    this.on("drag", this._onDrag, this);
+                    this.on("dragEnd", this._onDragEnd, this);
+                }
                 
                 this._uncyclic.push(function() {
                     lm.destructor();
                 })
             },
             "destructor": function() {
+                this._e.removeEventListener("mousewheel", this._proxy.onMouseWheel, false);
                 this._l._e.removeChild(this._e);
                 
                 View.fn.destructor.call(this);
             },
             "appendChild": function(e) {
                 this._e.appendChild(e);
+            },
+            "_initProxy": function() {
+                this._proxy = {
+                    onMouseWheel: this._onMouseWheel.bind(this)
+                };
             },
             "maximizeMinSize": function(child) {
                 var width = Math.max(this._o.minWidth, child._o.minWidth);
@@ -63,12 +76,25 @@
                 this.setLeft(cX);
             },
             "_onDragEnd": function(pos) {
-                console.log("end")
+                //console.log("end")
             },
             "_onDragStart": function(pos) {
                 this._sX = this._x;
                 this._sY = this._y;
-                console.log("start");
+                //console.log("start");
+            },
+            "_onMouseWheel": function(e) {
+                var dX = this._o.horizontal ? e.deltaX : 0;
+                var dY = this._o.vertical ? e.deltaY : 0;
+                
+                var aX = this._x + dX;
+                var aY = this._y - dY;
+                
+                var cX = Math.max(Math.min(0, aX), this._l._w - this._w);
+                var cY = Math.max(Math.min(0, aY), this._l._h - this._h);
+                
+                this.setTop(cY);
+                this.setLeft(cX);
             },
             "removeChild": function(e) {
                 this._e.removeChild(e);
@@ -82,7 +108,7 @@
                         View.fn.setLeft.call(this, x);
                     }
                     if (x === 0) {
-                        this.trigger("scrollLeft", x);
+                        this.trigger("scrollLeft", 0);
                     } else {
                         this.trigger("scrollLeft", -x);
                     }

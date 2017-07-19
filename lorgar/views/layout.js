@@ -31,6 +31,7 @@
                 }
             },
             "destructor": function() {
+                this._destroying = true;
                 this.clear();
                 if (this._o.scrollable) {
                     this._scr.destructor();
@@ -76,9 +77,11 @@
                     var c = this._c[this._c.length - 1];
                     c.c.destructor();
                 }
-                if (this._o.scrollable) {
-                    this._scr.setMinSize(0, 0);
-                    this._scr.setSize(this._w, this._h);
+                if (!this._destroying) {
+                    if (this._o.scrollable) {
+                        this._scr.setMinSize(0, 0);
+                        this._scr.setSize(this._w, this._h);
+                    }
                 }
             },
             "_onChildChangeLimits": function(child) {
@@ -174,14 +177,16 @@
                 
                 if (this._o.scrollable) {
                     this._scr.removeChild(child._e);
-                    var w = 0;
-                    var h = 0;
-                    for (var i = 0; i < this._c.length; ++i) {
-                        w = Math.max(this._c[i].c._o.minWidth, w);
-                        h = Math.max(this._c[i].c._o.minHeight, h);
+                    if (!this._destroying) {
+                        var w = 0;
+                        var h = 0;
+                        for (var i = 0; i < this._c.length; ++i) {
+                            w = Math.max(this._c[i].c._o.minWidth, w);
+                            h = Math.max(this._c[i].c._o.minHeight, h);
+                        }
+                        this._scr.setMinSize(w, h);
+                        this._scr.setSize(this._w, this._h);
                     }
-                    this._scr.setMinSize(w, h);
-                    this._scr.setSize(this._w, this._h);
                 } else {
                     this._e.removeChild(child._e);
                 }

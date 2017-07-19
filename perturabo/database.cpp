@@ -166,7 +166,6 @@ void Database::h_subscribeMember(const W::Event& ev)
             M::Vocabulary* modelRecord = new M::Vocabulary(record, address + lastHops >> 1);
             if (lastHops.ends(W::Address{u"subscribe"})) {
                 addModel(modelRecord);
-                //passToHandler(ev);  //not sure about this. May be it's better to make this class a friend of M::Model or M::Vocabulary, so i can call handler directly?
                 modelRecord->_h_subscribe(ev);
             } else {
                 W::Vocabulary* vc = new W::Vocabulary;
@@ -180,6 +179,8 @@ void Database::h_subscribeMember(const W::Event& ev)
             } else {
                 throw err;
             }
+        } catch (const std::invalid_argument& err) {
+            emit serviceMessage(QString("Strange event in custom handler of database ") + ev.toString().c_str());
         }
     } else {
         emit serviceMessage(QString("Strange event in custom handler of database ") + ev.toString().c_str());

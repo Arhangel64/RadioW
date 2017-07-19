@@ -5,6 +5,8 @@ var Handler = require("../../wDispatcher/handler");
 var Vocabulary = require("../../wType/vocabulary");
 var Address = require("../../wType/address");
 
+var config = require("../../../config/config.json");
+
 var Proxy = Model.inherit({
     "className": "Proxy",
     "constructor": function(address, controller, socket) {      //les't pretend - this class is abstract
@@ -15,6 +17,7 @@ var Proxy = Model.inherit({
         this.controller = controller;
         this.childrenPossible = false;
         this._destroyOnLastUnsubscription = false;
+        this._destructionTimeout = undefined;
         this._childClass = undefined;
         this._waitingEvents = [];
         
@@ -26,18 +29,19 @@ var Proxy = Model.inherit({
         });
     },
     "destructor": function() {
+        if (this._destructionTimeout) {
+            clearTimeout(this._destructionTimeout);
+        }
         for (var i = 0; i < this._waitingEvents.length; ++i) {
             this._waitingEvents[i].destructor();
         }
         this.reporterHandler.destructor();
         Model.fn.destructor.call(this);
-        
-        this.destructor = function() {};        //to prevent double destruction;
     },
     "checkSubscribersAndDestroy": function() {
-        if (this._subscribersCount === 0) {
-            this.trigger("serviceMessage", this._address.toString() + " has no more subscribers, destroing model");
-            setTimeout(this.unregisterAndDestroy.bind(this), 1);
+        if (this._subscribersCount === 0 && this._destructionTimeout === undefined) {
+            this.trigger("serviceMessage", this._address.toString() + " has no more subscribers, destroying model");
+            this._destructionTimeout = setTimeout(this.trigger.bind(this, "destroyMe"), config.modelDestructionTimeout);
         }
     },
     "dispatchWaitingEvents": function() {
@@ -62,11 +66,19 @@ var Proxy = Model.inherit({
             this._waitingEvents.push(ev.clone());
         }
     },
+    "_h_subscribe": function(ev) {
+        Model.fn._h_subscribe.call(this, ev);
+        
+        if (this._destructionTimeout) {
+            clearTimeout(this._destructionTimeout);
+            this._destructionTimeout = undefined;
+        }
+    },
     "_h_unsubscribe": function(ev) {
         Model.fn._h_unsubscribe.call(this, ev);
         
         if (this._destroyOnLastUnsubscription) {
-            this.checkSubscribersAndDestroy()
+            this.checkSubscribersAndDestroy();
         }
     },
     "_h_subscribeMember": function(ev) {
@@ -88,12 +100,19 @@ var Proxy = Model.inherit({
                     child.on("ready", child.checkSubscribersAndDestroy, child);
                 }
                 child.subscribe();
-                child.on("destroying", this.removeModel.bind(this, child));     //to remove model from children if it autodestroys by the lack of subscribers
+                child.on("destroyMe", this.destroyChild.bind(this, child));     //to remove model if it has no subscribers
             } else {
-                this.trigger("serviceMessage", "Proxy model got a strange event: " + ev.toString());
+                this.trigger("serviceMessage", "Proxy model got a strange event: " + ev.toString(), 1);
             }
         } else {
-            this.trigger("serviceMessage", "Proxy model got a strange event: " + ev.toString());
+            this.trigger("serviceMessage", "Proxy model got a strange event: " + ev.toString(), 1);
+        }
+    },
+    "_onSocketDisconnected": function(ev, socket) {
+        Model.fn._onSocketDisconnected.call(this, ev, socket);
+        
+        if (this._destroyOnLastUnsubscription) {
+            this.checkSubscribersAndDestroy();
         }
     },
     "register": function(dp, server) {
@@ -134,13 +153,13 @@ var Proxy = Model.inherit({
     "subscribe": function() {
         this.controller.subscribe();
     },
-    "unregisterAndDestroy": function() {
-        this.trigger("destroying");
-        this.destructor();
+    "destroyChild": function(child) {
+        this.removeModel(child);
+        child.destructor();
     },
     "unsetChildrenClass": function() {
         if (!this.childrenPossible) {
-            this.trigger("serviceMessage", "An attempt to unset children class in Proxy, which dont have it", 1);
+            this.trigger("serviceMessage", "An attempt to unset children class in Proxy, which don't have it", 1);
         } else {
             delete this._childClass;
             this.childrenPossible = false;

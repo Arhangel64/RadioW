@@ -12,27 +12,20 @@ var Address = require("../wType/address");
 var Socket = Subscribable.inherit({
     "className": "Socket",
     "constructor": function(name, socket, id) {
-        Subscribable.fn.constructor.call(this);
-        
-        this._state = DISCONNECTED;
-        
         if (!name) {
             throw new Error("Can't construct a socket without a name");
         }
+        Subscribable.fn.constructor.call(this);
         
-        this._initProxy();
-        
+        this._state = DISCONNECTED;
         this._name = name instanceof String ? name : new String(name);
         this._remoteName = new String();
         this._id = new Uint64(0);
         this._serverCreated = false;
         
-        this.on("connected", this.onConnected);
-        this.on("disconnected", this.onDisconnected);
-        
+        this._initProxy();
         if (socket) {
             this._serverCreated = true;
-            this._state = CONNECTING;
             this._socket = socket;
             this._id.destructor();
             this._id = id.clone();
@@ -40,8 +33,6 @@ var Socket = Subscribable.inherit({
             this._socket.on("close", this._proxy.onClose);
             this._socket.on("error", this._proxy.onError);
             this._socket.on("message", this._proxy.onMessage);
-            
-            this._setRemoteId();
         }
     },
     "destructor": function() {
@@ -69,7 +60,6 @@ var Socket = Subscribable.inherit({
     },
     "_initProxy": function() {
         this._proxy = {
-            onOpen: this._onOpen.bind(this),
             onClose: this._onClose.bind(this),
             onError: this._onError.bind(this),
             onMessage: this._onMessage.bind(this)
@@ -79,6 +69,9 @@ var Socket = Subscribable.inherit({
         return this._state !== undefined && this._state === CONNECTED;
     },
     "_onClose": function(ev) {
+        this._state = DISCONNECTED;
+        this._remoteName.destructor();
+        this._remoteName = new String();
         this.trigger("disconnected", ev, this);
     },
     "_onError": function(err) {
@@ -97,14 +90,23 @@ var Socket = Subscribable.inherit({
             
             switch(cmd) {
                 case "setId":
-                    this._setId(ev._data.at("id"));
-                    this._setRemoteName();
+                    if (this._serverCreated) {
+                        if (this._state === CONNECTING) {
+                            this.trigger("negotiationId", ev._data.at("id"));
+                        } else {
+                            throw new Error("An attempt to set id in unexpected time");
+                        }
+                    } else {
+                        this._setId(ev._data.at("id"));
+                        this._setRemoteName();
+                    }
                     break;
                 case "setName":
                     this._setName(ev._data.at("name"));
-                    if (this._serverCreated) {
+                    if (!ev._data.at("yourName")["=="](this._name)) {
                         this._setRemoteName();
                     }
+                    this._state = CONNECTED;
                     this.trigger("connected");
                     break;
                 default:
@@ -115,18 +117,11 @@ var Socket = Subscribable.inherit({
         }
         ev.destructor();
     },
-    "_onOpen": function() {
-        this.trigger("__cnt__");
-    },
     "open": function(addr, port) {
-        var that = this;
-        
         if (this._state === DISCONNECTED) {
             this._state = CONNECTING;
             this._socket = new WebSocket("ws://"+ addr + ":" + port);
-            //this._socket.binaryType = "arraybuffer";
             
-            this._socket.on("open", this._proxy.onOpen);
             this._socket.on("close", this._proxy.onClose);
             this._socket.on("error", this._proxy.onError);
             this._socket.on("message", this._proxy.onMessage);
@@ -138,14 +133,8 @@ var Socket = Subscribable.inherit({
         
         this._socket.send(ba.toArrayBuffer());
     },
-    "onConnected": function() {
-        this._state = CONNECTED;
-    },
-    "onDisconnected": function(ev) {
-        this._state = DISCONNECTED;
-    },
     "_setId": function(id) {
-        if ((this._state === CONNECTING) && (this._id.valueOf() === 0)) {
+        if (this._state === CONNECTING) {
             this._id.destructor();
             this._id = id.clone();
         } else {
@@ -164,6 +153,7 @@ var Socket = Subscribable.inherit({
         var vc = new Vocabulary();
         vc.insert("command", new String("setName"));
         vc.insert("name", this._name.clone());
+        vc.insert("yourName", this._remoteName.clone());
         
         var ev = new Event(new Address(), vc, true);
         ev.setSenderId(this._id.clone());
@@ -172,6 +162,9 @@ var Socket = Subscribable.inherit({
         ev.destructor();
     },
     "_setRemoteId": function() {
+        if (this._state === DISCONNECTED) {
+            this._state = CONNECTING;
+        }
         var vc = new Vocabulary();
         vc.insert("command", new String("setId"));
         vc.insert("id", this._id.clone());

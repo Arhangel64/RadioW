@@ -3,7 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include <utils/file.h>
+#include <tools/file.h>
 #include <wType/string.h>
 #include <taglib/fileref.h>
 #include <iostream>

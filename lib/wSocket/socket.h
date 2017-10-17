@@ -64,6 +64,7 @@ namespace W
     signals:
         void connected();
         void disconnected();
+        void negotiationId(uint64_t p_id);
         void error(W::Socket::SocketError err, const QString& msg);
         void message(const W::Event&);
         void proxy(const W::Event&);

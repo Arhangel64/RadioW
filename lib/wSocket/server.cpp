@@ -8,8 +8,8 @@ using std::endl;
 W::Server::Server(const W::String& name, QObject* parent): 
     QObject(parent),
     lastId(0),
+    pool(),
     connections(),
-    peers(),
     server(0),
     name(name)
 {
@@ -25,8 +25,7 @@ W::Server::~Server()
 
 void W::Server::listen(uint16_t port)
 {
-    if (server->listen(QHostAddress::Any, port))
-    {
+    if (server->listen(QHostAddress::Any, port)){
         
     }
     
@@ -36,6 +35,7 @@ void W::Server::stop()
 {
     server->close();
     lastId = 0;
+    pool.clear();
     std::map<uint64_t, Socket*>::const_iterator it;
     std::map<uint64_t, Socket*>::const_iterator end = connections.end();
     
@@ -47,8 +47,7 @@ void W::Server::stop()
 const W::Socket& W::Server::getConnection(uint64_t p_id) const
 {
     std::map<uint64_t, Socket*>::const_iterator itr = connections.find(p_id);
-    if (itr == connections.end()) 
-    {
+    if (itr == connections.end()) {
         throw 2;
     }
     
@@ -63,49 +62,21 @@ uint64_t W::Server::getConnectionsCount() const
 void W::Server::onNewConnection()
 {
     QWebSocket *webSocket = server->nextPendingConnection();
-    ++lastId;
-    Socket *wSocket = new Socket(name, webSocket, lastId, this);
-    
-    connections[lastId] = wSocket;
-    connect(wSocket, SIGNAL(connected()), SLOT(onSocketConnected()));
-    connect(wSocket, SIGNAL(disconnected()), SLOT(onSocketDisconnected()));
+    Socket* wSocket = createSocket(webSocket);
+    wSocket->setRemoteId();
 }
 
 void W::Server::onSocketConnected() {
     Socket* socket = static_cast<Socket*>(sender());
-    String r_name = socket->getRemoteName();
-    
-    p_map::iterator itr = peers.find(r_name);
-    if (itr == peers.end())
-    {
-        std::pair<p_map::iterator, bool> elem = peers.emplace(r_name, std::map<uint64_t, Socket*>());
-        if (!elem.second)
-        {
-            throw 1; //TODO
-        }
-        itr = elem.first;
-    }
-    itr->second.insert(std::make_pair(socket->getId(), socket));
     emit newConnection(*socket);
 }
 
 void W::Server::onSocketDisconnected() {
     Socket* socket = static_cast<Socket*>(sender());
-    std::map<uint64_t, Socket*>::const_iterator it = connections.find(socket->getId());
-    p_map::iterator itn = peers.find(socket->getRemoteName());
-    if (it != connections.end()) {
-        connections.erase(it);
-    }
-    if (itn != peers.end())
-    {
-        std::map<uint64_t, Socket*>::const_iterator pIt = itn->second.find(socket->getId());
-        if (pIt != itn->second.end()) {
-            itn->second.erase(pIt);
-        }
-        if (itn->second.size() == 0) {
-            peers.erase(itn);
-        }
-    }
+    uint64_t socketId = socket->getId();
+    std::map<uint64_t, Socket*>::const_iterator it = connections.find(socketId);
+    connections.erase(it);
+    pool.insert(socketId);
     socket->deleteLater();
 }
 
@@ -117,10 +88,64 @@ void W::Server::onServerError(QWebSocketProtocol::CloseCode code)
 void W::Server::closeConnection(uint64_t p_id)
 {
     std::map<uint64_t, Socket*>::const_iterator itr = connections.find(p_id);
-    if (itr == connections.end()) 
-    {
+    if (itr == connections.end()) {
         throw 2;
     }
     
     itr->second->close();
 }
+
+W::Socket * W::Server::createSocket(QWebSocket* socket)
+{
+    uint64_t connectionId;
+    if (pool.empty()) {
+        connectionId = ++lastId;
+    } else {
+        std::set<uint64_t>::const_iterator itr = pool.begin();
+        connectionId = *itr;
+        pool.erase(itr);
+    }
+    Socket *wSocket = new Socket(name, socket, connectionId, this);
+    
+    connections[connectionId] = wSocket;
+    connect(wSocket, SIGNAL(connected()), SLOT(onSocketConnected()));
+    connect(wSocket, SIGNAL(disconnected()), SLOT(onSocketDisconnected()));
+    connect(wSocket, SIGNAL(negotiationId(uint64_t)), SLOT(onSocketNegotiationId(uint64_t)));
+    
+    return wSocket;
+}
+
+
+void W::Server::openConnection(const W::String& addr, const W::Uint64& port)
+{
+    QWebSocket *webSocket = new QWebSocket();
+    Socket* wSocket = createSocket(webSocket);
+    wSocket->open(addr, port);
+    
+}
+
+void W::Server::onSocketNegotiationId(uint64_t p_id)
+{
+    Socket* socket = static_cast<Socket*>(sender());
+    
+    if (p_id == socket->id) {
+        socket->setRemoteName();
+    } else {
+        std::set<uint64_t>::const_iterator pItr = pool.lower_bound(p_id);
+        uint64_t newId;
+        if (pItr == pool.end()) {
+            newId = ++lastId;
+        } else {
+            newId = *pItr;
+            pool.erase(pItr);
+        }
+        std::map<uint64_t, Socket*>::const_iterator itr = connections.find(socket->id);
+        connections.erase(itr);
+        pool.insert(socket->id);
+        socket->id = Uint64(newId);
+        connections[newId] = socket;
+        socket->setRemoteId();
+    }
+}
+
+

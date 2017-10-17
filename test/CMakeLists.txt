@@ -8,9 +8,9 @@ if(CXXTEST_FOUND)
     CXXTEST_ADD_TEST(testtypes testtypes.cpp ${CMAKE_CURRENT_SOURCE_DIR}/testTypes.h)
     target_link_libraries(testtypes wType)
     
-    CXXTEST_ADD_TEST(testutils testutils.cpp ${CMAKE_CURRENT_SOURCE_DIR}/testUtils.h)
-    target_link_libraries(testutils utils)
-    target_link_libraries(testutils tag)
+    CXXTEST_ADD_TEST(testtools testtools.cpp ${CMAKE_CURRENT_SOURCE_DIR}/testTools.h)
+    target_link_libraries(testtools tools)
+    target_link_libraries(testtools tag)
     
     find_package(Qt5Core REQUIRED)
 

@@ -23,22 +23,18 @@
         var Socket = Subscribable.inherit({
             "className": "Socket",
             "constructor": function(name) {
-                Subscribable.fn.constructor.call(this);
-                
-                this._state = DISCONNECTED;
-                
                 if (!name) {
                     throw new Error("Can't construct a socket without a name");
                 }
+                Subscribable.fn.constructor.call(this);
                 
+                this._state = DISCONNECTED;
                 this._name = name instanceof String ? name : new String(name);
                 this._remoteName = new String();
                 this._id = new Uint64(0);
-                this._socket;
+                this._socket = undefined;
                 
-                this.on("connected", this.onConnected);
-                this.on("disconnected", this.onDisconnected);
-                this.on("__msg__", this.on__msg__);
+                this._initProxy();
             },
             "destructor": function() {
                 this.close();
@@ -60,40 +56,18 @@
                 return this._id;
             },
             "isOpened": function() {
-                return this._state !== undefined && this._state === CONNECTED;
+                return this._state === CONNECTED;
             },
             "open": function(addr, port) {
-                var that = this;
-                
                 if (this._state === DISCONNECTED) {
                     this._state = CONNECTING;
                     this._socket = new WebSocket("ws://"+ addr + ":" + port);
                     this._socket.binaryType = "arraybuffer";
                     
-                    this._socket.onopen = function() {
-                        that.trigger("__cnt__");
-                    }
-                    this._socket.onclose = function(ev) {
-                        that.trigger("disconnected", ev);
-                    }
-                    this._socket.onerror = function(err) {
-                        that.trigger("error", err);
-                    }
-                    this._socket.onmessage = function(mes) {
-                        var raw = new ByteArray(new Uint8Array(mes.data));
-                        
-                        var ev = raw[">>"]();
-                        
-                        if (!(ev instanceof Event)) {
-                            throw new Error("Wrong format of websocket data");
-                        }
-                        that.trigger("__msg__", ev);
-                    }
+                    this._socket.onclose = this._proxy.onSocketClose;
+                    this._socket.onerror = this._proxy.onSocketError;
+                    this._socket.onmessage = this._proxy.onSocketMessage
                 }
-                
-                this._uncyclic.push(function() {
-                    that = undefined;
-                });
             },
             "send": function(ev) {
                 var ba = new ByteArray();
@@ -101,10 +75,14 @@
                 
                 this._socket.send(ba.toArrayBuffer());
             },
-            "onConnected": function() {
-                this._state = CONNECTED;
+            "_initProxy": function() {
+                this._proxy = {
+                    onSocketClose: this._onSocketClose.bind(this),
+                    onSocketError: this._onSocketError.bind(this),
+                    onSocketMessage: this._onSocketMessage.bind(this)
+                }
             },
-            "onDisconnected": function(ev) {
+            "_onSocketClose": function(ev) {
                 this._state = DISCONNECTED;
                 
                 this._id.destructor();
@@ -114,8 +92,18 @@
                 this._remoteName = new String();
                 
                 console.log(ev);
+                this.trigger("disconnected", ev);
             },
-            "on__msg__": function(ev) {
+            "_onSocketError": function(err) {
+                this.trigger("error", err);
+            },
+            "_onSocketMessage": function(mes) {
+                var raw = new ByteArray(new Uint8Array(mes.data));
+                var ev = raw[">>"]();
+                if (!(ev instanceof Event)) {
+                    throw new Error("Wrong format of websocket data");
+                }
+                
                 if (ev.isSystem()) {
                     var cmd = ev._data.at("command").toString();
                     
@@ -126,6 +114,7 @@
                             break;
                         case "setName":
                             this._setName(ev._data.at("name"));
+                            this._state = CONNECTED;
                             this.trigger("connected");
                             break;
                         default:
@@ -137,7 +126,7 @@
                 ev.destructor();
             },
             "_setId": function(id) {
-                if ((this._state === CONNECTING) && (this._id.valueOf() === 0)) {
+                if (this._state === CONNECTING) {
                     this._id.destructor();
                     this._id = id.clone();
                 } else {
@@ -156,6 +145,7 @@
                 var vc = new Vocabulary();
                 vc.insert("command", new String("setName"));
                 vc.insert("name", this._name.clone());
+                vc.insert("yourName", this._remoteName.clone());
                 
                 var ev = new Event(new Address(), vc, true);
                 ev.setSenderId(this._id.clone());

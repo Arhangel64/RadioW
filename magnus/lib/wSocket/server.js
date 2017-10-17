@@ -4,29 +4,37 @@ var WebSocketServer = require("ws").Server;
 var Socket = require("./socket");
 var Subscribable = require("../utils/subscribable");
 var AbstractMap = require("../wContainer/abstractmap");
+var AbstractSet = require("../wContainer/abstractset");
 var String = require("../wType/string");
 var Uint64 = require("../wType/uint64");
 
 var Server = Subscribable.inherit({
     "className": "Server",
-    "constructor": function(name) {
-        Subscribable.fn.constructor.call(this);
-        
+    "constructor": function(name) { 
         if (!name) {
             throw new Error("Can't construct a socket without a name");
         }
+        Subscribable.fn.constructor.call(this);
         
         this._lastId = new Uint64(0);
+        this._pool = new Server.Uint64Set(true);
         this._name = name instanceof String ? name : new String(name);
-        this._server;
-        
-        this._connections = new Server.ConnectionsMap(false);
-        this._peers = new Server.PeersMap(false);
+        this._server = undefined;
+        this._connections = new Server.ConnectionsMap(true);
         this._listening = false;
         
         this._initProxy();
     },
     "destructor": function() {
+        if (this._listening) {
+            this._server.stop();
+            delete this._server;
+        }
+        this._lastId.destructor();
+        this._pool.destructor();
+        this._name.destructor();
+        this._connections.destructor();
+        
         Subscribable.fn.destructor.call(this);
     },
     "listen": function(port) {
@@ -42,7 +50,7 @@ var Server = Subscribable.inherit({
             this._server.stop();
             this._lastId = new Uint64(0);
             this._connections.clear();
-            this._peers.clear();
+            this._pool.clear();
             delete this._server;
         }
     },
@@ -56,6 +64,31 @@ var Server = Subscribable.inherit({
     "getConnectionsCount": function() {
         return this._connections.size();
     },
+    "openConnection": function(addr, port) {
+        var webSocket = new Subscribable();
+        var wSocket = this._createSocket(webSocket);
+        wSocket._socket.destructor();
+        wSocket.open(addr, port);
+    },
+    "_createSocket": function(socket) {
+        var connectionId;
+        if (this._pool.size() === 0) {
+            this._lastId["++"]()
+            connectionId = this._lastId.clone();
+        } else {
+            var itr = this._pool.begin();
+            connectionId = itr["*"]().clone();
+            this._pool.erase(itr);
+        }
+        var wSocket = new Socket(this._name, socket, connectionId);
+        this._connections.insert(connectionId, wSocket);
+        
+        wSocket.on("connected", this._onSocketConnected.bind(this, wSocket));
+        wSocket.on("disconnected", this._onSocketDisconnected.bind(this, wSocket));
+        wSocket.on("negotiationId", this._onSocketNegotiationId.bind(this, wSocket));
+        
+        return wSocket;
+    },
     "_initProxy": function() {
         this._proxy = {
             onConnection: this._onConnection.bind(this),
@@ -63,58 +96,44 @@ var Server = Subscribable.inherit({
         };
     },
     "_onConnection": function(socket) {
-        this._lastId["++"]();
-        var wSocket = new Socket(this._name, socket, this._lastId);
-        this._connections.insert(this._lastId.clone(), wSocket);
-        
-        wSocket.one("connected", Server.onSocketConnected, {srv: this, soc: wSocket});
-        wSocket.one("disconnected", Server.onSocketDisconnected, {srv: this, soc: wSocket});
+        var wSocket = this._createSocket(socket);
+        wSocket._setRemoteId();
     },
     "_onReady": function() {
         this.trigger("ready");
+    },
+    "_onSocketConnected": function(socket) {
+        this.trigger("newConnection", socket);
+    },
+    "_onSocketDisconnected": function(socket) {
+        var cItr = this._connections.find(socket.getId());
+        setTimeout(this._connections.erase.bind(this._connections, cItr), 1);
+    },
+    "_onSocketNegotiationId": function(socket, id) {
+        var oldId = socket.getId();
+        if (id["=="](oldId)) {
+            socket._setRemoteName();
+        } else {
+            var pItr = this._pool.lowerBound(id);
+            var newId;
+            if (pItr["=="](this._pool.end())) {
+                this._lastId["++"]();
+                newId = this._lastId.clone();
+            } else {
+                newId = pItr["*"]().clone();
+                this._pool.erase(pItr);
+            }
+            var itr = this._connections.find(oldId);
+            this._connections.erase(itr);
+            this._pool.insert(oldId);
+            socket._id = newId;
+            this._connections.insert(newId.clone(), wSocket);
+            socket._setRemoteId();
+        }
     }
 });
-    Server.onSocketDisconnected = function() {
-        var cItr = this.srv._connections.find(this.soc.getId());
-        if (!cItr["=="](this.srv._connections.end())) {
-            var pair = cItr["*"]();
-            this.srv._connections.erase(cItr);
-            pair.first.destructor();
-        }
-        var nItr = this.srv._peers.find(this.soc.getRemoteName());
-        if (!nItr["=="](this.srv._peers.end())) {
-            var nPair = nItr["*"]();
-            var pIt = nPair.second.find(this.soc.getId());
-            if (!pIt["=="](nPair.second.end())) {
-                var pPair = pIt["*"]();
-                nPair.second.erase(pIt);
-                pPair.first.destructor();
-            }
-            if (nPair.second.size() === 0) {
-                this.srv._peers.erase(nItr);
-                nPair.destructor();
-            }
-        }
-        setTimeout(Server.removeLater.bind(this), 1);
-    };
-    Server.onSocketConnected = function() {
-        var name = this.soc.getRemoteName();
-        
-        var itr = this.srv._peers.find(name);
-        var peer;
-        if (itr["=="](this.srv._peers.end())) {
-            peer = new Server.ConnectionsMap(false);
-            this.srv._peers.insert(name.clone(), peer);
-        } else {
-            peer = itr["*"]().second;
-        }
-        peer.insert(this.soc.getId().clone(), this.soc);
-        this.srv.trigger("newConnection", this.soc);
-    };
-    Server.ConnectionsMap = AbstractMap.template(Uint64, Socket);
-    Server.PeersMap = AbstractMap.template(String, Server.ConnectionsMap);
-    Server.removeLater = function() {
-        this.soc.destructor();
-    }
+
+Server.ConnectionsMap = AbstractMap.template(Uint64, Socket);
+Server.Uint64Set = AbstractSet.template(Uint64);
 
 module.exports = Server;

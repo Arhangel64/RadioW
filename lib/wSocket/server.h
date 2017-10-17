@@ -1,6 +1,5 @@
 #ifndef SERVER_H
 #define SERVER_H
-
 #include <QtCore/QObject>
 #include <QtWebSockets/QWebSocketServer>
 #include <QtNetwork/QHostAddress>
@@ -9,6 +8,7 @@
 
 #include <stdint.h>
 #include <map>
+#include <set>
 
 #include "socket.h"
 
@@ -30,15 +30,16 @@ namespace W
         const Socket& getConnection(uint64_t p_id) const;
         uint64_t getConnectionsCount() const;
         void closeConnection(uint64_t p_id);
+        void openConnection(const String& addr, const Uint64& port);
         
     private:
-        typedef std::map<String, std::map<uint64_t, Socket*>> p_map;
-        
         uint64_t lastId;
+        std::set<uint64_t> pool;
         std::map<uint64_t, Socket*> connections;
-        p_map peers;
         QWebSocketServer* server;
         String name;
+        
+        Socket* createSocket(QWebSocket* socket);
         
     signals:
         void newConnection(const W::Socket&);
@@ -51,6 +52,7 @@ namespace W
         
         void onSocketConnected();
         void onSocketDisconnected();
+        void onSocketNegotiationId(uint64_t p_id);
         
     private:
         class HandshakeNameError: 

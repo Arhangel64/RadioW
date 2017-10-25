@@ -26,7 +26,9 @@ Perturabo::Perturabo(QObject *parent):
     }
     Perturabo::perturabo = this;
     
-    connector = new U::Connector(W::String(u"Perturabo"), dispatcher, server, commands);
+    connector = new U::Connector(dispatcher, server, commands);
+    connector->addIgnoredNode(W::String(u"Lorgar"));
+    connector->addIgnoredNode(W::String(u"Roboute"));
     W::Handler* parseDirectory = W::Handler::create(W::Address({u"management", u"parseDirectory"}), this, &Perturabo::_h_parseDirectory);
     
     connect(attributes, SIGNAL(serviceMessage(const QString&)), SLOT(onModelServiceMessage(const QString&)));
@@ -36,7 +38,7 @@ Perturabo::Perturabo(QObject *parent):
     connect(albums, SIGNAL(serviceMessage(const QString&)), SLOT(onModelServiceMessage(const QString&)));
     connect(songs, SIGNAL(serviceMessage(const QString&)), SLOT(onModelServiceMessage(const QString&)));
     
-    connect(connector, SIGNAL(connectionCountChange(uint64_t)), SLOT(onConnectionCountChanged(uint64_t)));
+    connect(server, SIGNAL(connectionCountChange(uint64_t)), SLOT(onConnectionCountChanged(uint64_t)));
     
     parentReporter->registerParent(artists->getAddress(), artists->subscribeMember);
     parentReporter->registerParent(albums->getAddress(), albums->subscribeMember);
@@ -44,9 +46,6 @@ Perturabo::Perturabo(QObject *parent):
     
     dispatcher->registerDefaultHandler(parentReporter);
     dispatcher->registerDefaultHandler(logger);
-    
-    connector->addNode(W::String(u"Magnus"));
-    connector->addNode(W::String(u"Corax"));
     
     attributes->addAttribute(W::String(u"connectionsCount"), new M::String(W::String(u"0"), W::Address({u"attributes", u"connectionCount"})));
     attributes->addAttribute(W::String(u"name"), new M::String(W::String(u"Perturabo"), W::Address({u"attributes", u"name"})));

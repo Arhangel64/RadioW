@@ -21,6 +21,7 @@ namespace U {
         ~Commands();
         
         void addCommand(const W::String& key, W::Handler* handler, const W::Vocabulary& args);
+        void removeCommand(const W::String& key);
         void enableCommand(const W::String& key, bool value);
         
     private:

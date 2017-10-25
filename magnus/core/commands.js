@@ -66,6 +66,19 @@ var Commands = ModelVocabulary.inherit({
         vc.insert("arguments", cmd.arguments.clone());
         
         this.insert(cmd.name.toString(), vc);
+    },
+    "removeCommand": function(name) {
+        var cmd = this._commands[name];
+        if (cmd === undefined) {
+            throw new Error("An attempt to access non existing command: " + key);
+        }
+        if (cmd.enabled) {
+            this._disableCommand(cmd);
+        }
+        cmd.name.destructor();
+        cmd.handler.destructor();
+        cmd.arguments.destructor();
+        delete this._commands[name];
     }
 });
 

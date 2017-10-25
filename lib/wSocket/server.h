@@ -31,6 +31,7 @@ namespace W
         uint64_t getConnectionsCount() const;
         void closeConnection(uint64_t p_id);
         void openConnection(const String& addr, const Uint64& port);
+        String getName() const;
         
     private:
         uint64_t lastId;
@@ -43,8 +44,8 @@ namespace W
         
     signals:
         void newConnection(const W::Socket&);
-
-    public slots:
+        void closedConnection(const W::Socket&);
+        void connectionCountChange(uint64_t count);
 
     private slots:
         void onNewConnection();

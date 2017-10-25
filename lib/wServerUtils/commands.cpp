@@ -67,3 +67,19 @@ void U::Commands::disableCommand(U::Commands::Command* cmd)
     cmd->enabled = false;
     erase(cmd->name);
 }
+
+void U::Commands::removeCommand(const W::String& key)
+{
+    Map::const_iterator itr = commands->find(key);
+    if (itr == commands->end()) {
+        throw 2;
+    }
+    Command* cmd = itr->second;
+    if (cmd->enabled) {
+        disableCommand(cmd);
+    }
+    
+    commands->erase(itr);
+    delete cmd->handler;
+    delete cmd;
+}

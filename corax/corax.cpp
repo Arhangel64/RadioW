@@ -22,17 +22,16 @@ Corax::Corax(QObject *parent):
     }
     Corax::corax = this;
     
-    connector = new U::Connector(W::String(u"Corax"), dispatcher, server, commands);
+    connector = new U::Connector(dispatcher, server, commands);
+    connector->addIgnoredNode(W::String(u"Lorgar"));
+    connector->addIgnoredNode(W::String(u"Roboute"));
     
     connect(attributes, SIGNAL(serviceMessage(const QString&)), SLOT(onModelServiceMessage(const QString&)));
     connect(commands, SIGNAL(serviceMessage(const QString&)), SLOT(onModelServiceMessage(const QString&)));
     connect(connector, SIGNAL(serviceMessage(const QString&)), SLOT(onModelServiceMessage(const QString&)));
-    connect(connector, SIGNAL(connectionCountChange(uint64_t)), SLOT(onConnectionCountChanged(uint64_t)));
+    connect(server, SIGNAL(connectionCountChange(uint64_t)), SLOT(onConnectionCountChanged(uint64_t)));
     
     dispatcher->registerDefaultHandler(logger);
-    
-    connector->addNode(W::String(u"Magnus"));
-    connector->addNode(W::String(u"Perturabo"));
     
     attributes->addAttribute(W::String(u"connectionsCount"), new M::String(W::String(u"0"), W::Address({u"attributes", u"connectionCount"})));
     attributes->addAttribute(W::String(u"name"), new M::String(W::String(u"Corax"), W::Address({u"attributes", u"name"})));

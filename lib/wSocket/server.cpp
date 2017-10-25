@@ -69,6 +69,7 @@ void W::Server::onNewConnection()
 void W::Server::onSocketConnected() {
     Socket* socket = static_cast<Socket*>(sender());
     emit newConnection(*socket);
+    emit connectionCountChange(getConnectionsCount());
 }
 
 void W::Server::onSocketDisconnected() {
@@ -77,6 +78,8 @@ void W::Server::onSocketDisconnected() {
     std::map<uint64_t, Socket*>::const_iterator it = connections.find(socketId);
     connections.erase(it);
     pool.insert(socketId);
+    emit closedConnection(*socket);
+    emit connectionCountChange(getConnectionsCount());
     socket->deleteLater();
 }
 
@@ -148,4 +151,8 @@ void W::Server::onSocketNegotiationId(uint64_t p_id)
     }
 }
 
+W::String W::Server::getName() const
+{
+    return name;
+}
 

@@ -41,15 +41,14 @@ var Magnus = Subscribable.inherit({
         global.magnus = this;
     },
     "_initConnector": function() {
-        this._connector = new Connector("Magnus", this.dispatcher, this.server, this._commands);
+        this._connector = new Connector(this.dispatcher, this.server, this._commands);
         
         this._connector.on("serviceMessage", this._onModelServiceMessage, this);
-        this._connector.on("connectionsCountChange", this._onConnectionsCountChange, this);
         this._connector.on("nodeConnected", this._onNodeConnected, this);
         this._connector.on("nodeDisconnected", this._onNodeDisconnected, this);
         
-        this._connector.addNode("Corax");
-        this._connector.addNode("Perturabo");
+        this._connector.addIgnoredNode("Lorgar");
+        this._connector.addIgnoredNode("Roboute");
     },
     "_initDispatcher": function() {
         this.dispatcher = new Dispatcher();
@@ -100,7 +99,8 @@ var Magnus = Subscribable.inherit({
     },
     "_initServer": function() {
         this.server = new Server("Magnus");
-        this.server.on("ready", this._onServerReady, this)
+        this.server.on("ready", this._onServerReady, this);
+        this.server.on("connectionsCountChange", this._onConnectionsCountChange, this);
     },
     "hasPage": function(name) {
         return this._ps.hasPage(name);

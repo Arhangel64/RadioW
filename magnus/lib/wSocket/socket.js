@@ -70,8 +70,6 @@ var Socket = Subscribable.inherit({
     },
     "_onClose": function(ev) {
         this._state = DISCONNECTED;
-        this._remoteName.destructor();
-        this._remoteName = new String();
         this.trigger("disconnected", ev, this);
     },
     "_onError": function(err) {
@@ -120,6 +118,8 @@ var Socket = Subscribable.inherit({
     "open": function(addr, port) {
         if (this._state === DISCONNECTED) {
             this._state = CONNECTING;
+            this._remoteName.destructor();
+            this._remoteName = new String();
             this._socket = new WebSocket("ws://"+ addr + ":" + port);
             
             this._socket.on("close", this._proxy.onClose);

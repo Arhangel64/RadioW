@@ -37,6 +37,9 @@ var Server = Subscribable.inherit({
         
         Subscribable.fn.destructor.call(this);
     },
+    "getName": function() {
+        return this._name;
+    },
     "listen": function(port) {
         if (!this._listening) {
             this._listening = true;
@@ -69,6 +72,13 @@ var Server = Subscribable.inherit({
         var wSocket = this._createSocket(webSocket);
         wSocket._socket.destructor();
         wSocket.open(addr, port);
+    },
+    "closeConnection": function(id) {
+        var itr = this._connections.find(id);
+        if (itr["=="](this._connections.end())) {
+            throw new Error("Connection not found");
+        }
+        itr["*"]().second.close();
     },
     "_createSocket": function(socket) {
         var connectionId;
@@ -104,9 +114,13 @@ var Server = Subscribable.inherit({
     },
     "_onSocketConnected": function(socket) {
         this.trigger("newConnection", socket);
+        this.trigger("connectionCountChange", this._connections.size());
     },
     "_onSocketDisconnected": function(socket) {
         var cItr = this._connections.find(socket.getId());
+        this._pool.insert(socket.getId().clone());
+        this.trigger("closedConnection", socket);
+        this.trigger("connectionCountChange", this._connections.size());
         setTimeout(this._connections.erase.bind(this._connections, cItr), 1);
     },
     "_onSocketNegotiationId": function(socket, id) {
@@ -124,10 +138,11 @@ var Server = Subscribable.inherit({
                 this._pool.erase(pItr);
             }
             var itr = this._connections.find(oldId);
+            itr["*"]().second = undefined;              //to prevent autodestruction of the socket;
             this._connections.erase(itr);
             this._pool.insert(oldId);
             socket._id = newId;
-            this._connections.insert(newId.clone(), wSocket);
+            this._connections.insert(newId.clone(), socket);
             socket._setRemoteId();
         }
     }

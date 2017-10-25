@@ -41,6 +41,7 @@ void W::Socket::open(const W::String& addr, const W::Uint64& port)
     if (state == disconnected_s) {
         String::StdStr url_str("ws://" + addr.toString() + ":" + port.toString());
         QUrl url(url_str.c_str());
+        remoteName = String();
         state = connecting_s;
         socket->open(url);
     }
@@ -95,7 +96,6 @@ void W::Socket::onSocketConnected()
 void W::Socket::onSocketDisconnected()
 {
     state = disconnected_s;
-    remoteName = String();
     emit disconnected();
 }
 

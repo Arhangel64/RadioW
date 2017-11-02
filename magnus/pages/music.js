@@ -13,6 +13,7 @@ var Link = require("../lib/wModel/link");
 var List = require("./list");
 var Artist = require("./artist");
 var Album = require("./album");
+var Song = require("./song");
 
 var MusicPage = Page.inherit({
     "className": "MusicPage",
@@ -64,7 +65,7 @@ var MusicPage = Page.inherit({
         
         var rs = new Address(["songs"]);
         var ps = this._address["+"](rs);
-        this._songs = new List(ps, "Songs", rs, socket);
+        this._songs = new List(ps, "Songs", rs, socket, Song);
         this._songsLink = new Link(this._address["+"](new Address(["songsLink"])), "Songs", ps.clone());
         this._songsLink.label.addProperty("fontSize", "largeFontSize");
         this._songsLink.label.addProperty("fontFamily", "largeFont");

@@ -30,7 +30,7 @@ html {
 }
 
 .hoverable:hover {
-    background-image: none, linear-gradient(to bottom, rgba(0, 0, 0, .2) 0%, rgba(0, 0, 0, .2) 100%);
+    background-image: linear-gradient(to bottom, rgba(0, 0, 0, .2) 0%, rgba(0, 0, 0, .2) 100%);
 }
 
 .draggable {

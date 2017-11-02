@@ -3,7 +3,6 @@
 var Page = require("../lib/wModel/page");
 var String = require("../lib/wModel/string");
 var ProxyCatModel = require("../lib/wModel/proxy/catalogue");
-var ProxyVCModel = require("../lib/wModel/proxy/vocabulary");
 var PaneModel = require("../lib/wModel/proxy/pane");
 
 var Address = require("../lib/wType/address");
@@ -81,7 +80,7 @@ var List = Page.inherit({
         if (lastHops.size() === 2) {
             var command = lastHops.back().toString();
             var numId = parseInt(lastHops.front().toString());
-            if (command === "subscribe" || command === "get" || numId === numId) {
+            if ((command === "subscribe" || command === "get" || command === "ping") && numId === numId) {
                 var id = new Uint64(numId);
                 var child = this._createChildPage(id);
                 this.addPage(child);

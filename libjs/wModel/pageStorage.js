@@ -6,6 +6,7 @@ var ModelString = require("./string");
 var Vocabulary = require("../wType/vocabulary");
 var Address = require("../wType/address");
 var String = require("../wType/string");
+var Event = require("../wType/event");
 var AbstractMap = require("../wContainer/abstractmap");
 
 var AddressMap = AbstractMap.template(Address, String);
@@ -64,8 +65,13 @@ var PageStorage = Model.inherit({
     },
     "_h_getPageName": function(ev) {
         var data = ev.getData();
+        var address = data.at("address");
         
-        var itr = this._rMap.find(data.at("address"));
+        var evp = new Event(address["+"](new Address(["ping"])));
+        this._dp.pass(evp);
+        evp.destructor();
+        
+        var itr = this._rMap.find(address);
         var vc = new Vocabulary();
         if (itr["=="](this._rMap.end())) {
             vc.insert("name", new String("notFound"));

@@ -23,6 +23,7 @@ var Page = Model.inherit({
         this._childPages = {};
         
         this.addHandler("get");
+        this.addHandler("ping");
         
         this.addProperty("backgroundColor", "mainColor");
         this.addProperty("color", "mainFontColor");
@@ -92,6 +93,9 @@ var Page = Model.inherit({
         data.insert("name", new String(this.name));
         data.insert("data", vector);
         this.response(data, "get", ev);
+    },
+    "_h_ping": function(ev) {
+        this.trigger("serviceMessage", "page " + this._address.toString() + " got pinged", 0);
     },
     "_h_subscribe": function(ev) {
         Model.fn._h_subscribe.call(this, ev);

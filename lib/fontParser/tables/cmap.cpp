@@ -47,7 +47,7 @@ void CMap::read(const std::string& path)
         
         //std::cout << "Found encoding platformId " << pid << ", encodingId " << eid << std::endl;
         
-        if (pid == 0) {
+        if (pid == 0 || (pid == 3 && eid == 1)) {
             encodings.emplace_back(pid, eid, offset);
         }
     }

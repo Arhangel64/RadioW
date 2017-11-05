@@ -24,11 +24,15 @@
                 W.extend(base, options);
                 View.fn.constructor.call(this, lm, base);
                 
-                this._initProxy();
-                
                 this._l = layout;
-                this._l.on("resize", this.setSize, this);
                 this._l._e.appendChild(this._e);
+                this._horizontalBar = document.createElement("div");
+                this._verticalBar = document.createElement("div");
+                this._horizontalBarShown = false;
+                this._verticalBarShown = false;
+                
+                this._initProxy();
+                this._initBars();
                 
                 this._e.addEventListener("mousewheel", this._proxy.onMouseWheel, false);
                 
@@ -45,11 +49,34 @@
             "destructor": function() {
                 this._e.removeEventListener("mousewheel", this._proxy.onMouseWheel, false);
                 this._l._e.removeChild(this._e);
+                if (this._horizontalBarShown) {
+                    this._l._e.removeChild(this._horizontalBar);
+                }
+                if (this._verticalBarShown) {
+                    this._l._e.removeChild(this._verticalBar);
+                }
                 
                 View.fn.destructor.call(this);
             },
             "appendChild": function(e) {
                 this._e.appendChild(e);
+            },
+            "_initBars": function() {
+                this._horizontalBar.style.position = "absolute";
+                this._horizontalBar.style.left = "0";
+                this._horizontalBar.style.bottom = "0";
+                this._horizontalBar.style.height = "10px";
+                this._horizontalBar.style.width = "0";
+                this._horizontalBar.style.zIndex = "2";
+                this._horizontalBar.style.backgroundColor = Scrollable.theme.primaryColor || "#ff0000";
+                
+                this._verticalBar.style.position = "absolute";
+                this._verticalBar.style.right = "0";
+                this._verticalBar.style.top = "0";
+                this._verticalBar.style.height = "0";
+                this._verticalBar.style.width = "10px";
+                this._verticalBar.style.zIndex = "2";
+                this._verticalBar.style.backgroundColor = Scrollable.theme.primaryColor || "#ff0000";
             },
             "_initProxy": function() {
                 this._proxy = {
@@ -99,6 +126,12 @@
             "removeChild": function(e) {
                 this._e.removeChild(e);
             },
+            "_resetTheme": function() {
+                View.fn._resetTheme.call(this);
+                
+                this._horizontalBar.style.backgroundColor = Scrollable.theme.primaryColor || "#ff0000";
+                this._verticalBar.style.backgroundColor = Scrollable.theme.primaryColor || "#ff0000";
+            },
             "setLeft": function(x) {
                 if (this._x !== x) {
                     if (this._o.virtual) {
@@ -112,6 +145,8 @@
                     } else {
                         this.trigger("scrollLeft", -x);
                     }
+                    
+                    this._horizontalBar.style.top = this._x / this._w * this._l._w + "px";
                 }
             },
             "setSize": function(w, h) {
@@ -119,12 +154,44 @@
                     this._w = this.constrainWidth(w);
                     this._h = this.constrainHeight(h);
                     
-                    this._e.style.width = this._l._w + "px";
-                    this._e.style.height = this._l._h + "px";
+                    this._e.style.width = w + "px";
+                    this._e.style.height = h + "px";
                     
                     this.trigger("resize", this._w, this._h);
                 } else {
                     View.fn.setSize.call(this, w, h);
+                }
+                
+                if (this._w > this._l._w) {
+                    var width = this._l._w / this._w * this._l._w;
+                    var wOffset = this._x / this._w * this._l._w;
+                    
+                    this._horizontalBar.style.width = width + "px";
+                    this._horizontalBar.style.left = wOffset + "px";
+                    
+                    if (!this._horizontalBarShown) {
+                        this._l._e.appendChild(this._horizontalBar);
+                        this._horizontalBarShown = true;
+                    }
+                } else if (this._horizontalBarShown) {
+                    this._l._e.removeChild(this._horizontalBar);
+                    this._horizontalBarShown = false;
+                }
+                
+                if (this._h > this._l._h) {
+                    var height = this._l._h / this._h * this._l._h;
+                    var hOffset = -this._y / this._h * this._l._h;
+                    
+                    this._verticalBar.style.height = height + "px";
+                    this._verticalBar.style.top = hOffset + "px";
+                    
+                    if (!this._verticalBarShown) {
+                        this._l._e.appendChild(this._verticalBar);
+                        this._verticalBarShown = true;
+                    }
+                } else if (this._verticalBarShown) {
+                    this._l._e.removeChild(this._verticalBar);
+                    this._verticalBarShown = false;
                 }
             },
             "setTop": function(y) {
@@ -140,6 +207,9 @@
                     } else {
                         this.trigger("scrollTop", -y);
                     }
+                    
+                    
+                    this._verticalBar.style.top = -this._y / this._h * this._l._h + "px";
                 }
             }
         });

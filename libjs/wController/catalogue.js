@@ -17,6 +17,7 @@ var Catalogue = Controller.inherit({
         
         this._hasSorting = false;
         this._hasFilter = false;
+        this._filter = undefined;
         this.data = new IdOrder(true);
         
         if (options.sorting) {
@@ -25,9 +26,19 @@ var Catalogue = Controller.inherit({
             this._sorting.insert("ascending", new Boolean(options.sorting.ascending));
             this._sorting.insert("field", new String(options.sorting.field));
         }
-        if (options.filter instanceof Vocabulary) {
-            this._hasFilter = true;
-            this._filter = options.filter.clone();
+        if (options.filter) {
+            var filter = new Vocabulary();
+            for (var key in options.filter) {
+                if (options.filter.hasOwnProperty(key)) {
+                    filter.insert(key, options.filter[key]);
+                }
+            }
+            if (filter.size()) {
+                this._filter = filter;
+                this._hasFilter = true;
+            } else {
+                filter.destructor();
+            }
         }
         
         this.addHandler("get");

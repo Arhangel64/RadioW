@@ -71,7 +71,7 @@
                     this._dg.destructor();
                 }
                 
-                delete View[this._id];
+                delete View.collection[this._id];
                 
                 Subscribable.fn.destructor.call(this);
             },
@@ -211,7 +211,14 @@
         View.theme = Object.create(null);
         View.collection = Object.create(null);
         View.setTheme = function(theme) {
-            this.theme = theme;
+            for (var key in this.theme) {
+                delete this.theme[key];
+            }
+            for (var key in theme) {
+                if (theme.hasOwnProperty(key)) {
+                    this.theme[key] = theme[key];
+                }
+            }
             
             for (var id in this.collection) {
                 this.collection[id]._resetTheme();

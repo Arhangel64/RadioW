@@ -15,12 +15,17 @@ var Artist = require("./artist");
 var Album = require("./album");
 var Song = require("./song");
 
+var PaneModel = require("../lib/wModel/proxy/pane");
+
 var MusicPage = Page.inherit({
     "className": "MusicPage",
     "constructor": function(address, name) {
         Page.fn.constructor.call(this, address, name);
         
         this._dbConnected = false;
+        this._addresses = Object.create(null);
+        
+        this._createAddresses();
         
         var header = new String(this._address["+"](new Address(["header"])), "Music");
         header.addProperty("fontFamily", "casualFont");
@@ -41,32 +46,103 @@ var MusicPage = Page.inherit({
         }
         this._errMessage.destructor();
         
+        for (var tag in this._addresses) {
+            var group = this._addresses[tag];
+            for (var name in group) {
+                group[name].destructor();
+            }
+        }
+        
         Page.fn.destructor.call(this);
     },
-    "_createLists": function(socket) {
+    "_createAddresses": function() {
         var ra = new Address(["artists"]);
-        var pa = this._address["+"](ra);
-        this._artists = new List(pa, "Artists", ra, socket, Artist);
-        this._artistsLink = new Link(this._address["+"](new Address(["artistsLink"])), "Artists", pa.clone());
+        var ral = new Address(["albums"]);
+        var rs = new Address(["songs"]);
+        
+        var artists = Object.create(null);
+        var albums = Object.create(null);
+        var songs = Object.create(null);
+        
+        artists.remote = ra.clone();
+        artists.local = this._address["+"](ra);
+        
+        albums.remote = ral.clone();
+        albums.local = this._address["+"](ral);
+        
+        songs.remote = rs.clone();
+        songs.local = this._address["+"](rs);
+        
+        this._addresses.artists = artists;
+        this._addresses.albums = albums;
+        this._addresses.songs = songs;
+        
+        var PaneArtist = PaneModel.Artists;
+        if (!PaneArtist) {
+            PaneArtist = PaneModel.inherit({});
+            PaneModel.Artists = PaneArtist;
+        } else {
+            PaneArtist.pageAddress.destructor()
+        }
+        PaneArtist.pageAddress = artists.local.clone();
+        
+        var PaneAlbum = PaneModel.Albums;
+        if (!PaneAlbum) {
+            PaneAlbum = PaneModel.inherit({});
+            PaneModel.Albums = PaneAlbum;
+        } else {
+            PaneAlbum.pageAddress.destructor()
+        }
+        PaneAlbum.pageAddress = albums.local.clone();
+        
+        var PaneSongs = PaneModel.Songs;
+        if (!PaneSongs) {
+            PaneSongs = PaneModel.inherit({});
+            PaneModel.Songs = PaneSongs;
+        } else {
+            PaneSongs.pageAddress.destructor()
+        }
+        PaneSongs.pageAddress = songs.local.clone();
+        
+        ra.destructor();
+        ral.destructor();
+        rs.destructor();
+    },
+    "_createLists": function(socket) {
+        this._artists = new List(
+            this._addresses.artists.local.clone(), 
+            "Artists", 
+            this._addresses.artists.remote.clone(), 
+            socket, 
+            Artist
+        );
+        this._artistsLink = new Link(this._address["+"](new Address(["artistsLink"])), "Artists", this._addresses.artists.local.clone());
         this._artistsLink.label.addProperty("fontSize", "largeFontSize");
         this._artistsLink.label.addProperty("fontFamily", "largeFont");
         this._artistsLink.label.addProperty("color", "primaryFontColor");
         this._artistsLink.addProperty("backgroundColor", "primaryColor");
         
-        
-        var ral = new Address(["albums"]);
-        var pal = this._address["+"](ral);
-        this._albums = new List(pal, "Albums", ral, socket, Album);
-        this._albumsLink = new Link(this._address["+"](new Address(["albumsLink"])), "Albums", pal.clone());
+        this._albums = new List(
+            this._addresses.albums.local.clone(), 
+            "Albums", 
+            this._addresses.albums.remote.clone(), 
+            socket, 
+            Album
+        );
+        this._albumsLink = new Link(this._address["+"](new Address(["albumsLink"])), "Albums", this._addresses.albums.local.clone());
         this._albumsLink.label.addProperty("fontSize", "largeFontSize");
         this._albumsLink.label.addProperty("fontFamily", "largeFont");
         this._albumsLink.label.addProperty("color", "primaryFontColor");
         this._albumsLink.addProperty("backgroundColor", "primaryColor");
         
-        var rs = new Address(["songs"]);
-        var ps = this._address["+"](rs);
-        this._songs = new List(ps, "Songs", rs, socket, Song);
-        this._songsLink = new Link(this._address["+"](new Address(["songsLink"])), "Songs", ps.clone());
+        this._songs = new List(
+            this._addresses.songs.local.clone(), 
+            "Songs", 
+            this._addresses.songs.remote.clone(), 
+            socket, 
+            Song
+        );
+        this._songsLink = new Link(this._address["+"](new Address(["songsLink"])), "Songs", this._addresses.songs.local.clone());
         this._songsLink.label.addProperty("fontSize", "largeFontSize");
         this._songsLink.label.addProperty("fontFamily", "largeFont");
         this._songsLink.label.addProperty("color", "primaryFontColor");

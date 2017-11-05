@@ -196,6 +196,10 @@
             "setSize": function(w, h) {
                 View.fn.setSize.call(this, w, h);
                 
+                if (this._o.scrollable) {
+                    this._scr.setSize(this._w, this._h);
+                }
+                
                 for (var i = 0; i < this._c.length; ++i) {
                     this._positionElement(this._c[i]);
                 }

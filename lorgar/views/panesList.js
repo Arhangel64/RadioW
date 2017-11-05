@@ -139,11 +139,13 @@
                 this._scr.setMinSize(this._w, Math.max(this._cachedMinH, this._h));
             },
             "_recalculateShown": function() {
-                var possibleRows = Math.ceil(this._h / (this._o.nestHeight + this._o.verticalSpace));
+                var ch = this._o.nestHeight + this._o.verticalSpace;
+                this._scrollShift = this._scrolled % (ch);
+                var pr = (this._h + this._scrollShift + this._o.verticalSpace) / (ch);
+                var possibleRows = Math.ceil(pr);
                 var amount = this._cols * (possibleRows);
                 
-                this._scrollShift = this._scrolled % (this._o.nestHeight + this._o.verticalSpace);
-                var start = Math.floor(this._scrolled / (this._o.nestHeight + this._o.verticalSpace)) * this._cols;
+                var start = Math.floor(this._scrolled / (ch)) * this._cols;
                 var end = start + amount;
                 
                 this._f.setSubscriptionRange(start, end);
@@ -175,6 +177,7 @@
                 
                 if (this._o.scrollable) {
                     this._recalculateRows();
+                    this._scr.setSize(this._w, this._h);
                 }
                 this._recalculateShown();
                 this._refreshPositions(0);

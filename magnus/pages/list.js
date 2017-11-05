@@ -31,8 +31,11 @@ var List = Page.inherit({
             socket
         );
         this._list.className = "PanesList";
-        var PaneClass = PaneModel.inherit({});
-        PaneClass.pageAddress = address;
+        var PaneClass = PaneModel[name];
+        if (!PaneClass) {
+            PaneClass = PaneModel.inherit({});
+            PaneClass.pageAddress = address;
+        }
         this._list.setChildrenClass(PaneClass);
         this.addItem(this._list, 1, 0, 1, 1, Page.Aligment.CenterTop);
         
@@ -49,9 +52,13 @@ var List = Page.inherit({
         var childName = id.toString();
         var postfix = new Address([childName]);
         var childAddr = this._address["+"](postfix);
-        var childRemoteAddress = this._list.controller.getPairAddress()["+"](postfix);
         
-        return new this._ChildClass(childAddr, childName, childRemoteAddress, this._proxySocket);
+        var child = new this._ChildClass(childAddr, childName, id.clone(), this._proxySocket);
+        this.addPage(child);
+        child.on("destroyMe", this._destroyChild.bind(this, child));     //to remove model if it has no subscribers
+        child.checkSubscribersAndDestroy();
+        
+        return child;
     },
     "_destroyChild": function(child) {
         this.removePage(child);
@@ -66,7 +73,6 @@ var List = Page.inherit({
                 var itr = this._list.controller.data.find(id);
                 if (!itr["=="](this._list.controller.data.end())) {
                     child = this._createChildPage(id);
-                    this.addPage(child);
                 }
             }
         }
@@ -83,11 +89,7 @@ var List = Page.inherit({
             if ((command === "subscribe" || command === "get" || command === "ping") && numId === numId) {
                 var id = new Uint64(numId);
                 var child = this._createChildPage(id);
-                this.addPage(child);
                 child["_h_" + command](ev);
-                
-                child.checkSubscribersAndDestroy();
-                child.on("destroyMe", this._destroyChild.bind(this, child));     //to remove model if it has no subscribers
             } else {
                 this.trigger("serviceMessage", "ListPage model got a strange event: " + ev.toString(), 1);
             }

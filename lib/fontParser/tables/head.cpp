@@ -1,7 +1,7 @@
 #include "head.h"
 #include <arpa/inet.h>
 
-HEad::HEad(const std::string& p_tag, uint32_t p_checkSum, uint32_t p_offset, uint32_t p_length):
+Head::Head(const std::string& p_tag, uint32_t p_checkSum, uint32_t p_offset, uint32_t p_length):
     Table(p_tag, p_checkSum, p_offset, p_length),
     fontRevisionMajor(0),
     fontRevisionMinor(0),
@@ -18,11 +18,11 @@ HEad::HEad(const std::string& p_tag, uint32_t p_checkSum, uint32_t p_offset, uin
 {
 }
 
-HEad::~HEad()
+Head::~Head()
 {
 }
 
-void HEad::read(const std::string& path)
+void Head::read(const std::string& path)
 {
     char * buffer;
     buffer = new char[2];

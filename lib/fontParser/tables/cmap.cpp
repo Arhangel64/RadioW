@@ -1,14 +1,14 @@
 #include "cmap.h"
 #include <arpa/inet.h>
 
-CMap::CMap(const std::string& p_tag, uint32_t p_checkSum, uint32_t p_offset, uint32_t p_length):
+Cmap::Cmap(const std::string& p_tag, uint32_t p_checkSum, uint32_t p_offset, uint32_t p_length):
     Table(p_tag, p_checkSum, p_offset, p_length),
     initialized(false),
     mt(0)
 {
 }
 
-CMap::~CMap()
+Cmap::~Cmap()
 {
     if (initialized) {
         delete mt;
@@ -16,7 +16,7 @@ CMap::~CMap()
 }
 
 
-void CMap::read(const std::string& path)
+void Cmap::read(const std::string& path)
 {
     std::ifstream file(path, std::ios::in | std::ios::binary);
     file.seekg(offset);
@@ -77,7 +77,7 @@ void CMap::read(const std::string& path)
     }
 }
 
-uint32_t CMap::getCID(uint32_t charCode) const
+uint32_t Cmap::getCID(uint32_t charCode) const
 {
     return this->mt->getCID(charCode);
 }

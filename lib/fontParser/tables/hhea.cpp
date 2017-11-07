@@ -1,7 +1,7 @@
 #include "hhea.h"
 #include <arpa/inet.h>
 
-HHea::HHea(const std::string& p_tag, uint32_t p_checkSum, uint32_t p_offset, uint32_t p_length):
+Hhea::Hhea(const std::string& p_tag, uint32_t p_checkSum, uint32_t p_offset, uint32_t p_length):
     Table(p_tag, p_checkSum, p_offset, p_length),
     ascent(0),
     descent(0),
@@ -17,11 +17,11 @@ HHea::HHea(const std::string& p_tag, uint32_t p_checkSum, uint32_t p_offset, uin
 {
 }
 
-HHea::~HHea()
+Hhea::~Hhea()
 {
 }
 
-void HHea::read(const std::string& path)
+void Hhea::read(const std::string& path)
 {
     char * buffer;
     buffer = new char[2];

@@ -1,19 +1,19 @@
 #include "hmtx.h"
 #include <arpa/inet.h>
 
-HMtx::HMtx(const std::string& p_tag, uint32_t p_checkSum, uint32_t p_offset, uint32_t p_length):
+Hmtx::Hmtx(const std::string& p_tag, uint32_t p_checkSum, uint32_t p_offset, uint32_t p_length):
     Table(p_tag, p_checkSum, p_offset, p_length),
     numOfLongHorMetrics(0),
     longHorMetric(0)
 {
 }
 
-HMtx::~HMtx()
+Hmtx::~Hmtx()
 {
     delete longHorMetric;
 }
 
-void HMtx::read(const std::string& path)
+void Hmtx::read(const std::string& path)
 {
     if (numOfLongHorMetrics == 0) {
         throw 1;
@@ -43,13 +43,13 @@ void HMtx::read(const std::string& path)
     delete[] buffer;
 }
 
-HMtx::HMetric::HMetric():
+Hmtx::HMetric::HMetric():
     advanceWidth(0),
     leftSideBearing(0)
 {
 }
 
-HMtx::HMetric HMtx::getMetric(uint16_t cid) const
+Hmtx::HMetric Hmtx::getMetric(uint16_t cid) const
 {
     if (cid >= longHorMetric->size()) {
         cid = longHorMetric->size() - 1;

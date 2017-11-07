@@ -7,6 +7,7 @@ set(SOURCES
     hhea.cpp
     hmtx.cpp
     head.cpp
+    name.cpp
 )
 
 add_library(tables STATIC ${SOURCES})

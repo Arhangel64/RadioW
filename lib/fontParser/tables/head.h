@@ -3,11 +3,11 @@
 
 #include "table.h"
 
-class HEad : public Table
+class Head : public Table
 {
 public:
-    HEad(const std::string& p_tag, uint32_t p_checkSum, uint32_t p_offset, uint32_t p_length);
-    ~HEad();
+    Head(const std::string& p_tag, uint32_t p_checkSum, uint32_t p_offset, uint32_t p_length);
+    ~Head();
     
     void read(const std::string & path) override;
     

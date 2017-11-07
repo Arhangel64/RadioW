@@ -3,11 +3,11 @@
 
 #include "table.h"
 
-class HHea : public Table
+class Hhea : public Table
 {
 public:
-    HHea(const std::string& p_tag, uint32_t p_checkSum, uint32_t p_offset, uint32_t p_length);
-    ~HHea();
+    Hhea(const std::string& p_tag, uint32_t p_checkSum, uint32_t p_offset, uint32_t p_length);
+    ~Hhea();
     
     void read(const std::string & path) override;
     

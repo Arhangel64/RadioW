@@ -46,11 +46,11 @@ private:
     std::vector<uint16_t>* glyphIndexArray;
 };
 
-class CMap : public Table
+class Cmap : public Table
 {
 public:
-    CMap(const std::string& p_tag, uint32_t p_checkSum, uint32_t p_offset, uint32_t p_length);
-    ~CMap();
+    Cmap(const std::string& p_tag, uint32_t p_checkSum, uint32_t p_offset, uint32_t p_length);
+    ~Cmap();
     
     void read(const std::string & path) override;
     uint32_t getCID(uint32_t charCode) const;

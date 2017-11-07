@@ -13,6 +13,7 @@
 #include "tables/hhea.h"
 #include "tables/hmtx.h"
 #include "tables/head.h"
+#include "tables/name.h"
 
 class Font
 {
@@ -29,11 +30,18 @@ public:
     Table* getTable(const std::string& tag);
     std::list<std::string> availableTables() const;
     std::map<uint32_t, uint32_t> getCharCodeToCIDTable(uint32_t start = 0, uint32_t end = 0xffff);
-    std::map<uint32_t, HMtx::HMetric> getCharCodeMetrics(uint32_t start = 0, uint32_t end = 0xffff);
+    std::map<uint32_t, Hmtx::HMetric> getCharCodeMetrics(uint32_t start = 0, uint32_t end = 0xffff);
     uint16_t getUnitsPerEm();
     int16_t getAscent();
     int16_t getDescent();
     int16_t getLineGap();
+    int16_t getCaretSlopeRise();
+    int16_t getCaretSlopeRun();
+    int16_t getXMin();
+    int16_t getXMax();
+    int16_t getYMin();
+    int16_t getYMax();
+    std::string getNameField(std::string key);
 
     SfntVersion version;
     uint16_t numberTables;
@@ -44,10 +52,11 @@ public:
 private:
     const std::string path;
     std::map<std::string, Table*> tables;
-    CMap* cmap;
-    HHea* hhea;
-    HMtx* hmtx;
-    HEad* head;
+    Cmap* cmap;
+    Hhea* hhea;
+    Hmtx* hmtx;
+    Head* head;
+    Name* name;
 };
 
 #endif // FILE_H

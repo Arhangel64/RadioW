@@ -4,11 +4,11 @@
 #include "table.h"
 #include <vector>
 
-class HMtx : public Table
+class Hmtx : public Table
 {
 public:
-    HMtx(const std::string& p_tag, uint32_t p_checkSum, uint32_t p_offset, uint32_t p_length);
-    ~HMtx();
+    Hmtx(const std::string& p_tag, uint32_t p_checkSum, uint32_t p_offset, uint32_t p_length);
+    ~Hmtx();
     
     uint16_t numOfLongHorMetrics;
     

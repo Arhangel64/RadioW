@@ -7,7 +7,8 @@ Font::Font(const std::string& p_path):
     cmap(0),
     hhea(0),
     hmtx(0),
-    head(0)
+    head(0),
+    name(0)
 {
     std::ifstream file(path, std::ios::in | std::ios::binary);
     
@@ -80,7 +81,7 @@ std::list<std::string> Font::availableTables() const
 std::map<uint32_t, uint32_t> Font::getCharCodeToCIDTable(uint32_t start, uint32_t end)
 {
     if (cmap == NULL) {
-        cmap = static_cast<CMap*>(tables.at("cmap"));
+        cmap = static_cast<Cmap*>(tables.at("cmap"));
         cmap->read(path);
     }
     std::map<uint32_t, uint32_t> res;
@@ -90,15 +91,15 @@ std::map<uint32_t, uint32_t> Font::getCharCodeToCIDTable(uint32_t start, uint32_
     return res;
 }
 
-std::map<uint32_t, HMtx::HMetric> Font::getCharCodeMetrics(uint32_t start, uint32_t end)
+std::map<uint32_t, Hmtx::HMetric> Font::getCharCodeMetrics(uint32_t start, uint32_t end)
 {
     std::map<uint32_t, uint32_t> CCtoCID = getCharCodeToCIDTable(start, end);
-    std::map<uint32_t, HMtx::HMetric> res;
+    std::map<uint32_t, Hmtx::HMetric> res;
     
     if (hmtx == NULL) {
-        hmtx = static_cast<HMtx*>(tables.at("hmtx"));
+        hmtx = static_cast<Hmtx*>(tables.at("hmtx"));
         if (hhea == NULL) {
-            hhea = static_cast<HHea*>(tables.at("hhea"));
+            hhea = static_cast<Hhea*>(tables.at("hhea"));
             hhea->read(path);
         }
         hmtx->numOfLongHorMetrics = hhea->numOfLongHorMetrics;
@@ -125,7 +126,7 @@ Table * Font::getTable(const std::string& tag)
 uint16_t Font::getUnitsPerEm()
 {
     if (head == NULL) {
-        head = static_cast<HEad*>(tables.at("head"));
+        head = static_cast<Head*>(tables.at("head"));
         head->read(path);
     }
     return head->unitsPerEm;
@@ -134,7 +135,7 @@ uint16_t Font::getUnitsPerEm()
 int16_t Font::getAscent()
 {
     if (hhea == NULL) {
-        hhea = static_cast<HHea*>(tables.at("hhea"));
+        hhea = static_cast<Hhea*>(tables.at("hhea"));
         hhea->read(path);
     }
     return hhea->ascent;
@@ -143,7 +144,7 @@ int16_t Font::getAscent()
 int16_t Font::getDescent()
 {
     if (hhea == NULL) {
-        hhea = static_cast<HHea*>(tables.at("hhea"));
+        hhea = static_cast<Hhea*>(tables.at("hhea"));
         hhea->read(path);
     }
     return hhea->descent;
@@ -152,8 +153,71 @@ int16_t Font::getDescent()
 int16_t Font::getLineGap()
 {
     if (hhea == NULL) {
-        hhea = static_cast<HHea*>(tables.at("hhea"));
+        hhea = static_cast<Hhea*>(tables.at("hhea"));
         hhea->read(path);
     }
     return hhea->lineGap;
+}
+
+std::string Font::getNameField(std::string key)
+{
+    if (name == NULL) {
+        name = static_cast<Name*>(tables.at("name"));
+        name->read(path);
+    }
+    return name->getRecord(key);
+}
+
+int16_t Font::getCaretSlopeRise()
+{
+    if (hhea == NULL) {
+        hhea = static_cast<Hhea*>(tables.at("hhea"));
+        hhea->read(path);
+    }
+    return hhea->caretSlopeRise;
+}
+
+int16_t Font::getCaretSlopeRun()
+{
+    if (hhea == NULL) {
+        hhea = static_cast<Hhea*>(tables.at("hhea"));
+        hhea->read(path);
+    }
+    return hhea->caretSlopeRun;
+}
+
+int16_t Font::getXMax()
+{
+    if (head == NULL) {
+        head = static_cast<Head*>(tables.at("head"));
+        head->read(path);
+    }
+    return head->xMax;
+}
+
+int16_t Font::getXMin()
+{
+    if (head == NULL) {
+        head = static_cast<Head*>(tables.at("head"));
+        head->read(path);
+    }
+    return head->xMin;
+}
+
+int16_t Font::getYMax()
+{
+    if (head == NULL) {
+        head = static_cast<Head*>(tables.at("head"));
+        head->read(path);
+    }
+    return head->yMax;
+}
+
+int16_t Font::getYMin()
+{
+    if (head == NULL) {
+        head = static_cast<Head*>(tables.at("head"));
+        head->read(path);
+    }
+    return head->yMin;
 }

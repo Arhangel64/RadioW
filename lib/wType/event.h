@@ -20,15 +20,17 @@ namespace W
         
         Event& operator=(const Event& original);
         
-        StdStr toString() const;
-        Object* copy() const;
-        size_type size() const;
-        objectType getType() const;
+        StdStr toString() const override;
+        Object* copy() const override;
+        size_type size() const override;
+        objectType getType() const override;
+        
+        bool operator==(const W::Object & other) const override;
         
         static const objectType type = event;
         
-        void serialize(ByteArray& out) const;
-        void deserialize(ByteArray& in);
+        void serialize(ByteArray& out) const override;
+        void deserialize(ByteArray& in) override;
         
         bool isSystem() const;
         const Address& getDestination() const;

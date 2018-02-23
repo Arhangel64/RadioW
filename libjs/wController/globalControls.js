@@ -41,6 +41,10 @@ var GlobalControls = List.inherit({
             this.addController(ctrl);
         }
     },
+    "clear": function() {
+        List.fn.clear.call(this);
+        this.clearChildren();
+    },
     "_onThemeReady": function(theme) {
         this.trigger("themeSelected", theme._data);
         this.removeController(theme);

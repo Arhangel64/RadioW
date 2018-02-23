@@ -1,6 +1,8 @@
 #ifndef PERTURABO_H
 #define PERTURABO_H
 
+#include <map>
+
 #include <QtCore/QObject>
 #include <QtCore/QString>
 
@@ -26,8 +28,7 @@
 #include <wServerUtils/commands.h>
 #include <wServerUtils/connector.h>
 
-#include "database.h"
-#include "audiotag.h"
+#include <wDatabase/database.h>
 
 class Perturabo: public QObject
 {
@@ -48,11 +49,10 @@ private:
     U::Commands* commands;
     U::Connector* connector;
     
-    Database* artists;
-    Database* albums;
-    Database* songs;
+    std::map<W::String, Database*> databases;
     
-    handler(parseDirectory);
+    handler(clearDatabase);
+//     handler(parseDirectory);
     
 public:
     W::Dispatcher *dispatcher;
@@ -64,6 +64,11 @@ public slots:
 private slots:
     void onModelServiceMessage(const QString& msg);
     void onConnectionCountChanged(uint64_t count);
+    void onDatabaseCountChange(uint64_t count);
+    
+private:
+    void createDatabases();
+    void addDatabase(Database* db);
     
 private:
     class SingletonError: 

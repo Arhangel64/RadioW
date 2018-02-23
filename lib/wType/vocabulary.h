@@ -23,10 +23,13 @@ namespace W
         
         Vocabulary& operator=(const Vocabulary& original);
         
-        StdStr toString() const;
-        Object* copy() const;
-        size_type size() const;
-        objectType getType() const;
+        StdStr toString() const override;
+        Object* copy() const override;
+        size_type size() const override;
+        objectType getType() const override;
+        
+        bool operator==(const W::Object & other) const override;
+        bool operator==(const W::Vocabulary& other) const;
         
         void clear();
         void insert(const String::u16string& key, const Object& value);
@@ -43,8 +46,10 @@ namespace W
         
         static const objectType type = vocabulary;
         
-        void serialize(ByteArray& out) const;
-        void deserialize(ByteArray& in);
+        void serialize(ByteArray& out) const override;
+        void deserialize(ByteArray& in) override;
+        
+        static W::Vocabulary* extend(const W::Vocabulary& first, const W::Vocabulary& second);
         
         class NoElement:
             Utils::Exception

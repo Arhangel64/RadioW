@@ -37,6 +37,9 @@ int main(int argc, char **argv) {
     QObject::connect(roboute, SIGNAL(serviceRemoveCommand(uint64_t, const QString&)),
                      wnd, SLOT(serviceRemoveCommand(uint64_t, const QString&)));
     QObject::connect(roboute, SIGNAL(serviceClearCommands(uint64_t)), wnd, SLOT(serviceClearCommands(uint64_t)));
+    QObject::connect(roboute, SIGNAL(serviceChangeName(uint64_t, const QString&)), wnd, SLOT(serviceNameChange(uint64_t, const QString&)));
+    QObject::connect(roboute, SIGNAL(serviceEdit(uint64_t, const QMap<QString, QString>&)), wnd, SLOT(serviceEdit(uint64_t, const QMap<QString, QString>&)));
+    
     QObject::connect(wnd, SIGNAL(addService(const QMap<QString, QString>&)), roboute, SLOT(addService(const QMap<QString, QString>&)));
     QObject::connect(wnd, SIGNAL(connectService(uint64_t)), roboute, SLOT(connectService(uint64_t)));
     QObject::connect(wnd, SIGNAL(disconnectService(uint64_t)), roboute, SLOT(disconnectService(uint64_t)));
@@ -45,6 +48,9 @@ int main(int argc, char **argv) {
     QObject::connect(wnd, SIGNAL(removeService(uint64_t)), roboute, SLOT(removeService(uint64_t)));
     QObject::connect(wnd, SIGNAL(launchCommand(uint64_t, const QString&, const QMap<QString, QVariant>&)), 
                      roboute, SLOT(launchCommand(uint64_t, const QString&, const QMap<QString, QVariant>&)));
+    QObject::connect(wnd, SIGNAL(editService(uint64_t)), roboute, SLOT(editService(uint64_t)));
+    QObject::connect(wnd, SIGNAL(changeService(uint64_t, const QMap<QString, QString>&)), roboute, SLOT(changeService(uint64_t, const QMap<QString, QString>&)));
+    
     
     QTimer::singleShot(0, roboute, SLOT(start()));
     QObject::connect(&app, SIGNAL(aboutToQuit()), roboute, SLOT(stop()));

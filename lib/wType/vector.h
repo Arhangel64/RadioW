@@ -20,10 +20,13 @@ namespace W
         
         Vector& operator=(const Vector& original);
         
-        StdStr toString() const;
-        Object* copy() const;
-        size_type size() const;
-        objectType getType() const;
+        StdStr toString() const override;
+        Object* copy() const override;
+        size_type size() const override;
+        objectType getType() const override;
+        
+        bool operator==(const W::Object & other) const override;
+        bool operator==(const W::Vector & other) const;
         
         void clear();
         void push(const Object& value);
@@ -32,8 +35,8 @@ namespace W
         
         static const objectType type = vector;
         
-        void serialize(ByteArray& out) const;
-        void deserialize(ByteArray& in);
+        void serialize(ByteArray& out) const override;
+        void deserialize(ByteArray& in) override;
         
         class NoElement:
             Utils::Exception

@@ -130,3 +130,12 @@ W::Boolean::operator bool() const
 {
     return data;
 }
+
+bool W::Boolean::operator==(const W::Object& other) const
+{
+    if (sameType(other)) {
+        return operator==(static_cast<const W::Boolean&>(other));
+    } else {
+        return false;
+    }
+}

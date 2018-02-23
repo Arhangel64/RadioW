@@ -1,6 +1,8 @@
 #ifndef CORAX_H
 #define CORAX_H
 
+#include <map>
+
 #include <QtCore/QObject>
 #include <QtCore/QString>
 
@@ -15,6 +17,7 @@
 
 #include <wDispatcher/dispatcher.h>
 #include <wDispatcher/logger.h>
+#include <wDispatcher/parentreporter.h>
 
 #include <wModel/modelstring.h>
 #include <wModel/attributes.h>
@@ -23,6 +26,10 @@
 
 #include <wServerUtils/commands.h>
 #include <wServerUtils/connector.h>
+
+#include <wDatabase/resourcecache.h>
+
+#include "tools/parser.h"
 
 class Corax: public QObject
 {
@@ -37,13 +44,18 @@ public:
 private:
     W::Server *server;
     W::Logger *logger;
+    W::ParentReporter* parentReporter;
     
     M::Attributes* attributes;
     U::Commands* commands;
     U::Connector* connector;
-    
-public:
     W::Dispatcher *dispatcher;
+    
+    std::map<W::String, ResourceCache*> caches;
+    std::map<W::String, Parser*> parsers;
+    
+    handler(clearCache);
+    handler(parseDirectory);
     
 public slots:
     void start();
@@ -52,6 +64,15 @@ public slots:
 private slots:
     void onModelServiceMessage(const QString& msg);
     void onConnectionCountChanged(uint64_t count);
+    void onParserDone(const W::String& path);
+    void onCacheCountChange(uint64_t count);
+    void onNodeConnected(const W::String& name);
+    void onNodeDisconnected(const W::String& name);
+    
+private:
+    void addCache(ResourceCache* cache);
+    void createCaches();
+    void createHandlers();
     
 private:
     class SingletonError: 

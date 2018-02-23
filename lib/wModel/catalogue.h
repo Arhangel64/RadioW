@@ -12,10 +12,13 @@ namespace M {
         
         uint64_t addElement(const W::Vocabulary & record) override;
         void removeElement(uint64_t id) override;
+        void clear() override;
         W::Vocabulary* getElement(uint64_t id) override;
+        void modifyElement(uint64_t id, const W::Vocabulary & newValue) override;
+        uint64_t size() const override;
         
     protected:
-        std::set<uint64_t> getAll() override;
+        std::set<uint64_t> getAll() const override;
         
     private:
         typedef std::map<uint64_t, W::Vocabulary*> Data;

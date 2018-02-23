@@ -15,12 +15,14 @@ public:
     AppModel(uint64_t p_id, const QString& p_name);
     
     const QString& getName() const;
+    void setName(const QString& p_name);
     void logMessage(const QString& msg);
     QString* getHistory() const;
     bool getConnectable() const;
     bool getConnected() const;
     bool getLaunchable() const;
     bool getLaunched() const;
+    bool getEditable() const;
     void clearLog();
     
 public:
@@ -34,6 +36,7 @@ signals:
     void changedConnected(bool value);
     void changedLaunchable(bool value);
     void changedLaunched(bool value);
+    void changedEditable(bool value);
     void clearedLog();
     
 public slots:
@@ -41,6 +44,7 @@ public slots:
     void setConnected(bool value);
     void setLaunchable(bool value);
     void setLaunched(bool value);
+    void setEditable(bool value);
     
 private:
     typedef std::list<QString> List;
@@ -50,6 +54,7 @@ private:
     bool connected;
     bool launchable;
     bool launched;
+    bool editable;
     
 };
 

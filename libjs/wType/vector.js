@@ -35,7 +35,7 @@ var Vector = Object.inherit({
     "deserialize": function(ba) {
         this.clear();
         
-        var length = Object.pop32int(ba);
+        var length = Object.pop32uint(ba);
         
         for (var i = 0; i < length; ++i) {
             var value = ba[">>"]();
@@ -49,7 +49,7 @@ var Vector = Object.inherit({
         this._data.push(value);
     },
     "serialize": function(ba) {
-        Object.push32int(this._data.length, ba);
+        Object.push32uint(this._data.length, ba);
         
         for (var i = 0; i < this._data.length; ++i) {
             ba["<<"](this._data[i]);

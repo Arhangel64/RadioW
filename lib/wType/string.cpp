@@ -201,4 +201,12 @@ uint64_t W::String::toUint64() const
     return std::stoull(toString());
 }
 
+bool W::String::operator==(const W::Object& other) const
+{
+    if (sameType(other)) {
+        return operator==(static_cast<const W::String&>(other));
+    } else {
+        return false;
+    }
+}
 

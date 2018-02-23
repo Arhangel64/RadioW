@@ -18,10 +18,12 @@ namespace W
         
         Uint64& operator=(const Uint64& original);
         
-        StdStr toString() const;
-        Object* copy() const;
-        size_type size() const;
-        objectType getType() const;
+        StdStr toString() const override;
+        Object* copy() const override;
+        size_type size() const override;
+        objectType getType() const override;
+        
+        bool operator==(const W::Object & other) const override;
         
         bool operator<(const Uint64& other) const;
         bool operator>(const Uint64& other) const;
@@ -32,8 +34,8 @@ namespace W
         
         static const objectType type = uint64;
         
-        void serialize(ByteArray& out) const;
-        void deserialize(ByteArray& in);
+        void serialize(ByteArray& out) const override;
+        void deserialize(ByteArray& in) override;
         
         operator uint64_t() const;
         

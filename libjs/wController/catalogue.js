@@ -44,6 +44,8 @@ var Catalogue = Controller.inherit({
         this.addHandler("get");
         this.addHandler("addElement");
         this.addHandler("removeElement");
+        this.addHandler("moveElement");
+        this.addHandler("clear");
     },
     "destructor": function() {
         this.data.destructor();
@@ -68,13 +70,6 @@ var Catalogue = Controller.inherit({
     },
     "clear": function() {
         this.data.clear();
-        
-        while (this._controllers.length) {
-            var controller = this._controllers[this._controllers.length - 1]
-            this._removeController(controller);
-            controller.destructor();
-        }
-        
         this.trigger("clear");
     },
     "_createSubscriptionVC": function() {
@@ -112,10 +107,30 @@ var Catalogue = Controller.inherit({
         this.initialized = true;
         this.trigger("data");
     },
+    "_h_moveElement": function(ev) {
+        var data = ev.getData();
+        var id = data.at("id").clone();
+        var before = undefined;
+        if (data.has("before")) {
+            before = data.at("before").clone();
+        }
+        
+        this.data.erase(id);
+        if (before === undefined) {
+            this.data.push_back(element);
+        } else {
+            this.data.insert(element, before);
+        }
+        
+        this.trigger("moveElement", id, before);
+    },
     "_h_removeElement": function(ev) {
         var data = ev.getData();
         
         this.removeElement(data.at("id").clone());
+    },
+    "_h_clear": function(ev) {
+        this.clear();
     },
     "removeElement": function(id) {
         this.data.erase(id);

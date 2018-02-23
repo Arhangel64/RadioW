@@ -1,4 +1,4 @@
-#include <QMenuBar>
+#include <QtWidgets/QMenuBar>
 
 #include "mainwindow.h"
 #include <iostream>
@@ -10,7 +10,8 @@ MainWindow::MainWindow():
     widget(new MainView(apps, this)),
     newApp(0),
     commandForm(0),
-    rightBar(new QToolBar(this))
+    rightBar(new QToolBar(this)),
+    editingService(0)
 {
     createActions();
     createToolbar();
@@ -19,6 +20,7 @@ MainWindow::MainWindow():
     apps->push_back(0, "Roboute");
     apps->setLaunched(0, true);
     apps->setConnected(0, true);
+    apps->setEditable(0, false);
     
     QItemSelectionModel* as = widget->list->selectionModel();
     
@@ -31,6 +33,7 @@ MainWindow::MainWindow():
     connect(widget->details, SIGNAL(launch(uint64_t)), this, SIGNAL(launchService(uint64_t)));
     connect(widget->details, SIGNAL(stop(uint64_t)), this, SIGNAL(stopService(uint64_t)));
     connect(widget->details, SIGNAL(remove(uint64_t)), this, SIGNAL(removeService(uint64_t)));
+    connect(widget->details, SIGNAL(edit(uint64_t)), this, SIGNAL(editService(uint64_t)));
     connect(widget->details, SIGNAL(clearLog(uint64_t)), this, SLOT(clearServiceLog(uint64_t)));
     connect(widget->details, SIGNAL(launchCommand(uint64_t, const QString&)), this, SLOT(onLaunchedCommand(uint64_t, const QString&)));
     
@@ -130,13 +133,19 @@ void MainWindow::newApplication()
 
 void MainWindow::newAppAccepted()
 {
-    emit addService(newApp->getData());
+    if (editingService == 0) {
+        emit addService(newApp->getData());
+    } else {
+        emit changeService(editingService, newApp->getData());
+        editingService = 0;
+    }
     delete newApp;
     newApp = 0;
 }
 
 void MainWindow::newAppRejected()
 {
+    editingService = 0;
     delete newApp;
     newApp = 0;
 }
@@ -145,35 +154,41 @@ void MainWindow::newService(uint64_t id, const QString& name)
 {
     apps->push_back(id, name);
     apps->setConnectable(id, true);
+    apps->setEditable(id, true);
 }
 
 void MainWindow::serviceConnecting(uint64_t id)
 {
     apps->setConnectable(id, false);
     apps->setConnected(id, false);
+    apps->setEditable(id, false);
 }
 
 void MainWindow::serviceConnected(uint64_t id)
 {
     apps->setConnectable(id, true);
     apps->setConnected(id, true);
+    apps->setEditable(id, false);
 }
 
 void MainWindow::serviceDisconnecting(uint64_t id)
 {
     apps->setConnectable(id, false);
     apps->setConnected(id, true);
+    apps->setEditable(id, false);
 }
 
 void MainWindow::serviceDisconnected(uint64_t id)
 {
     apps->setConnectable(id, true);
     apps->setConnected(id, false);
+    apps->setEditable(id, true);
 }
 
 void MainWindow::serviceConnectionFailed(uint64_t id)
 {
     apps->setConnected(id, false);
+    apps->setEditable(id, true);
 }
 
 void MainWindow::serviceLaunched(uint64_t id)
@@ -291,4 +306,23 @@ void MainWindow::commandFormRejected()
 void MainWindow::clearServiceLog(uint64_t id)
 {
     apps->clearLog(id);
+}
+
+void MainWindow::serviceEdit(uint64_t id, const QMap<QString, QString>& data)
+{
+    if (editingService == 0) {
+        editingService = id;
+        
+        newApp = new NewAppDialogue(data, this);
+        connect(newApp, SIGNAL(accepted()), SLOT(newAppAccepted()));
+        connect(newApp, SIGNAL(rejected()), SLOT(newAppRejected()));
+        newApp->setModal(true);
+        newApp->setWindowTitle(tr("Edit application"));
+        newApp->show();
+    }
+}
+
+void MainWindow::serviceNameChange(uint64_t id, const QString& name)
+{
+    apps->setName(id, name);
 }

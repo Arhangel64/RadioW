@@ -4,7 +4,7 @@ uint64_t C::Vocabulary::counter = 0;
 
 C::Vocabulary::Vocabulary(const W::Address p_address, QObject* parent):
     C::Controller(p_address, W::Address({W::String(u"vocabulary") += counter++}), parent),
-    data(new W::Vocabulary())
+    p_data(new W::Vocabulary())
 {
     W::Handler* get = W::Handler::create(address + W::Address({u"get"}), this, &C::Vocabulary::_h_get);
     W::Handler* change = W::Handler::create(address + W::Address({u"change"}), this, &C::Vocabulary::_h_change);
@@ -16,12 +16,12 @@ C::Vocabulary::Vocabulary(const W::Address p_address, QObject* parent):
 
 C::Vocabulary::~Vocabulary()
 {
-    delete data;
+    delete p_data;
 }
 
 C::Vocabulary::Vocabulary(const W::Address p_address, const W::Address& my_address, QObject* parent):
     C::Controller(p_address, my_address, parent),
-    data(new W::Vocabulary())
+    p_data(new W::Vocabulary())
 {
     W::Handler* get = W::Handler::create(address + W::Address({u"get"}), this, &C::Vocabulary::_h_get);
     W::Handler* change = W::Handler::create(address + W::Address({u"change"}), this, &C::Vocabulary::_h_change);
@@ -46,7 +46,8 @@ void C::Vocabulary::h_get(const W::Event& ev)
         _newElement(key, e_data.at(key));
     }
     
-    emit modification(*data);
+    emit modification(*p_data);
+    emit data();
 }
 
 void C::Vocabulary::h_change(const W::Event& ev)
@@ -69,40 +70,50 @@ void C::Vocabulary::h_change(const W::Event& ev)
         _newElement(key, insert.at(key));
     }
     
-    emit modification(*data);
+    emit modification(*p_data);
 }
 
 void C::Vocabulary::h_clear(const W::Event& ev)
 {
     _clear();
-    emit modification(*data);
+    emit modification(*p_data);
 }
 
 void C::Vocabulary::_newElement(const W::String& key, const W::Object& element)
 {
-    data->insert(key, element);
+    p_data->insert(key, element);
     emit newElement(key, element);
 }
 
 void C::Vocabulary::_removeElement(const W::String& key)
 {
     emit removeElement(key);
-    data->erase(key);
+    p_data->erase(key);
 }
 
 
 void C::Vocabulary::_clear()
 {
     emit clear();
-    data->clear();
+    p_data->clear();
 }
 
-const W::Object & C::Vocabulary::at(const W::String& key)
+const W::Object & C::Vocabulary::at(const W::String& key) const
 {
-    return data->at(key);
+    return p_data->at(key);
 }
 
-const W::Object & C::Vocabulary::at(const W::String::u16string& key)
+const W::Object & C::Vocabulary::at(const W::String::u16string& key) const
 {
-    return data->at(key);
+    return p_data->at(key);
+}
+
+bool C::Vocabulary::has(const W::String& key) const
+{
+    return p_data->has(key);
+}
+
+bool C::Vocabulary::has(const W::String::u16string& key) const
+{
+    return p_data->has(key);
 }

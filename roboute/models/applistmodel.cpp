@@ -146,6 +146,12 @@ void AppListModel::setLaunched(uint64_t id, bool value)
     map[id]->setLaunched(value);
 }
 
+void AppListModel::setEditable(uint64_t id, bool value)
+{
+    map[id]->setEditable(value);
+}
+
+
 void AppListModel::setAttribute(uint64_t id, const QString& key, const QString& value)
 {
     map[id]->props.setProp(key, value);
@@ -170,3 +176,12 @@ void AppListModel::clearLog(uint64_t id)
 {
     map[id]->clearLog();
 }
+
+void AppListModel::setName(uint64_t id, const QString& name)
+{
+    map[id]->setName(name);
+    int row = *(helper.find(id));
+    
+    emit dataChanged(QAbstractListModel::index(row), QAbstractListModel::index(row), {Qt::DisplayRole});
+}
+

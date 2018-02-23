@@ -1,13 +1,12 @@
 #ifndef DATABASE_H
 #define DATABASE_H
 
-#include <utils/lmdb++.h>
+#include "lmdb++.h"
 
 #include <map>
 #include <set>
 
 #include <wModel/icatalogue.h>
-#include <wModel/vocabulary.h>
 
 #include <wType/string.h>
 #include <wType/address.h>
@@ -25,17 +24,17 @@ public:
     uint64_t addElement(const W::Vocabulary& record) override;
     W::Vocabulary* getElement(uint64_t id) override;
     void removeElement(uint64_t id) override;
+    void clear() override;
+    void modifyElement(uint64_t id, const W::Vocabulary & newValue) override;
+    uint64_t size() const override;
     
     void addIndex(const W::String& fieldName, W::Object::objectType fieldType) override;
-    
-    W::Handler* subscribeMember;
-    handler(subscribeMember);
     
     void addModel(M::Model* model);
     void removeModel(M::Model* model);
     
 protected:
-    std::set<uint64_t> getAll() override;
+    std::set<uint64_t> getAll() const override;
     
 private:
     void checkDirAndOpenEnvironment();
@@ -44,8 +43,10 @@ private:
 private slots:
     void onChildSubscribersCountChange(uint64_t count);
     
+public:
+    const W::String name;
+    
 private:
-    W::String name;
     bool opened;
     lmdb::env environment;
     lmdb::dbi dbi;

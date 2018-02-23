@@ -131,7 +131,7 @@ var Address = Object.inherit({
     },
     "deserialize": function(ba) {
         this.clear()
-        var length = Object.pop32int(ba);
+        var length = Object.pop32uint(ba);
         
         for (var i = 0; i < length; ++i) {
             var hop = new String();
@@ -140,7 +140,7 @@ var Address = Object.inherit({
         }
     },
     "serialize": function(ba) {
-        Object.push32int(this._data.length, ba);
+        Object.push32uint(this._data.length, ba);
         
         for (var i = 0; i < this._data.length; ++i) {
             this._data[i].serialize(ba);

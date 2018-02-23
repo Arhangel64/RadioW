@@ -101,6 +101,7 @@ void Roboute::addService(Service* srv)
     services.insert(srv->id, srv);
     
     connect(srv, SIGNAL(serviceMessage(const QString&)), this, SLOT(onServiceMessage(const QString&)));
+    connect(srv, SIGNAL(changeName(const QString&)), this, SLOT(onServiceChangeName(const QString&)));
     connect(srv, SIGNAL(connecting()), this, SLOT(onServiceConnecting()));
     connect(srv, SIGNAL(connected()), this, SLOT(onServiceConnected()));
     connect(srv, SIGNAL(disconnecting()), this, SLOT(onServiceDisconnecting()));
@@ -270,3 +271,25 @@ void Roboute::launchCommand(uint64_t id, const QString& name, const QMap<QString
     Service* srv = services[id];
     srv->launchCommand(name, args);
 }
+
+void Roboute::editService(uint64_t id)
+{
+    Service* srv = services[id];
+    
+    emit serviceEdit(id, srv->getData());
+}
+
+void Roboute::changeService(uint64_t id, const QMap<QString, QString>& params)
+{
+    Service* srv = services[id];
+    
+    srv->passNewData(params);
+}
+
+void Roboute::onServiceChangeName(const QString& name)
+{
+    Service* srv = static_cast<Service*>(sender());
+    
+    emit serviceChangeName(srv->id, name);
+}
+

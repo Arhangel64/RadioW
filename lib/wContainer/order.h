@@ -79,6 +79,26 @@ namespace W
             r_map.clear();
         }
         
+        void insert(const_iterator pos, data_type element) {
+            m_const_itr m_itr = r_map.find(element);
+            if (m_itr != r_map.end()) {
+                throw Duplicates();
+            }
+            
+            const_iterator itr = order.insert(pos, element);
+            r_map.insert(std::make_pair(element, itr));
+        }
+        
+        void insert(iterator pos, data_type element) {
+            m_const_itr m_itr = r_map.find(element);
+            if (m_itr != r_map.end()) {
+                throw Duplicates();
+            }
+            
+            const_iterator itr = order.insert(pos, element);
+            r_map.insert(std::make_pair(element, itr));
+        }
+        
         const_iterator find(data_type element) const {
             m_const_itr itr = r_map.find(element);
             

@@ -56,12 +56,12 @@ var Uint64 = Object.inherit({
         return clone;
     },
     "deserialize": function(ba) {
-        this._h = Object.pop32int(ba);
-        this._l = Object.pop32int(ba);
+        this._h = Object.pop32uint(ba);
+        this._l = Object.pop32uint(ba);
     },
     "serialize": function(ba) {
-        Object.push32int(this._h, ba);
-        Object.push32int(this._l, ba);
+        Object.push32uint(this._h, ba);
+        Object.push32uint(this._l, ba);
     },
     "size": function() {
         return 8;

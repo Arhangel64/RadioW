@@ -3,6 +3,7 @@
 
 #include "object.h"
 #include "string.h"
+#include "uint64.h"
 
 #include <list>
 #include <initializer_list>
@@ -23,14 +24,16 @@ namespace W
         
         Address& operator=(const Address& original);
         
-        StdStr toString() const;
-        Object* copy() const;
-        size_type size() const;
+        StdStr toString() const override;
+        Object* copy() const override;
+        size_type size() const override;
         
-        objectType getType() const;
+        objectType getType() const override;
         
-        void serialize(ByteArray& out) const;
-        void deserialize(ByteArray& in);
+        void serialize(ByteArray& out) const override;
+        void deserialize(ByteArray& in) override;
+        
+        bool operator==(const Object & other) const override;
         
         bool operator<(const Address& other) const;
         bool operator>(const Address& other) const;
@@ -45,11 +48,13 @@ namespace W
         
         Address& operator+=(const Address& other);
         Address& operator+=(const String& other);
+        Address& operator+=(const Uint64& other);
         Address& operator+=(const String::u16string& other);
         
         Address operator>>(size_type count) const;
         Address operator<<(size_type count) const;
         Address operator+(const Address& other) const;
+        Address operator+(const Uint64& other) const;
         
         static const objectType type = address;
         

@@ -31,6 +31,8 @@ public:
     void setConnected(uint64_t id, bool value);
     void setLaunchable(uint64_t id, bool value);
     void setLaunched(uint64_t id, bool value);
+    void setEditable(uint64_t id, bool value);
+    void setName(uint64_t id, const QString& name);
     void setAttribute(uint64_t id, const QString& key, const QString& value);
     void addCommand(uint64_t id, const QString& key, const QMap<QString, uint64_t>& arguments);
     void removeCommand(uint64_t id, const QString& key);

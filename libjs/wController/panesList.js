@@ -21,6 +21,10 @@ var PanesList = List.inherit({
             this.addController(controller);
         }
     },
+    "clear": function() {
+        List.fn.clear.call(this);
+        this.clearChildren();
+    },
     "setSubscriptionRange": function(s, e) {
         var needStart = s !== this._subscriptionStart;
         var needEnd = e !== this._subscriptionEnd;

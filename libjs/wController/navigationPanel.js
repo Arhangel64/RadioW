@@ -14,6 +14,10 @@ var NavigationPanel = List.inherit({
         this.addController(ctrl);
         
         List.fn.addElement.call(this, element);
+    },
+    "clear": function() {
+        List.fn.clear.call(this);
+        this.clearChildren();
     }
 });
 

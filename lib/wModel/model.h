@@ -30,7 +30,9 @@ namespace M {
             vocabulary,
             catalogue,
             
-            attributes = 50
+            attributes = 50,
+            file,
+            resourceCache
         };
         
         Model(const W::Address p_address, QObject* parent = 0);

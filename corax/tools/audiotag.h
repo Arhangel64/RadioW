@@ -12,7 +12,7 @@
 class AudioTag
 {
 public:
-    AudioTag(const W::File& file);
+    AudioTag(const T::File& file);
     AudioTag(const AudioTag& other);
     ~AudioTag();
     

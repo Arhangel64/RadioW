@@ -28,6 +28,8 @@ namespace W {
         void execute(const QString& command);
         void interrupt();
         bool isReady() const;
+        void setLogin(const QString& lng);
+        void setPassword(const QString& pass);
         
     signals:
         void opened();

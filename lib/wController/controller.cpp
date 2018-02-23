@@ -4,15 +4,16 @@
 #include "list.h"
 #include "vocabulary.h"
 #include "attributes.h"
+#include "catalogue.h"
 
 C::Controller::Controller(const W::Address& p_address, const W::Address& my_address, QObject* parent):
     QObject(parent),
     pairAddress(p_address),
     address(my_address),
+    subscribed(false),
     dispatcher(0),
     socket(0),
     registered(false),
-    subscribed(false),
     controllers(new CList()),
     handlers(new HList()),
     properties(new W::Vector())
@@ -96,10 +97,10 @@ void C::Controller::h_properties(const W::Event& event)
     const W::Vocabulary& vc = static_cast<const W::Vocabulary&>(event.getData());
     properties = static_cast<W::Vector*>(vc.at(u"properties").copy());
     
-    emit serviceMessage("successfully received properties");
+    //emit serviceMessage("successfully received properties");
 }
 
-void C::Controller::registerController(W::Dispatcher* dp, W::Socket* sock)
+void C::Controller::registerController(W::Dispatcher* dp, const W::Socket* sock)
 {
      if (registered) {
         emit serviceMessage(QString("Controller ") + address.toString().c_str() + " is already registered");
@@ -159,7 +160,7 @@ void C::Controller::unregisterController()
     }
 }
 
-void C::Controller::send(W::Vocabulary* vc, const W::Address& handlerAddress)
+void C::Controller::send(W::Vocabulary* vc, const W::Address& handlerAddress) const
 {
     if (!registered) {
         emit serviceMessage(QString("An attempt to send event from model ") + address.toString().c_str() + " which was not registered");
@@ -177,7 +178,9 @@ void C::Controller::subscribe()
         emit serviceMessage(QString("An attempt to subscribe model ") + address.toString().c_str() + " which is already subscribed");
         throw 3;
     }
-    send(new W::Vocabulary(), W::Address{u"subscribe"});
+    W::Vocabulary* vc =  new W::Vocabulary();
+    vc->insert(u"params", createSubscriptionVC());
+    send(vc, W::Address{u"subscribe"});
     
     CList::iterator itr = controllers->begin();
     CList::iterator end = controllers->end();
@@ -225,6 +228,9 @@ C::Controller * C::Controller::createByType(int type, const W::Address& address,
         case vocabulary:
             ptr = new C::Vocabulary(address, parent);
             break;
+        case catalogue:
+            ptr = new C::Catalogue(address, parent);
+            break;
             
         case attributes:
             ptr = new C::Attributes(address, parent);
@@ -248,6 +254,25 @@ void C::Controller::dropSubscribed()
     }
 }
 
+W::Vocabulary * C::Controller::createSubscriptionVC() const
+{
+    return new W::Vocabulary();
+}
 
+void C::Controller::cleanChildren()
+{
+    CList::const_iterator beg = controllers->begin();
+    CList::const_iterator end = controllers->end();
+    
+    while (beg != end) {
+        C::Controller* ctrl = *beg;
+        removeController(ctrl);
+        delete ctrl;
+        beg = controllers->begin();
+    }
+}
 
-
+bool C::Controller::isSubscribed()
+{
+    return subscribed;
+}

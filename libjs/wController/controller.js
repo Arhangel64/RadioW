@@ -79,6 +79,13 @@ var Controller = Subscribable.inherit({
             this._dp.registerHandler(handler);
         }
     },
+    "clearChildren": function() {
+        while (this._controllers.length) {
+            var controller = this._controllers[this._controllers.length - 1]
+            this._removeController(controller);
+            controller.destructor();
+        }
+    },
     "_createSubscriptionVC": function() {
         return new Vocabulary();
     },

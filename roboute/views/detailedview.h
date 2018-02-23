@@ -43,6 +43,7 @@ private:
     QPushButton* launchBtn;
     QPushButton* clearBtn;
     QPushButton* removeBtn;
+    QPushButton* editBtn;
     
     bool connected;
     bool launched;
@@ -59,6 +60,7 @@ public slots:
     void setLaunchable(bool value);
     void setLaunched(bool value);
     void setRemovable(bool value);
+    void setEditable(bool value);
     void clearedLog();
     
 signals:
@@ -67,6 +69,7 @@ signals:
     void launch(uint64_t id);
     void stop(uint64_t id);
     void remove(uint64_t id);
+    void edit(uint64_t id);
     void launchCommand(uint64_t id, const QString& name);
     void clearLog(uint64_t id);
     
@@ -75,6 +78,7 @@ private slots:
     void onLaunchClick();
     void onClearClick();
     void onRemoveClick();
+    void onEditClick();
     void checkDock();
     void onCommandDoubleClicked(const QModelIndex& index);
 };

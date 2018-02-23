@@ -1,21 +1,21 @@
 #include "file.h"
 #include <iostream>
 
-W::File::File(const W::String& p_path):
+T::File::File(const W::String& p_path):
     path(p_path)
 {
 }
 
-W::File::~File()
+T::File::~File()
 {
 }
 
-const W::String & W::File::getPath() const
+const W::String & T::File::getPath() const
 {
     return path;
 }
 
-W::String W::File::suffix() const
+W::String T::File::suffix() const
 {
     uint64_t dotPos = path.findLastOf(W::String(u"."));
     if (dotPos > path.findLastOf(W::String(u"/"))) {
@@ -25,7 +25,7 @@ W::String W::File::suffix() const
     }
 }
 
-bool W::File::readDirectoryRecursive(const W::String& path, std::list<File>* result)
+bool T::File::readDirectoryRecursive(const W::String& path, std::list<T::File>* result)
 {
     DIR *d;
     struct dirent *dir;
@@ -44,7 +44,7 @@ bool W::File::readDirectoryRecursive(const W::String& path, std::list<File>* res
                 success = true;
                 switch (st.st_mode & S_IFMT) {
                     case S_IFDIR:
-                        success = W::File::readDirectoryRecursive(d_path, result);
+                        success = File::readDirectoryRecursive(d_path, result);
                         break;
                     case S_IFREG:
                         result->emplace_back(d_path);
@@ -90,4 +90,26 @@ bool W::File::readDirectoryRecursive(const W::String& path, std::list<File>* res
     }
     
     return success;
+}
+
+W::String T::File::parentDirectory() const
+{
+    uint64_t lastSlashPos = path.findLastOf(W::String(u"/"));
+    W::String fPath = path.substr(0, lastSlashPos);
+    uint64_t pSpashPos = fPath.findLastOf(W::String(u"/"));
+    return fPath.substr(pSpashPos + 1);
+}
+
+W::String T::File::name() const
+{
+    uint64_t slashPos = path.findLastOf(W::String(u"/"));
+    return path.substr(slashPos + 1);
+    
+}
+
+W::String T::File::nameWithoutSuffix() const
+{
+    W::String nws = name();
+    uint64_t dotPos = path.findLastOf(W::String(u"."));
+    return nws.substr(0, dotPos);
 }

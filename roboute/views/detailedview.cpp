@@ -12,9 +12,10 @@ DetailedView::DetailedView(QWidget* parent):
     props(new QTableView(dock)),
     commands(new QListView(dock)),
     connectBtn(new QPushButton(QIcon::fromTheme("state-ok"), "", this)),
-    launchBtn(new QPushButton(QIcon::fromTheme("kt-start"), "", this)),
+    launchBtn(new QPushButton(QIcon::fromTheme("system-run"), "", this)),
     clearBtn(new QPushButton(QIcon::fromTheme("trash-empty"), "", this)),
-    removeBtn(new QPushButton(QIcon::fromTheme("remove"), "", this)),
+    removeBtn(new QPushButton(QIcon::fromTheme("delete"), "", this)),
+    editBtn(new QPushButton(QIcon::fromTheme("edit-rename"), "", this)),
     connected(false),
     launched(false),
     propsShown(false),
@@ -53,16 +54,20 @@ DetailedView::DetailedView(QWidget* parent):
     clearBtn->setEnabled(false);
     removeBtn->setToolTip(tr("Remove"));
     removeBtn->setEnabled(false);
+    editBtn->setToolTip(tr("Edit"));
+    editBtn->setEnabled(false);
     QObject::connect(connectBtn, SIGNAL(clicked()), this, SLOT(onConnectClick()));
     QObject::connect(launchBtn, SIGNAL(clicked()), this, SLOT(onLaunchClick()));
     QObject::connect(clearBtn, SIGNAL(clicked()), this, SLOT(onClearClick()));
     QObject::connect(removeBtn, SIGNAL(clicked()), this, SLOT(onRemoveClick()));
+    QObject::connect(editBtn, SIGNAL(clicked()), this, SLOT(onEditClick()));
     QObject::connect(commands, SIGNAL(doubleClicked(const QModelIndex)), SLOT(onCommandDoubleClicked(const QModelIndex)));
     
     topPanel->addWidget(connectBtn);
     topPanel->addWidget(launchBtn);
     topPanel->addWidget(clearBtn);
     topPanel->addStretch();
+    topPanel->addWidget(editBtn);
     topPanel->addWidget(removeBtn);
     
     layout->setContentsMargins(0,0,0,0);
@@ -167,10 +172,24 @@ void DetailedView::onRemoveClick()
     emit remove(model->id);
 }
 
+void DetailedView::onEditClick()
+{
+    if (model == 0) {
+        return;
+    }
+    emit edit(model->id);
+}
+
 void DetailedView::setRemovable(bool value)
 {
     removeBtn->setEnabled(value);
 }
+
+void DetailedView::setEditable(bool value)
+{
+    editBtn->setEnabled(value);
+}
+
 
 void DetailedView::setModel(AppModel* p_model)
 {
@@ -185,6 +204,7 @@ void DetailedView::setModel(AppModel* p_model)
     setLaunchable(model->getLaunchable());
     setLaunched(model->getLaunched());
     setRemovable(model->id != 0);
+    setEditable(model->getEditable());
     clearBtn->setEnabled(true);
     delete history;
     QObject::connect(model, SIGNAL(newLogMessage(const QString&)), this, SLOT(appendMessage(const QString&)));
@@ -192,6 +212,7 @@ void DetailedView::setModel(AppModel* p_model)
     QObject::connect(model, SIGNAL(changedConnected(bool)), this, SLOT(setConnected(bool)));
     QObject::connect(model, SIGNAL(changedLaunchable(bool)), this, SLOT(setLaunchable(bool)));
     QObject::connect(model, SIGNAL(changedLaunched(bool)), this, SLOT(setLaunched(bool)));
+    QObject::connect(model, SIGNAL(changedEditable(bool)), this, SLOT(setEditable(bool)));
     QObject::connect(model, SIGNAL(clearedLog()), this, SLOT(clearedLog()));
     
     QItemSelectionModel *m1 = props->selectionModel();

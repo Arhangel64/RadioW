@@ -41,7 +41,7 @@ var Catalogue = Proxy.inherit({
         vc.insert("data", this._getAllData());
         this.broadcast(vc, "get")
     },
-    "_onRemoteAddElement": function(obj) {
+    "_onRemoteAddElement": function(obj, before) {
         if (this.ready) {                   //only end appends are supported now
             var vc = new Vocabulary();
             vc.insert("data", obj.clone());

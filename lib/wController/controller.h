@@ -25,6 +25,7 @@ namespace C {
             string,
             list,
             vocabulary,
+            catalogue,
             
             attributes = 50
         };
@@ -34,10 +35,11 @@ namespace C {
         
         void addController(C::Controller* ctrl);
         void addHandler(W::Handler* handler);
-        void registerController(W::Dispatcher* dp, W::Socket* sock);
+        void registerController(W::Dispatcher* dp, const W::Socket* sock);
         void unregisterController();
         void subscribe();
         void unsubscribe();
+        bool isSubscribed();
         
         void removeHandler(W::Handler* handler);
         void removeController(C::Controller* ctrl);
@@ -45,26 +47,28 @@ namespace C {
         static C::Controller* createByType(int type, const W::Address& address, QObject* parent = 0);
         
     signals:
-        void serviceMessage(const QString& msg);
+        void serviceMessage(const QString& msg) const;
         void modification(const W::Object& data);
         
     protected:
         W::Address pairAddress;
         W::Address address;
+        bool subscribed;
         
-        void send(W::Vocabulary* vc, const W::Address& handlerAddress);
+        void send(W::Vocabulary* vc, const W::Address& handlerAddress) const;
         handler(properties)
         
         void dropSubscribed();
+        virtual W::Vocabulary* createSubscriptionVC() const;
+        void cleanChildren();
         
     private:
         typedef W::Order<W::Handler*> HList;
         typedef W::Order<C::Controller*> CList;
         
         W::Dispatcher* dispatcher;
-        W::Socket* socket;
+        const W::Socket* socket;
         bool registered;
-        bool subscribed;
         CList* controllers;
         HList* handlers;
         W::Vector* properties;

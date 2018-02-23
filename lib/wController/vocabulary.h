@@ -19,16 +19,19 @@ namespace C {
         Vocabulary(const W::Address p_address, QObject* parent = 0);
         ~Vocabulary();
         
-        const W::Object& at(const W::String& key);
-        const W::Object& at(const W::String::u16string& key);
+        const W::Object& at(const W::String& key) const;
+        const W::Object& at(const W::String::u16string& key) const;
+        bool has(const W::String& key) const;
+        bool has(const W::String::u16string& key) const;
         
     signals:
         void clear();
         void newElement(const W::String& key, const W::Object& element);
         void removeElement(const W::String& key);
+        void data();
         
     protected:
-        W::Vocabulary* data;
+        W::Vocabulary* p_data;
         
         handler(get)
         handler(change)

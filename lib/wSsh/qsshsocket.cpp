@@ -130,13 +130,12 @@ void QSshSocket::socketRead(int ptr)
 {
     command->notifier->setEnabled(false);
     
-    QByteArray buffer;
-    buffer.resize(1048576);
+    char* buffer = new char[1048576];
 
     int totalBytes = 0;
     int newBytes = 0;
     do {
-        newBytes = ssh_channel_read_nonblocking(command->channel, &(buffer.data()[totalBytes]), buffer.size() - totalBytes, 0);
+        newBytes = ssh_channel_read_nonblocking(command->channel, &buffer[totalBytes], 1048576 - totalBytes, 0);
         
         if (newBytes > 0) {
             totalBytes += newBytes;
@@ -149,15 +148,17 @@ void QSshSocket::socketRead(int ptr)
         destroyCommand();
     } else if (ssh_channel_is_eof(command->channel) != 0) {
         command->notifier->setEnabled(true);
-        QString response = QString(buffer).mid(0, totalBytes);
+        QString response = QString::fromUtf8(buffer, totalBytes);
         emit commandData(response);
         emit endOfFile();
         destroyCommand();
     } else {
         command->notifier->setEnabled(true);
-        QString response = QString(buffer).mid(0, totalBytes);
+        QString response = QString::fromUtf8(buffer, totalBytes);
         emit commandData(response);
     }
+    
+    delete[] buffer;
 }
 
 void QSshSocket::destroyCommand()

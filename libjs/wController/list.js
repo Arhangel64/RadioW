@@ -24,13 +24,6 @@ var List = Controller.inherit({
     },
     "clear": function() {
         this.data.clear();
-        
-        while (this._controllers.length) {
-            var controller = this._controllers[this._controllers.length - 1]
-            this._removeController(controller);
-            controller.destructor();
-        }
-        
         this.trigger("clear");
     },
     "_h_clear": function(ev) {

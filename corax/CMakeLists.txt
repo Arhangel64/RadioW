@@ -9,11 +9,17 @@ set(CMAKE_AUTOMOC ON)
 
 set(HEADERS
     corax.h
+    tools/parser.h
+    tools/audioid.h
+    tools/audiotag.h
 )
 
 set(SOURCES
     main.cpp
     corax.cpp
+    tools/parser.cpp
+    tools/audioid.cpp
+    tools/audiotag.cpp
 )
 
 add_executable(corax ${HEADERS} ${SOURCES})
@@ -25,6 +31,10 @@ target_link_libraries(corax wSocket)
 target_link_libraries(corax wDispatcher)
 target_link_libraries(corax utils)
 target_link_libraries(corax wModel)
+target_link_libraries(corax wController)
 target_link_libraries(corax wServerUtils)
+target_link_libraries(corax wDatabase)
+target_link_libraries(corax tag)
+target_link_libraries(corax tools)
 
 install(TARGETS corax RUNTIME DESTINATION bin)

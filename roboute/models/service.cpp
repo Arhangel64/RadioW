@@ -436,3 +436,54 @@ void Service::launchCommand(const QString& name, const QMap<QString, QVariant>& 
     socket->send(ev);
 }
 
+QMap<QString, QString> Service::getData() const
+{
+    QMap<QString, QString> data;
+    
+    data["name"] = name;
+    data["address"] = address;
+    data["port"] = port;
+    data["login"] = login;
+    data["password"] = password;
+    data["logFile"] = logFile;
+    data["command"] = command;
+    
+    return data;
+}
+
+void Service::passNewData(const QMap<QString, QString> data)
+{
+    if (data.contains("name") && data.value("name") != name) {
+        name = data.value("name");
+        emit changeName(name);
+    }
+    
+    if (data.contains("address") && data.value("address") != address) {
+        address = data.value("address");
+    }
+    
+    if (data.contains("port") && data.value("port") != port) {
+        port = data.value("port");
+    }
+    
+    if (data.contains("login") && data.value("login") != login) {
+        login = data.value("login");
+        dataSsh->setLogin(login);
+        commandSsh->setLogin(login);
+    }
+    
+    if (data.contains("password") && data.value("password") != password) {
+        password = data.value("password");
+        dataSsh->setPassword(password);
+        commandSsh->setPassword(password);
+    }
+    
+    if (data.contains("logFile") && data.value("logFile") != logFile) {
+        logFile = data.value("logFile");
+    }
+    
+    if (data.contains("command") && data.value("command") != command) {
+        command = data.value("command");
+    }
+}
+

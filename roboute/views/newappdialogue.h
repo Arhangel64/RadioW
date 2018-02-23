@@ -15,6 +15,7 @@ class NewAppDialogue : public QDialog
     Q_OBJECT
 public:
     NewAppDialogue(QWidget* parent = 0);
+    NewAppDialogue(const QMap<QString, QString>& data, QWidget* parent = 0);
     
     QMap<QString, QString> getData() const;
     
@@ -28,6 +29,7 @@ private:
     QLineEdit* command;
     
 private:
+    void construct();
     void createButtons(QHBoxLayout* layout);
     void createForm(QFormLayout* layout);
 };

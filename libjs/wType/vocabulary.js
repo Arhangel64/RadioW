@@ -39,7 +39,7 @@ var Vocabulary = Object.inherit({
     "deserialize": function(ba) {
         this.clear();
         
-        this._length = Object.pop32int(ba);
+        this._length = Object.pop32uint(ba);
         
         for (var i = 0; i < this._length; ++i) {
             var key = new String();
@@ -78,7 +78,7 @@ var Vocabulary = Object.inherit({
         ++this._length;
     },
     "serialize": function(ba) {
-        Object.push32int(this._length, ba);
+        Object.push32uint(this._length, ba);
         
         for (var key in this._data) {
             var sKey = new String(key);

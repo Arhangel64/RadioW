@@ -10,7 +10,8 @@ AppModel::AppModel(uint64_t p_id, const QString& p_name):
     connectable(false),
     connected(false),
     launchable(false),
-    launched(false)
+    launched(false),
+    editable(false)
 {
 }
 
@@ -51,12 +52,17 @@ bool AppModel::getConnected() const
 
 bool AppModel::getLaunchable() const
 {
-    return launchable;
+    return launchable && connected;
 }
 
 bool AppModel::getLaunched() const
 {
     return launched;
+}
+
+bool AppModel::getEditable() const
+{
+    return editable && !connected;
 }
 
 void AppModel::setConnectable(bool value)
@@ -92,8 +98,22 @@ void AppModel::setLaunched(bool value)
     }
 }
 
+void AppModel::setEditable(bool value)
+{
+    if (value != editable) {
+        editable = value;
+        emit changedEditable(editable && !connected);
+    }
+}
+
+
 void AppModel::clearLog()
 {
     log.clear();
     emit clearedLog();
+}
+
+void AppModel::setName(const QString& p_name)
+{
+    name = p_name;
 }

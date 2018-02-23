@@ -11,6 +11,7 @@ set(HEADERS
     boolean.h
     event.h
     vector.h
+    blob.h
 )
 
 set(SOURCES
@@ -23,6 +24,7 @@ set(SOURCES
     boolean.cpp
     event.cpp
     vector.cpp
+    blob.cpp
 )
 
 add_library(wType ${HEADERS} ${SOURCES})

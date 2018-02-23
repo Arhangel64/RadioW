@@ -48,7 +48,7 @@ const W::Socket& W::Server::getConnection(uint64_t p_id) const
 {
     std::map<uint64_t, Socket*>::const_iterator itr = connections.find(p_id);
     if (itr == connections.end()) {
-        throw 2;
+        throw new SocketAccessError();
     }
     
     return *(itr->second);
@@ -92,7 +92,7 @@ void W::Server::closeConnection(uint64_t p_id)
 {
     std::map<uint64_t, Socket*>::const_iterator itr = connections.find(p_id);
     if (itr == connections.end()) {
-        throw 2;
+        throw new SocketAccessError();
     }
     
     itr->second->close();

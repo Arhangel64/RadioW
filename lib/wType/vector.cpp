@@ -153,3 +153,25 @@ std::string W::Vector::NoElement::getMessage() const
     
     return msg;
 }
+
+
+bool W::Vector::operator==(const W::Object& other) const
+{
+    if (sameType(other)) {
+        return operator==(static_cast<const W::Vector&>(other));
+    } else {
+        return false;
+    }
+}
+
+bool W::Vector::operator==(const W::Vector& other) const
+{
+    bool equals = data->size() == other.data->size();
+    int i = 0;
+    while (equals && i != data->size()) {
+        equals = data->at(i) == other.data->at(i);
+        ++i;
+    }
+    
+    return equals;
+}

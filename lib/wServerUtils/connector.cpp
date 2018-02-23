@@ -41,7 +41,7 @@ void U::Connector::sendTo(const W::String& name, const W::Event& event)
 {
     Map::const_iterator itr = nodes.find(name);
     if (itr != nodes.end()) {
-        throw 2;
+        throw new NodeAccessError(name);
     } else {
         server->getConnection(itr->second).send(event);
     }
@@ -68,6 +68,8 @@ void U::Connector::onNewConnection(const W::Socket& socket)
                 
                 emit serviceMessage(QString("New connection, id: ") + socket.getId().toString().c_str());
                 connect(&socket, SIGNAL(message(const W::Event&)), dispatcher, SLOT(pass(const W::Event&)));
+                
+                emit nodeConnected(name);
             }
         } else {
             emit serviceMessage(QString("Node ") + QString(name.toString().c_str()) + " tried to connect, but connection with that node is already open, closing new connection");
@@ -88,6 +90,7 @@ void U::Connector::onClosedConnection(const W::Socket& socket)
     if (ign == ignoredNodes.end()) {
         Map::const_iterator itr = nodes.find(name);
         if (itr != nodes.end()) {
+            emit nodeDisconnected(name);
             commands->removeCommand(W::String(u"disconnect") + name);
             nodes.erase(itr);
         }
@@ -109,4 +112,13 @@ void U::Connector::h_disconnect(const W::Event& ev)
     
     Map::const_iterator itr = nodes.find(name);
     server->closeConnection(itr->second);
+}
+
+const W::Socket& U::Connector::getNodeSocket(const W::String& name)
+{
+    Map::const_iterator itr = nodes.find(name);
+    if (itr == nodes.end()) {
+        throw new NodeAccessError(name);
+    }
+    return server->getConnection(itr->second);
 }

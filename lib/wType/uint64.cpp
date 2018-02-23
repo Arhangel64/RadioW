@@ -126,3 +126,12 @@ W::Uint64::operator uint64_t() const
 {
     return data;
 }
+
+bool W::Uint64::operator==(const W::Object& other) const
+{
+    if (sameType(other)) {
+        return operator==(static_cast<const W::Uint64&>(other));
+    } else {
+        return false;
+    }
+}

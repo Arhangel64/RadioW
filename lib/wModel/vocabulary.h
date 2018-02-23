@@ -8,12 +8,13 @@
 #include <wType/vocabulary.h>
 #include <wType/vector.h>
 
-class Database;
 
 namespace M {
+    class ICatalogue;
+    
     class Vocabulary : public M::Model 
     {
-        friend class ::Database;
+        friend class ICatalogue;
     public:
         Vocabulary(const W::Address p_address, QObject* parent = 0);
         Vocabulary(W::Vocabulary* p_data, const W::Address p_address, QObject* parent = 0);

@@ -274,6 +274,22 @@ W::Address W::Address::operator+(const W::Address& other) const
     return res;
 }
 
+W::Address & W::Address::operator+=(const Uint64& other)
+{
+    data->push_back(String(other.toString()));
+}
+
+
+W::Address W::Address::operator+(const Uint64& other) const
+{
+    W::Address res;
+    res += *this;
+    res += other;
+    
+    return res;
+}
+
+
 const W::String& W::Address::front() const
 {
     return data->front();
@@ -282,4 +298,13 @@ const W::String& W::Address::front() const
 const W::String& W::Address::back() const
 {
     return data->back();
+}
+
+bool W::Address::operator==(const W::Object& other) const
+{
+    if (sameType(other)) {
+        return operator==(static_cast<const W::Address&>(other));
+    } else {
+        return false;
+    }
 }

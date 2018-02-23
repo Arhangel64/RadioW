@@ -38,6 +38,8 @@ public:
     QVariant saveState() const;
     void registerContollers(W::Dispatcher* dp);
     void unregisterControllers(W::Dispatcher* dp);
+    QMap<QString, QString> getData() const;
+    void passNewData(const QMap<QString, QString> data);
     
 private:
     enum State {
@@ -98,6 +100,7 @@ signals:
     void addCommand(const QString& name, const QMap<QString, uint64_t>& arguments);
     void removeCommand(const QString& name);
     void clearCommands();
+    void changeName(const QString& name);
     
 public slots:
     void connect();

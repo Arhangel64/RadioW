@@ -53,6 +53,7 @@ signals:
     void debugMessage(const QString& msg) const;
     void log(uint64_t id,const QString& msg);
     void newService(uint64_t id, const QString& name);
+    void serviceChangeName(uint64_t id, const QString& name);
     void serviceAttrChange(uint64_t id, const QString& key, const QString& value);
     void serviceRemoved(uint64_t id);
     void serviceConnected(uint64_t id);
@@ -64,6 +65,7 @@ signals:
     void serviceStopped(uint64_t id);
     void serviceLaunching(uint64_t id);
     void serviceStopping(uint64_t id);
+    void serviceEdit(uint64_t id, const QMap<QString, QString>& params);
     void serviceAddCommand(uint64_t id, const QString& key, const QMap<QString, uint64_t>& arguments);
     void serviceRemoveCommand(uint64_t id, const QString& key);
     void serviceClearCommands(uint64_t id);
@@ -73,15 +75,18 @@ public slots:
     void start();
     void stop();
     void addService(const QMap<QString, QString>& params);
+    void changeService(uint64_t id, const QMap<QString, QString>& params);
     void removeService(uint64_t id);
     void connectService(uint64_t id);
     void disconnectService(uint64_t id);
     void launchService(uint64_t id);
+    void editService(uint64_t id);
     void stopService(uint64_t id);
     void launchCommand(uint64_t id, const QString& name, const QMap<QString, QVariant>& args);
     
 private slots:
     void onServiceMessage(const QString& msg);
+    void onServiceChangeName(const QString& name);
     void onServiceConnecting();
     void onServiceConnected();
     void onServiceDisconnecting();

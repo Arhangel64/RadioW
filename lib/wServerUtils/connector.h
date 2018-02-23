@@ -14,6 +14,8 @@
 #include <wType/uint64.h>
 #include <wType/event.h>
 
+#include <utils/exception.h>
+
 #include "commands.h"
 
 namespace U {
@@ -27,9 +29,12 @@ namespace U {
         
         void addIgnoredNode(const W::String& name);
         void sendTo(const W::String& name, const W::Event& event);
+        const W::Socket& getNodeSocket(const W::String& name);
         
     signals:
         void serviceMessage(const QString& msg);
+        void nodeConnected(const W::String& name);
+        void nodeDisconnected(const W::String& name);
         
     private:
         W::Dispatcher* dispatcher;
@@ -46,8 +51,17 @@ namespace U {
         void onNewConnection(const W::Socket& socket);
         void onClosedConnection(const W::Socket& socket);
 
+    public:
+        class NodeAccessError: 
+        public Utils::Exception
+        {
+            W::String name;
+        public:
+            NodeAccessError(const W::String& p_name):Exception(), name(p_name){}
+            
+            std::string getMessage() const{return std::string("An attempt to access non existing node ") + name.toString();}
+        };
     };
-
 }
 
 

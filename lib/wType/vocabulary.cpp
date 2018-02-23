@@ -239,3 +239,41 @@ std::string W::Vocabulary::NoElement::getMessage() const
     
     return msg;
 }
+
+bool W::Vocabulary::operator==(const W::Object& other) const
+{
+    if (sameType(other)) {
+        return operator==(static_cast<const W::Vocabulary&>(other));
+    } else {
+        return false;
+    }
+}
+
+bool W::Vocabulary::operator==(const W::Vocabulary& other) const
+{
+    bool equal = data->size() == other.data->size();
+    Map::const_iterator mItr = data->begin();
+    Map::const_iterator oItr = other.data->begin();
+    
+    while (equal && mItr != data->end()) {
+        equal = (mItr->first == oItr->first) && (mItr->second == oItr->second);
+        ++mItr;
+        ++oItr;
+    }
+    
+    return equal;
+}
+
+W::Vocabulary * W::Vocabulary::extend(const W::Vocabulary& first, const W::Vocabulary& second)
+{
+    W::Vocabulary* vc = static_cast<W::Vocabulary*>(first.copy());
+    
+    Map::const_iterator itr = second.data->begin();
+    Map::const_iterator end = second.data->end();
+    
+    for (; itr != end; ++itr) {
+        vc->data->operator[](itr->first) = itr->second;
+    }
+    
+    return vc;
+}

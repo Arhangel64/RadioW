@@ -8,7 +8,6 @@
 
 Database::Database(const W::String& dbName, QObject* parent):
     M::ICatalogue(W::Address({dbName}), parent),
-    subscribeMember(W::Handler::create(W::Address({}), this, &Database::_h_subscribeMember)),
     name(dbName),
     opened(false),
     environment(lmdb::env::create()),
@@ -19,7 +18,6 @@ Database::Database(const W::String& dbName, QObject* parent):
 
 Database::~Database()
 {
-    delete subscribeMember;
 }
 
 void Database::open()
@@ -61,6 +59,9 @@ void Database::addIndex(const W::String& fieldName, W::Object::objectType fieldT
 
 uint64_t Database::addElement(const W::Vocabulary& record)
 {
+    if (!opened) {
+        throw 6;    //TODO
+    }
     uint64_t id = ICatalogue::addElement(record);
     
     elements.insert(id);
@@ -128,6 +129,8 @@ void Database::index()
     }
     cursor.close();
     rtxn.abort();
+    
+    emit countChange(elements.size());
 }
 
 W::Vocabulary* Database::getElement(uint64_t id)
@@ -154,41 +157,7 @@ W::Vocabulary* Database::getElement(uint64_t id)
     }
 }
 
-void Database::h_subscribeMember(const W::Event& ev)
-{
-    const W::Address& addr = ev.getDestination();
-    W::Address lastHops = addr << address.size();
-    
-    if (lastHops.size() == 2 && (lastHops.ends(W::Address{u"subscribe"}) || lastHops.ends(W::Address{u"get"}))) {
-        W::Vocabulary* record;
-        try {
-            record = getElement(lastHops.front().toUint64());
-            M::Vocabulary* modelRecord = new M::Vocabulary(record, address + lastHops >> 1);
-            if (lastHops.ends(W::Address{u"subscribe"})) {
-                addModel(modelRecord);
-                modelRecord->_h_subscribe(ev);
-            } else {
-                W::Vocabulary* vc = new W::Vocabulary;
-                vc->insert(u"data", record);
-    
-                fakeResponse(vc, W::Address({u"get"}), addr >> 1, ev);
-            }
-        } catch(int err) {
-            if (err == 3) {
-                emit serviceMessage(QString("An attempt to create and subscribe record model in database, but it is not found. Event: ") + ev.toString().c_str());
-            } else {
-                throw err;
-            }
-        } catch (const std::invalid_argument& err) {
-            emit serviceMessage(QString("Strange event in custom handler of database ") + ev.toString().c_str());
-        }
-    } else {
-        emit serviceMessage(QString("Strange event in custom handler of database ") + ev.toString().c_str());
-    }
-    
-}
-
-std::set<uint64_t> Database::getAll()
+std::set<uint64_t> Database::getAll() const
 {
     return elements;
 }
@@ -196,16 +165,28 @@ std::set<uint64_t> Database::getAll()
 void Database::removeElement(uint64_t id)
 {
     if (!opened) {
-        throw 6;
+        throw 6;    //TODO
     }
     ICatalogue::removeElement(id);
     
-    lmdb::txn rtxn = lmdb::txn::begin(environment, nullptr, MDB_RDONLY);
+    lmdb::txn transaction = lmdb::txn::begin(environment);
     lmdb::val key((uint8_t*) &id, 8);
-    dbi.del(rtxn, key);
+    dbi.del(transaction, key);
+    transaction.commit();
     elements.erase(id);
 }
 
+void Database::clear()
+{
+    if (!opened) {
+        throw 6;    //TODO
+    }
+    M::ICatalogue::clear();
+    
+    lmdb::txn transaction = lmdb::txn::begin(environment);
+    dbi.drop(transaction);
+    transaction.commit();
+}
 
 void Database::addModel(M::Model* model)
 {
@@ -233,4 +214,30 @@ void Database::onChildSubscribersCountChange(uint64_t count)
         model->deleteLater();
     }
 }
+
+void Database::modifyElement(uint64_t id, const W::Vocabulary& newValue)
+{
+    if (!opened) {
+        throw 6;    //TODO
+    }
+    W::ByteArray ba;
+    ba << newValue;
+    int length = ba.size();
+    uint8_t data[length];
+    for (int i = 0; i < length; ++i) {
+        data[i] = ba.pop();
+    }
+    lmdb::val key((uint8_t*) &id, 8);
+    lmdb::val value(data, length);
+    lmdb::txn wTrans = lmdb::txn::begin(environment);
+    dbi.put(wTrans, key, value);
+    wTrans.commit();
+
+}
+
+uint64_t Database::size() const
+{
+    return elements.size();
+}
+
 

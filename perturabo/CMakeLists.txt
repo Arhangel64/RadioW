@@ -9,15 +9,11 @@ set(CMAKE_AUTOMOC ON)
 
 set(HEADERS
     perturabo.h
-    database.h
-    audiotag.h
 )
 
 set(SOURCES
     main.cpp
     perturabo.cpp
-    database.cpp
-    audiotag.cpp
 )
 
 add_executable(perturabo ${HEADERS} ${SOURCES})
@@ -28,10 +24,8 @@ target_link_libraries(perturabo Qt5::Network)
 target_link_libraries(perturabo wSocket)
 target_link_libraries(perturabo wDispatcher)
 target_link_libraries(perturabo utils)
-target_link_libraries(perturabo tools)
 target_link_libraries(perturabo wModel)
 target_link_libraries(perturabo wServerUtils)
-target_link_libraries(perturabo lmdb)
-target_link_libraries(perturabo tag)
+target_link_libraries(perturabo wDatabase)
 
 install(TARGETS perturabo RUNTIME DESTINATION bin)

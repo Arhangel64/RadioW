@@ -179,6 +179,15 @@ void W::SshSocket::interrupt()
     }
 }
 
+void W::SshSocket::setLogin(const QString& lng)
+{
+    login = lng;
+}
+
+void W::SshSocket::setPassword(const QString& pass)
+{
+    password = pass;
+}
 
 
 

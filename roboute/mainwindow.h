@@ -24,6 +24,7 @@ private:
     NewAppDialogue* newApp;
     CommandForm* commandForm;
     QToolBar* rightBar;
+    uint64_t editingService;
     
 private:
     void createActions();
@@ -40,6 +41,8 @@ signals:
     void launchService(uint64_t);
     void stopService(uint64_t);
     void removeService(uint64_t id);
+    void editService(uint64_t id);
+    void changeService(uint64_t id, const QMap<QString, QString>&);
     void launchCommand(uint64_t id, const QString& name, const QMap<QString, QVariant>& args);
     
 public slots:
@@ -60,7 +63,9 @@ public slots:
     void serviceRemoved(uint64_t id);
     void serviceAddCommand(uint64_t id, const QString& key, const QMap<QString, uint64_t>& arguments);
     void serviceRemoveCommand(uint64_t id, const QString& key);
+    void serviceNameChange(uint64_t id, const QString& name);
     void serviceClearCommands(uint64_t id);
+    void serviceEdit(uint64_t id, const QMap<QString, QString>& data);
     
 private slots:
     void selectionChanged(const QItemSelection &selected, const QItemSelection &deselected);

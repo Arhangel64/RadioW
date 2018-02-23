@@ -5,7 +5,7 @@ AudioTag::AudioTag(const AudioTag& other):
 {
 }
 
-AudioTag::AudioTag(const W::File& file):
+AudioTag::AudioTag(const T::File& file):
     fileRef(file.getPath().toString().c_str())
 {
 }

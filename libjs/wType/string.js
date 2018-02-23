@@ -46,7 +46,7 @@ var String = Object.inherit({
     },
     "deserialize": function(ba) {
         this.clear();
-        var size = Object.pop32int(ba);
+        var size = Object.pop32uint(ba);
         
         for (var i = 0; i < size; ++i) {
             var h = ba.pop();
@@ -56,7 +56,7 @@ var String = Object.inherit({
         }
     },
     "serialize": function(ba) {
-        Object.push32int(this._data.length, ba);
+        Object.push32uint(this._data.length, ba);
         
         for (var i = 0; i < this._data.length; ++i) {
             var code = this._data.charCodeAt(i);

@@ -6,9 +6,13 @@
 #include <set>
 #include <map>
 
+#include <wModel/vocabulary.h>
+#include <utils/exception.h>
+
 namespace M {
     class ICatalogue : public M::Model
     {
+        Q_OBJECT
     protected:
         class AbstractIndex;
     public:
@@ -18,6 +22,9 @@ namespace M {
         virtual uint64_t addElement(const W::Vocabulary& record);
         virtual void removeElement(uint64_t id);
         virtual W::Vocabulary* getElement(uint64_t id) = 0;
+        virtual void modifyElement(uint64_t id, const W::Vocabulary& newValue) = 0;
+        virtual uint64_t size() const = 0;
+        virtual void clear();
         
         virtual void addIndex(const W::String& fieldName, W::Object::objectType fieldType);
         const std::set<uint64_t>& find(const W::String& indexName, const W::Object& value) const;
@@ -28,28 +35,43 @@ namespace M {
         void set(const W::Object & value) override;
         void set(W::Object * value) override;
         
+        W::Handler* subscribeMember;
+        handler(subscribeMember);
+        
+        static bool match(const W::Vocabulary& value, const W::Vocabulary& filter);
+        static const std::set<uint64_t> empty;
+        
+    signals:
+        void countChange(uint64_t count);
+        
     protected:
-        virtual std::set<uint64_t> getAll() = 0;
+        virtual std::set<uint64_t> getAll() const = 0;
         void h_subscribe(const W::Event & ev) override;
         
         handler(get);
+        handler(add);
+        handler(update);
         
         typedef std::map<W::String, AbstractIndex*> IndexMap;
         IndexMap indexes;
         
     private:
         uint64_t lastIndex;
+        std::map<uint64_t, M::Vocabulary*> activeChildren;
         
+        void processAddElement(uint64_t id, const W::Vocabulary& value, SMap::const_iterator subscriberIterator, uint64_t socketId);
+        uint64_t getInsertingNeighbour(const W::Vocabulary& params, const W::Vocabulary& record, uint64_t id, const std::set<uint64_t>& allowed = empty) const;
         
     protected:
         class AbstractIndex {
         public:
-            AbstractIndex(W::Object::objectType vt): valueType(vt), empty() {}
+            AbstractIndex(W::Object::objectType vt): valueType(vt) {}
             virtual ~AbstractIndex() {}
             
             virtual const std::set<uint64_t>& find(const W::Object& value) const = 0;
             virtual void add(const W::Object& value, uint64_t id) = 0;
             virtual void remove(const W::Object & value, uint64_t id) = 0;
+            virtual void clear() = 0;
             virtual W::Vector sort(const std::set<uint64_t>& set, bool ascending) = 0;
             virtual uint64_t getNext(uint64_t id, const W::Object& value) = 0;
             virtual uint64_t getPrev(uint64_t id, const W::Object& value) = 0;
@@ -57,7 +79,18 @@ namespace M {
             W::Object::objectType valueType;
             
         protected:
-            std::set<uint64_t> empty;
+            class TypeError : public Utils::Exception {
+            public:
+                TypeError(const std::string& name, const std::string& method, W::Object::objectType myType, W::Object::objectType valueType);
+                
+                std::string getMessage() const;
+                
+            private:
+                std::string name;
+                std::string method;
+                W::Object::objectType myType;
+                W::Object::objectType valueType;
+            };
         };
         
         template <class T> 
@@ -69,6 +102,7 @@ namespace M {
             const std::set<uint64_t>& find(const W::Object& value) const override;
             void add(const W::Object & value, uint64_t id) override;
             void remove(const W::Object & value, uint64_t id) override;
+            void clear() override;
             W::Vector sort(const std::set<uint64_t> & set, bool ascending) override;
             uint64_t getNext(uint64_t id, const W::Object& value) override;
             uint64_t getPrev(uint64_t id, const W::Object& value) override;
@@ -99,14 +133,14 @@ namespace M {
     const std::set<uint64_t> & ICatalogue::Index<T>::find(const W::Object& value) const
     {
         if (value.getType() != valueType) {
-            throw 1;
+            throw new TypeError("Unknown", "find", valueType, value.getType());             //todo replace that unknown stuff, find a way to provide index name
         }
             
         const T& val = static_cast<const T&>(value);
         typename std::map<T, std::set<uint64_t>>::const_iterator itr = values.find(val);
         
         if (itr == values.end()) {
-            return empty;
+            return ICatalogue::empty;
         } else {
             return itr->second;
         }
@@ -116,7 +150,7 @@ namespace M {
     void ICatalogue::Index<T>::add(const W::Object& value, uint64_t id)
     {
         if (value.getType() != valueType) {
-            throw 1;
+            throw new TypeError("Unknown", "add", valueType, value.getType());
         }
         
         const T& val = static_cast<const T&>(value);
@@ -131,7 +165,7 @@ namespace M {
     void ICatalogue::Index<T>::remove(const W::Object& value, uint64_t id) 
     {
         if (value.getType() != valueType) {
-            throw 1;
+            throw new TypeError("Unknown", "remove", valueType, value.getType());
         }
         const T& val = static_cast<const T&>(value);
         typename std::map<T, std::set<uint64_t>>::iterator itr = values.find(val);
@@ -144,6 +178,12 @@ namespace M {
                 set.erase(hint);
             }
         }
+    }
+    
+    template<class T> 
+    void ICatalogue::Index<T>::clear() 
+    {
+        values.clear();
     }
     
     template<class T> 
@@ -206,7 +246,7 @@ namespace M {
     uint64_t ICatalogue::Index<T>::getNext(uint64_t id, const W::Object& value) 
     {
         if (value.getType() != valueType) {
-            throw 1;
+            throw new TypeError("Unknown", "getNext", valueType, value.getType());
         }
         const T& val = static_cast<const T&>(value);
         typename std::map<T, std::set<uint64_t>>::iterator itr = values.find(val);
@@ -241,7 +281,7 @@ namespace M {
     uint64_t ICatalogue::Index<T>::getPrev(uint64_t id, const W::Object& value) 
     {
         if (value.getType() != valueType) {
-            throw 1;
+            throw new TypeError("Unknown", "getPrev", valueType, value.getType());
         }
         const T& val = static_cast<const T&>(value);
         typename std::map<T, std::set<uint64_t>>::iterator itr = values.find(val);

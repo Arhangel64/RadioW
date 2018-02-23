@@ -64,6 +64,15 @@ namespace W
             
             std::string getMessage() const{return "Name of connected socket haven't been found, but registering returned an error";}
         };
+        
+        class SocketAccessError: 
+            public Utils::Exception
+        {
+        public:
+            SocketAccessError():Exception(){}
+            
+            std::string getMessage() const{return "An attempt to access non existing socket";}
+        };
     };
 }
 

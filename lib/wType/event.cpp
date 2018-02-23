@@ -157,4 +157,13 @@ void W::Event::setSenderId(uint64_t senderId)
     sender = Uint64(senderId);
 }
 
+bool W::Event::operator==(const W::Object& other) const
+{
+    if (sameType(other)) {
+        const W::Event& oev = static_cast<const W::Event&>(other);
+        return destination == oev.destination && system == oev.system && sender == oev.sender && *data == *(oev.data);
+    } else {
+        return false;
+    }
+}
 

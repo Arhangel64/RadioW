@@ -18,6 +18,10 @@ var LocalModel = Subscribable.inherit({
                 }
             }
         }
+    },
+    "setData": function(data) {
+        this.data = data;
+        this.trigger("data");
     }
 });
 

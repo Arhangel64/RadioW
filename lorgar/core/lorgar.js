@@ -54,15 +54,18 @@
                 Class.fn.constructor.call(this);
                 
                 this._currentPageCtl = undefined;
+                this._nodes = Object.create(null);
                 
                 this._initDispatcher();
-                this._initMagnusSocket();
-                this._initCoraxSocket();
+                
+                this._prepareNode("Magnus", "localhost", 8081);
+                this._prepareNode("Corax", "localhost", 8080);
+                
                 this._initModels();
                 this._initViews();
                 
-                this.connectMagnus();
-                //this.connectCorax();
+                this.connectNode("Magnus");
+                this.connectNode("Corax");
                 window.onpopstate = this._onHistoryPopState.bind(this)
             },
             "destructor": function() {
@@ -84,8 +87,8 @@
                 
                 this._logger.destructor();
                 this.dispatcher.destructor();
-                this.magnusSocket.destructor();
-                this.coraxSocket.destructor();
+                //this.magnusSocket.destructor();
+                //this.coraxSocket.destructor();
                 
                 Class.fn.destructor.call(this);
             },
@@ -96,21 +99,13 @@
                 this._ps.getPageName(addr);
                 this._initPageController(addr.clone());
             },
-            "connectCorax": function() {
-                this.coraxSocket.open("localhost", 8080);
-            },
-            "connectMagnus": function() {
-                this.magnusSocket.open("localhost", 8081);
-            },
-            "_coraxSocketConnected": function() {
-                console.log("corax socket connected");
-            },
-            "_coraxSocketDisconnected": function() {
-                console.log("corax socket disconnected");
-            },
-            "_coraxSocketError": function(e) {
-                console.log("corax socket error: ");
-                console.log(e);
+            "connectNode": function(name) {
+                var node = this._nodes[name];
+                if (node === undefined) {
+                    throw new Error("An attempt to connect not prepared node " + name);
+                }
+                
+                node.socket.open(node.address, node.port);
             },
             "_initCoraxSocket": function() {
                 this.coraxSocket = new Socket("Lorgar");
@@ -124,13 +119,6 @@
                 this._logger = new Logger();
                 this.dispatcher.registerDefaultHandler(this._logger);
             },
-            "_initMagnusSocket": function() {
-                this.magnusSocket = new Socket("Lorgar");
-                this.magnusSocket.on("connected", this._magnusSocketConnected, this);
-                this.magnusSocket.on("disconnected", this._magnusSocketDisconnected, this);
-                this.magnusSocket.on("error", this._magnusSocketError, this);
-                this.magnusSocket.on("message", this.dispatcher.pass, this.dispatcher);
-            },
             "_initModels": function() {
                 this._gc = new GlobalControls(new Address(["magnus", "gc"]));
                 this._ps = new PageStorage(new Address(["magnus", "ps"]));
@@ -140,8 +128,8 @@
                 
                 this._gc.on("themeSelected", this.setTheme, this);
                 
-                this._gc.register(this.dispatcher, this.magnusSocket);
-                this._ps.register(this.dispatcher, this.magnusSocket);
+                this._gc.register(this.dispatcher, this._nodes.Magnus.socket);
+                this._ps.register(this.dispatcher, this._nodes.Magnus.socket);
                 
                 this._ps.on("pageName", this._onPageName, this);
             },
@@ -151,7 +139,7 @@
                     this._currentPageCtl.destructor();
                 }
                 this._currentPageCtl = new PageController(addr);
-                this._currentPageCtl.register(this.dispatcher, this.magnusSocket);
+                this._currentPageCtl.register(this.dispatcher, this._nodes.Magnus.socket);
                 this._currentPage = new Page(this._currentPageCtl);
                 this._currentPageCtl.subscribe();
                 this._mainLayout.append(this._currentPage, 1, 1, 1, 1);
@@ -175,21 +163,6 @@
                 this._mainLayout.append(spacerL, 1, 0, 1, 1);
                 this._mainLayout.append(spacerR, 1, 2, 1, 1);
             },
-            "_magnusSocketConnected": function() {
-                this._gc.subscribe();
-                
-                if (!this._currentPageCtl) {
-                    this._ps.getPageAddress(location.pathname);
-                    this._ps.one("pageAddress", this._initPageController, this);
-                }
-            },
-            "_magnusSocketDisconnected": function() {
-                console.log("magnus socket disconnected");
-            },
-            "_magnusSocketError": function(e) {
-                console.log("magnus socket error: ");
-                console.log(e);
-            },
             "_onHistoryPopState": function(e) {
                 this._initPageController(new Address(e.state.address));
             },
@@ -198,11 +171,116 @@
                     address: this._currentPageCtl.getPairAddress().toArray()
                 }, "", name);
             },
+            "_onSocketConnected": function(name) {
+                console.log(name + " socket connected");
+                var node = this._nodes[name];
+                node.connected = true;
+                
+                for (var id in node.foreigns) {
+                    if (node.foreigns[id].subscribed) {
+                        node.foreigns[id].controller.subscribe();
+                    }
+                }
+                
+                if (name === "Magnus") {
+                    this._gc.subscribe();
+                    
+                    if (!this._currentPageCtl) {
+                        this._ps.getPageAddress(location.pathname);
+                        this._ps.one("pageAddress", this._initPageController, this);
+                    }
+                }
+            },
+            "_onSocketDisconnected": function(name) {
+                console.log(name + " socket disconnected");
+                var node = this._nodes[name];
+                node.connected = false;
+                
+                for (var id in node.foreigns) {
+                    if (node.foreigns[id].subscribed) {
+                        node.foreigns[id].controller._onSocketDisconnected;
+                    }
+                }
+            },
+            "_onSocketError": function(name) {
+                console.log(name + " socket error: ");
+                console.log(e);
+            },
             "_onWindowResize": function() {
                 this._body.setSize(document.body.offsetWidth, document.body.offsetHeight);
             },
+            "_prepareNode": function(name, address, port) {
+                if (this._nodes[name]) {
+                    throw new Error("An attempt to prepeare node " + name + " for the second time");
+                }
+                var obj = Object.create(null);
+                obj.name = name;
+                obj.address = address;
+                obj.port = port;
+                obj.socket = new Socket("Lorgar");
+                obj.connected = false;
+                obj.foreigns = Object.create(null);
+                
+                obj.socket.on("connected", this._onSocketConnected.bind(this, name));
+                obj.socket.on("disconnected", this._onSocketDisconnected.bind(this, name));
+                obj.socket.on("error", this._onSocketError.bind(this, name));
+                obj.socket.on("message", this.dispatcher.pass, this.dispatcher);
+                
+                this._nodes[name] = obj;
+            },
+            "registerForeignController": function(node, controller) {
+                var node = this._nodes[node];
+                if (node === undefined) {
+                    throw new Error("An attempt to register controller to an unknown node " + node);
+                }
+                
+                if (node.foreigns[controller.id] !== undefined) {
+                    throw new Error("An attempt to register a controller under node " + node + " for a second time");
+                }
+                var obj = Object.create(null);
+                obj.controller = controller;
+                obj.subscribed = false;
+                node.foreigns[controller.id] = obj;
+                controller.register(this.dispatcher, node.socket);
+            },
             "setTheme": function(theme) {
                 View.setTheme(theme);
+            },
+            "subscribeForeignController": function(node, controller) {
+                var node = this._nodes[node];
+                if (node === undefined) {
+                    throw new Error("An attempt to subscribe a controller to an unknown node " + node);
+                }
+                
+                if (node.foreigns[controller.id] === undefined) {
+                    throw new Error("An attempt to subscribe not registered controller to node " + node);
+                }
+                node.foreigns[controller.id].subscribed = true;
+                controller.subscribe();
+            },
+            "unregisterForeignController": function(node, controller) {
+                var node = this._nodes[node];
+                if (node === undefined) {
+                    throw new Error("An attempt to unregister a controller from an unknown node " + node);
+                }
+                
+                if (node.foreigns[controller.id] === undefined) {
+                    throw new Error("An attempt to unregister not registered controller from node " + node);
+                }
+                delete node.foreigns[controller.id];
+                controller.unregister();
+            },
+            "unsubscribeForeignController": function(node, controller) {
+                var node = this._nodes[node];
+                if (node === undefined) {
+                    throw new Error("An attempt to unsubscribe a controller from an unknown node " + node);
+                }
+                
+                if (node.foreigns[controller.id] === undefined) {
+                    throw new Error("An attempt to unsubscribe not registered controller from node " + node);
+                }
+                node.foreigns[controller.id].subscribed = false;
+                controller.unsubscribe();
             }
         });
         

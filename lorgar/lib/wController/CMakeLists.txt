@@ -14,3 +14,5 @@ add_jslib(wController/themeSelecter.js lib/wController/themeSelecter ${LORGAR_DI
 add_jslib(wController/vocabulary.js lib/wController/vocabulary ${LORGAR_DIR} browser)
 add_jslib(wController/attributes.js lib/wController/attributes ${LORGAR_DIR} browser)
 add_jslib(wController/localModel.js lib/wController/localModel ${LORGAR_DIR} browser)
+add_jslib(wController/imagePane.js lib/wController/imagePane ${LORGAR_DIR} browser)
+add_jslib(wController/file/file.js lib/wController/file/file ${LORGAR_DIR} browser)

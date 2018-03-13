@@ -10,5 +10,6 @@ configure_file(panesList.js panesList.js)
 configure_file(mainLayout.js mainLayout.js)
 configure_file(page.js page.js)
 configure_file(pane.js pane.js)
+configure_file(image.js image.js)
 
 add_subdirectory(helpers)

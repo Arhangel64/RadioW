@@ -27,6 +27,11 @@
             launch: function() {
                 if (this.views && this.controllers) {
                     window.lorgar = new Lorgar();
+                    
+                    window.registerForeignController = window.lorgar.registerForeignController.bind(window.lorgar);
+                    window.unregisterForeignController = window.lorgar.unregisterForeignController.bind(window.lorgar);
+                    window.subscribeForeignController = window.lorgar.subscribeForeignController.bind(window.lorgar);
+                    window.unsubscribeForeignController = window.lorgar.unsubscribeForeignController.bind(window.lorgar);
                 }
             }
         }
@@ -38,4 +43,5 @@
         test.run();
         
     });
+    
 })();

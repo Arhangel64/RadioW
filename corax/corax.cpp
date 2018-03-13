@@ -41,7 +41,7 @@ Corax::Corax(QObject *parent):
     
     attributes->addAttribute(W::String(u"connectionsCount"), new M::String(W::String(u"0"), W::Address({u"attributes", u"connectionCount"})));
     attributes->addAttribute(W::String(u"name"), new M::String(W::String(u"Corax"), W::Address({u"attributes", u"name"})));
-    attributes->addAttribute(W::String(u"version"), new M::String(W::String(u"0.0.1"), W::Address({u"attributes", u"version"})));
+    attributes->addAttribute(W::String(u"version"), new M::String(W::String(u"0.0.2"), W::Address({u"attributes", u"version"})));
     
     createCaches();
     createHandlers();

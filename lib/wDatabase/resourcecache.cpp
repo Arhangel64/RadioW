@@ -66,6 +66,7 @@ void ResourceCache::checkDirAndOpenEnvironment()
         throw 1;
     }
     
+    environment.set_mapsize(1UL * 1024UL * 1024UL * 1024UL);
     environment.set_max_dbs(10);
     environment.open(path.toString().c_str(), 0, 0664);
     
@@ -218,7 +219,7 @@ void ResourceCache::h_subscribeMember(const W::Event& ev)
         W::String* record;
         try {
             record = getElement(lastHops.front().toUint64());
-            M::File* modelRecord = new M::File(readFile(*record), address + lastHops >> 1);
+            M::File* modelRecord = M::File::create(readFile(*record), address + lastHops >> 1);
             delete record;
             addModel(modelRecord);
             passToHandler(ev);

@@ -7,12 +7,14 @@
     defineArray.push("views/view");
     defineArray.push("views/layout");
     defineArray.push("views/label");
+    defineArray.push("views/image");
     defineArray.push("lib/wController/localModel");
     
     define(moduleName, defineArray, function() {
         var View = require("views/view");
         var Layout = require("views/layout");
         var Label = require("views/label");
+        var Image = require("views/image");
         var LM = require("lib/wController/localModel");
         
         var Pane = Layout.inherit({
@@ -27,9 +29,17 @@
                 this.addClass("hoverable");
                 this._e.addEventListener("click", this._proxy.onClick, false);
                 
-                var lm = this._labelModel = new LM();
+                var lm = this._labelModel = new LM({
+                    fontFamily: "casualFont"
+                });
+                
+                if (this._f.hasImage()) {
+                    this._image = new Image(this._f.image);
+                    this.append(this._image, Layout.Aligment.CenterCenter);
+                }
+                
                 var name = this._f.data.at("name");
-                this._labelModel.data = name || "";
+                this._labelModel.setData(name || "");
                 this._labelView = new Label(this._labelModel);
                 this._labelView.on("changeLimits", this._onLabelChangeLimits, this);
                 this.append(this._labelView, Layout.Aligment.CenterCenter);
@@ -65,15 +75,31 @@
                 this.setMinSize(label._o.minWidth, this._h);
             },
             "_onNewElement": function(key, value) {
-                if (key === "name") {
-                    this._labelModel.data = value.toString();
-                    this._labelModel.trigger("data");
+                switch (key) {
+                    case "name":
+                        this._labelModel.setData(value.toString());
+                        break;
+                    case "image":
+                        this._image = new Image(this._f.image);
+                        this.append(this._image, Layout.Aligment.LeftTop, 0);
+                        break;
                 }
             },
             "_onRemoveElement": function(key) {
-                if (key === "name") {
-                    this._labelModel.data = "";
-                    this._labelModel.trigger("data");
+                switch (key) {
+                    case "name":
+                        this._labelModel.setData("");
+                        break;
+                    case "image":
+                        this._image.destructor();
+                        break;
+                }
+            },
+            "setSize": function(w, h) {
+                Layout.fn.setSize.call(this, w, h);
+                
+                if (this._f.hasImage()) {
+                    this._image.setSize(w, h);
                 }
             }
         });

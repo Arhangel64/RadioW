@@ -1,6 +1,6 @@
 "use strict";
 var List = require("./list");
-var Vocabulary = require("./vocabulary");
+var ImagePane = require("./imagePane");
 
 var Address = require("../wType/address");
 
@@ -17,7 +17,7 @@ var PanesList = List.inherit({
         List.fn.addElement.call(this, element);
         
         if (size >= this._subscriptionStart && size < this._subscriptionEnd) {
-            var controller = new Vocabulary(this._pairAddress["+"](new Address([element.toString()])));
+            var controller = new ImagePane(this._pairAddress["+"](new Address([element.toString()])));
             this.addController(controller);
         }
     },
@@ -46,7 +46,7 @@ var PanesList = List.inherit({
                     } else {
                         var limit = Math.min(os, e) - s;
                         for (var i = 0; i < limit; ++i) {
-                            var ctrl = new Vocabulary(this._pairAddress["+"](new Address([this.data.at(i + s).toString()])));
+                            var ctrl = new ImagePane(this._pairAddress["+"](new Address([this.data.at(i + s).toString()])));
                             this.addController(ctrl, i);
                         }
                     }
@@ -58,7 +58,7 @@ var PanesList = List.inherit({
                         var start = Math.max(s, oe);
                         var amount = ce - start;    //it can be negative, it's fine
                         for (var i = 0; i < amount; ++i) {
-                            var ctrl = new Vocabulary(this._pairAddress["+"](new Address([this.data.at(start + i).toString()])));
+                            var ctrl = new ImagePane(this._pairAddress["+"](new Address([this.data.at(start + i).toString()])));
                             this.addController(ctrl);
                         }
                     } else if (ce < coe) {

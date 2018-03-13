@@ -6,15 +6,17 @@ W::Blob::Blob():
     W::Object(),
     hasData(false),
     dataSize(0),
-    data(0)
+    data(0),
+    qDataView()
 {
 }
 
-W::Blob::Blob(uint32_t size, char* data):
+W::Blob::Blob(uint32_t size, char* p_data):
     W::Object(),
     hasData(true),
     dataSize(size),
-    data(new char[size])
+    data(p_data),
+    qDataView(QByteArray::fromRawData(p_data, size))
 {
 }
 
@@ -22,11 +24,13 @@ W::Blob::Blob(const W::Blob& original):
     W::Object(),
     hasData(original.data),
     dataSize(original.dataSize),
-    data(0)
+    data(0),
+    qDataView()
 {
     if (hasData) {
         data = new char[dataSize];
         std::copy(original.data, original.data + dataSize, data);
+        qDataView = QByteArray::fromRawData(data, dataSize);
     }
 }
 
@@ -43,12 +47,14 @@ W::Blob & W::Blob::operator=(const W::Blob& original)
     {
         if (hasData) {
             delete [] data;
+            qDataView = QByteArray();
         }
         hasData = original.hasData;
         dataSize = original.dataSize;
         if (hasData) {
             data = new char[dataSize];
             std::copy(original.data, original.data + dataSize, data);
+            qDataView = QByteArray::fromRawData(data, dataSize);
         }
     }
     return *this;
@@ -81,6 +87,7 @@ void W::Blob::deserialize(W::ByteArray& in)
 {
     if (hasData) {
         delete [] data;
+        qDataView = QByteArray();
     }
     
     dataSize = popSize(in);
@@ -90,6 +97,7 @@ void W::Blob::deserialize(W::ByteArray& in)
         for (uint32_t i = 0; i < dataSize; ++i) {
             data[i] = in.pop();
         }
+        qDataView = QByteArray::fromRawData(data, dataSize);
     } else {
         hasData = false;
     }
@@ -125,3 +133,9 @@ bool W::Blob::operator==(const W::Object& other) const
         return false;
     }
 }
+
+const QByteArray & W::Blob::byteArray() const
+{
+    return qDataView;
+}
+

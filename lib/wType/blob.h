@@ -2,6 +2,7 @@
 #define BLOB_H
 
 #include "object.h"
+#include <QtCore/QByteArray>
 
 namespace W
 {
@@ -9,7 +10,7 @@ namespace W
     {
     public:
         Blob();
-        Blob(uint32_t size, char* data);
+        Blob(uint32_t size, char* p_data);
         Blob(const Blob& original);
         ~Blob();
         
@@ -30,10 +31,13 @@ namespace W
         
         static const objectType type = blob;
         
+        const QByteArray& byteArray() const;
+        
     protected:
         bool hasData;
         uint32_t dataSize;
         char* data;
+        QByteArray qDataView;
         
     };
 }

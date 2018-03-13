@@ -7,6 +7,7 @@ var Address = require("./address");
 var Boolean = require("./boolean");
 var Event = require("./event");
 var Vector = require("./vector");
+var Blob = require("./blob");
 
 var ByteArray = Object.inherit({
     "className": "ByteArray",
@@ -23,6 +24,7 @@ var ByteArray = Object.inherit({
         }
         
         this._data = arr || [];
+        this._index = 0;
     },
     "<<": function(obj) {
         if (!(obj instanceof Object)) {
@@ -57,6 +59,9 @@ var ByteArray = Object.inherit({
             case Object.objectType.Vector:
                 Type = Vector;
                 break;
+            case Object.objectType.Blob:
+                Type = Blob;
+                break;
             default:
                 throw new Error("Unsupported data type found during deserialization: " + type);
         }
@@ -67,7 +72,7 @@ var ByteArray = Object.inherit({
         return obj;
     },
     "size": function() {
-        return this._data.length;
+        return this._data.length - this._index;
     },
     "push": function(int) {
         
@@ -78,7 +83,8 @@ var ByteArray = Object.inherit({
         this._data.push(int);
     },
     "pop": function() {
-        return this._data.shift();
+        return this._data[this._index++];
+        
     },
     "toArrayBuffer": function() {
         var uarr = new Uint8Array(this._data);

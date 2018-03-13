@@ -11,6 +11,15 @@ var Blob = Object.inherit({
         this._data = data;
         this._additionalSize = addSize || 0;
     },
+    "base64": function() {
+        var arr = new Uint8Array(this._data);
+        var bin = "";
+        for (var i = 0; i < arr.length; ++i) {
+            bin += String.fromCharCode(arr[i]);
+        }
+        
+        return btoa(bin);
+    },
     "clone": function() {
         var clone = new Blob(this._data.slice(0), this._additionalSize);
         
@@ -44,4 +53,4 @@ var Blob = Object.inherit({
     }
 });
 
-module.exports = File;
+module.exports = Blob;

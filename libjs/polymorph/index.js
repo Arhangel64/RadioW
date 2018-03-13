@@ -1,6 +1,7 @@
 "use strict";
 var fs = require("fs");
 var DepResolver = require("./depresolver");
+var pathCheck = require("./pathCheck");
 
 var path = process.argv[2];
 var target = process.argv[3];
@@ -61,9 +62,14 @@ fs.readFile(path, function(err, buffer) {
     } else {
         output = file;
     }
-    fs.writeFile(target, output, function(err) {
+    var p = target.split("/");
+    p[1] = "/" + p[1]
+    pathCheck(p.slice(1, -1), function(err) {
         if (err) throw err;
-        process.exit(0);
-    });
+        fs.writeFile(target, output, function(err) {
+            if (err) throw err;
+                     process.exit(0);
+        });
+    })
 })
 

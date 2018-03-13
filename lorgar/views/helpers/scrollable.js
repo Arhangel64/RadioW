@@ -83,6 +83,9 @@
                     onMouseWheel: this._onMouseWheel.bind(this)
                 };
             },
+            "insertBefore": function(e, other) {
+                this._e.insertBefore(e, other);
+            },
             "maximizeMinSize": function(child) {
                 var width = Math.max(this._o.minWidth, child._o.minWidth);
                 var height = Math.max(this._o.minHeight, child._o.minHeight);

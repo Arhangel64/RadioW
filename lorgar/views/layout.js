@@ -52,15 +52,23 @@
                 }
                 child.remove();
                 if (this._o.scrollable) {
-                    this._scr.appendChild(child._e);
+                    if (index === undefined || this._c[index + 1] === undefined) {
+                        this._scr.appendChild(child._e);
+                    } else {
+                        this._scr.insertBefore(child._e, this._c[index + 1].c._e);
+                    }
                 } else {
-                    this._e.appendChild(child._e);
+                    if (index === undefined || this._c[index + 1] === undefined) {
+                        this._e.appendChild(child._e);
+                    } else {
+                        this._e.insertBefore(child._e, this._c[index + 1].c._e);
+                    }
                 }
                 child._p = this;
                 child.on("changeLimits", this._onChildChangeLimits, this);
             },
-            "append": function(child, aligment) {
-                this._addChild(child, aligment)
+            "append": function(child, aligment, index) {
+                this._addChild(child, aligment, index)
                 if (this._o.scrollable) {
                     this._scr.maximizeMinSize(child);
                     if (this._w !== undefined && this._h !== undefined) {

@@ -6,12 +6,14 @@ var Address = require("../wType/address");
 var String = require("../wType/string");
 var Vocabulary = require("../wType/vocabulary");
 var Event = require("../wType/event");
+var counter = 0;
 
 var Controller = Subscribable.inherit({
     "className": "Controller",
     "constructor": function(addr) {
         Subscribable.fn.constructor.call(this);
         
+        this.id = ++counter;
         this.initialized = false;
         
         this._subscribed = false;

@@ -1,4 +1,7 @@
 #include "file.h"
+#include <iostream>
+
+QMimeDatabase M::File::mimeDB;
 
 M::File::File(W::Blob* p_file, const W::Address& addr, QObject* parent):
     M::Model(addr, parent),
@@ -76,3 +79,14 @@ void M::File::h_get(const W::Event& ev)
     response(vc, W::Address({u"get"}), ev);
 }
 
+M::File * M::File::create(W::Blob* blob, const W::Address& addr, QObject* parent)
+{
+    M::File* out;
+    
+    //QMimeType mt = mimeDB.mimeTypeForData(blob->byteArray());
+    //std::cout << mt.name().toStdString() << std::endl;
+    out = new File(blob, addr, parent);
+    
+    out->initAdditional();
+    return out;
+}

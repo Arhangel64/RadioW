@@ -100,6 +100,7 @@ void Database::checkDirAndOpenEnvironment()
         throw 1;
     }
     
+    environment.set_mapsize(1UL * 1024UL * 1024UL * 1024UL);
     environment.set_max_dbs(10);
     environment.open(path.toString().c_str(), 0, 0664);
     

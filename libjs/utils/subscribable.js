@@ -7,7 +7,7 @@ var Subscribable = Class.inherit({
     "constructor": function() {
         Class.fn.constructor.call(this);
 
-        this._events = {};
+        this._events = Object.create(null);
     },
     "destructor": function() {
         this.off();
@@ -62,7 +62,7 @@ var Subscribable = Class.inherit({
                 }
             }
         } else {
-            this._events = {};
+            this._events = Object.create(null);
         }
     },
     "trigger": function() {

@@ -18,11 +18,7 @@ var ByteArray = Object.inherit({
             throw new Error("Wrong argument to construct ByteArray");
         }
         
-        if (arr instanceof Uint8Array) {
-            var raw = arr;
-            arr = Array.from(raw);
-        }
-        
+        this._referenceMode = arr instanceof Uint8Array;
         this._data = arr || [];
         this._index = 0;
     },
@@ -75,9 +71,13 @@ var ByteArray = Object.inherit({
         return this._data.length - this._index;
     },
     "push": function(int) {
-        
         if ((int < 0) || (int > 255)) {
             throw new Error("An attempt to push into byte array a number bigger than byte");
+        }
+        
+        if (this._referenceMode) {
+            this._data = Array.from(this._data);
+            this._referenceMode = false;
         }
         
         this._data.push(int);
@@ -87,7 +87,12 @@ var ByteArray = Object.inherit({
         
     },
     "toArrayBuffer": function() {
-        var uarr = new Uint8Array(this._data);
+        var uarr;
+        if (this._referenceMode) {
+            uarr = this._data;
+        } else {
+            uarr = new Uint8Array(this._data);
+        }
         
         return uarr.buffer;
     }

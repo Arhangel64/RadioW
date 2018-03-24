@@ -21,8 +21,8 @@ var Boolean = Object.inherit({
         return this._data > other._data;
     },
     "==": function(other) {
-        if (!(other instanceof Boolean)) {
-            throw new Error("Can compare Boolean only with Boolean");
+        if (this.getType() !== other.getType()) {
+            return false;
         }
         return this._data === other._data;
     },

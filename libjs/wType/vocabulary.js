@@ -15,6 +15,33 @@ var Vocabulary = Object.inherit({
         
         Object.fn.destructor.call(this);
     },
+    "==": function(other) {
+        if (this.getType() !== other.getType()) {
+            return false;
+        }
+        
+        if (this._length !== other._length) {
+            return false;
+        }
+        
+        var keysMe = this.getKeys();
+        var key;
+        var mValue;
+        var oValue;
+        
+        for (var i = 0; i < this._length; ++i) {
+            key = keysMe[i];
+            oValue = other._data[key];
+            if (oValue === undefined) {
+                return false;
+            }
+            mValue = this._data[key];
+            if (!oValue["=="](mValue)) {
+                return false;
+            }
+        }
+        return true;
+    },
     "at": function(str) {
         return this._data[str];
     },

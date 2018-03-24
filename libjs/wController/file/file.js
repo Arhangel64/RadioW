@@ -9,9 +9,9 @@ var File = Controller.inherit({
         Controller.fn.constructor.call(this, addr);
         
         this._hasData = false;
-        this._hasSize = false;
+        this._hasAdditional = false;
         this.data = null;
-        this._size = null;
+        this._additional = null;
         
         this.addHandler("get");
         this.addHandler("getAdditional");
@@ -20,15 +20,22 @@ var File = Controller.inherit({
         if (this._hasData) {
             this.data.destructor();
         }
-        if (this._hasSize) {
-            this._size.destructor();
+        if (this._hasAdditional) {
+            this._additional.destructor();
         }
         Controller.fn.destructor.call(this);
     },
-    "requestData": function() {
-        var vc = new WVocabulary();
-        
-        this.send(vc, "get");
+    "_getAdditional": function(add) {
+        var ac = !this._hasAdditional || !this._additional["=="](add);
+        if (ac && this._hasAdditional) {
+            this._additional.destructor();
+            this._additional = add.clone();
+        }
+        this._hasAdditional = true;
+        return ac;
+    },
+    "getMimeType": function() {
+        return this._additional.at("mimeType").toString();
     },
     "hasData": function() {
         return this._hasData;
@@ -48,19 +55,13 @@ var File = Controller.inherit({
     "_h_getAdditional": function(ev) {
         var ac = this._getAdditional(ev.getData());
         if (ac) {
-            this.trigger("additionalChange")
+            this.trigger("additionalChange");
         }
     },
-    "_getAdditional": function(vc) {
-        var change = this._size === null;
-        var os = this._size;
-        this._size = vc.at("size").clone();
-        this._hasSize = true;
-        if (!change) {
-            change = !(os["=="](this._size));
-        }
+    "requestData": function() {
+        var vc = new WVocabulary();
         
-        return change;
+        this.send(vc, "get");
     }
 });
 

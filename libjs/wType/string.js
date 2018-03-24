@@ -27,8 +27,8 @@ var String = Object.inherit({
         return this._data > other._data;
     },
     "==": function(other) {
-        if (!(other instanceof String)) {
-            throw new Error("Can compare String only with String");
+        if (this.getType() !== other.getType()) {
+            return false;
         }
         
         return this._data === other._data;

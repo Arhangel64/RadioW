@@ -36,8 +36,8 @@ var Uint64 = Object.inherit({
         }
     },
     "==": function(other) {
-        if (!(other instanceof Uint64)) {
-            throw new Error("Can compare Uint64 only with Uint64");
+        if (this.getType() !== other.getType()) {
+            return false;
         }
         return (this._h == other._h) && (this._l == other._l);
     },

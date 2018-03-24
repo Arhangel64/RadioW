@@ -11,6 +11,13 @@ var Blob = Object.inherit({
         this._data = data;
         this._additionalSize = addSize || 0;
     },
+    "==": function(other) {
+        if (this.getType() !== other.getType()) {
+            return false;
+        }
+        
+        return this.size() == other.size();         //TODO let's pretend one shall never wish to compare blobs) 
+    },
     "base64": function() {
         var arr = new Uint8Array(this._data);
         var bin = "";

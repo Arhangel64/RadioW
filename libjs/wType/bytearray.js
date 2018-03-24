@@ -1,4 +1,5 @@
 "use strict";
+var Class = require("../utils/class");
 var Object = require("./object");
 var String = require("./string");
 var Uint64 = require("./uint64");
@@ -9,10 +10,10 @@ var Event = require("./event");
 var Vector = require("./vector");
 var Blob = require("./blob");
 
-var ByteArray = Object.inherit({
+var ByteArray = Class.inherit({
     "className": "ByteArray",
     "constructor": function(arr) {
-        Object.fn.constructor.call(this);
+        Class.fn.constructor.call(this);
         
         if ((arr !== undefined) && !(arr instanceof Array) && !(arr instanceof Uint8Array)) {
             throw new Error("Wrong argument to construct ByteArray");

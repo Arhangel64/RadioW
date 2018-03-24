@@ -25,23 +25,17 @@ M::Model::ModelType M::File::getType() const
     return type;
 }
 
-void M::File::initAdditional()
+void M::File::initAdditional(const W::String& p_mime)
 {
     additional.clear();
     
     additional.insert(u"size", new W::Uint64(file->size()));
+    additional.insert(u"mimeType", p_mime);
 }
 
 void M::File::set(const W::Object& value)
 {
-    delete file;
-    file = static_cast<W::Blob*>(value.copy());
-    
-    initAdditional();
-    
-    W::Vocabulary* vc = static_cast<W::Vocabulary*>(additional.copy());
-    
-    broadcast(vc, W::Address({u"getAdditional"}));
+    set(value.copy());
 }
 
 void M::File::set(W::Object* value)
@@ -49,7 +43,8 @@ void M::File::set(W::Object* value)
     delete file;
     file = static_cast<W::Blob*>(value);
     
-    initAdditional();
+    QMimeType mt = mimeDB.mimeTypeForData(file->byteArray());
+    initAdditional(W::String(mt.name().toStdString()));
     
     W::Vocabulary* vc = static_cast<W::Vocabulary*>(additional.copy());
     
@@ -83,10 +78,9 @@ M::File * M::File::create(W::Blob* blob, const W::Address& addr, QObject* parent
 {
     M::File* out;
     
-    //QMimeType mt = mimeDB.mimeTypeForData(blob->byteArray());
-    //std::cout << mt.name().toStdString() << std::endl;
+    QMimeType mt = mimeDB.mimeTypeForData(blob->byteArray());
     out = new File(blob, addr, parent);
     
-    out->initAdditional();
+    out->initAdditional(W::String(mt.name().toStdString()));
     return out;
 }

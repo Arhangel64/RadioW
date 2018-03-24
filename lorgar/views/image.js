@@ -22,7 +22,7 @@
             },
             "_onData": function() {
                 if (this._f.hasData()) {
-                    this._e.src = "data:image/jpeg;base64," + this._f.data.base64();
+                    this._e.src = "data:" + this._f.getMimeType() + ";base64," + this._f.data.base64();
                 }
             }
         });

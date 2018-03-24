@@ -64,8 +64,8 @@ var Address = Object.inherit({
         return this._data.length > other._data.length;
     },
     "==": function(other) {
-        if (!(other instanceof Address)) {
-            throw new Error("Can compare Address only with Address");
+        if (this.getType() !== other.getType()) {
+            return false;
         }
         
         if (this._data.length !== other._data.length) {

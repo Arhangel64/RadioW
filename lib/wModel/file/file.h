@@ -13,6 +13,7 @@
 namespace M {
     
     class File: public Model {
+    protected:
         File(W::Blob* p_file, const W::Address& addr, QObject* parent = 0);
     public:
         ~File();
@@ -26,7 +27,7 @@ namespace M {
         static File* create(W::Blob* blob, const W::Address& addr, QObject* parent = 0);
         
     protected:
-        virtual void initAdditional();
+        virtual void initAdditional(const W::String& p_mime);
         void h_subscribe(const W::Event & ev) override;
         
         handler(get);

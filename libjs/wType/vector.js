@@ -13,6 +13,27 @@ var Vector = Object.inherit({
         
         Object.fn.destructor.call(this);
     },
+    "==": function(other) {
+        if (this.getType() !== other.getType()) {
+            return false;
+        }
+        
+        if (this._data.length !== other._data.length) {
+            return false;
+        }
+        
+        var hopMe;
+        var hopOt;
+        
+        for (var i = 0; i < this._data.length; ++i) {
+            hopMe = this._data[i];
+            hopOt = other._data[i];
+            if ( !(hopMe["=="](hopOt)) ) {
+                return false;
+            }
+        }
+        return true;
+    },
     "at": function(index) {
         return this._data[index];
     },

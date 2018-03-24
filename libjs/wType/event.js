@@ -27,8 +27,8 @@ var Event = Object.inherit({
         Object.fn.destructor.call(this);
     },
     "==": function(other) {
-        if (!(other instanceof Event)) {
-            throw new Error("Can compare Event only with Event");
+        if (this.getType() !== other.getType()) {
+            return false;
         }
         return  this._destination["=="](other._destination) &&
                 this._system["=="](other._system) &&

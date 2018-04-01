@@ -57,7 +57,7 @@ W::Object::objectType W::Boolean::getType() const
     return Boolean::type;
 }
 
-W::Object::size_type W::Boolean::size() const
+W::Object::size_type W::Boolean::length() const
 {
     return 1;
 }
@@ -109,12 +109,12 @@ void W::Boolean::serialize(W::ByteArray& out) const
         val = 0;
     }
     
-    out.push(val);
+    out.push8(val);
 }
 
 void W::Boolean::deserialize(W::ByteArray& in)
 {
-    uint8_t val = in.pop();
+    uint8_t val = in.pop8();
     
     if (val == 253)
     {
@@ -138,4 +138,9 @@ bool W::Boolean::operator==(const W::Object& other) const
     } else {
         return false;
     }
+}
+
+W::Object::size_type W::Boolean::size() const
+{
+    return 1;
 }

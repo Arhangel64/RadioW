@@ -90,7 +90,7 @@ void C::Catalogue::h_get(const W::Event& ev)
     const W::Vocabulary& vc = static_cast<const W::Vocabulary&>(ev.getData());
     const W::Vector& ord = static_cast<const W::Vector&>(vc.at(u"data"));
     
-    W::Vector::size_type size = ord.size();
+    W::Vector::size_type size = ord.length();
     for (uint64_t i = 0; i < size; ++i) {
         const W::Uint64& id = static_cast<const W::Uint64&>(ord.at(i));
         addElement(id);

@@ -1,37 +1,46 @@
 #ifndef BYTEARRAY_H
 #define BYTEARRAY_H
 
-#include <list>
+#include <vector>
 #include <stdint.h>
 
 namespace W 
 {
-    class Object;
-    
     class ByteArray
     {
         friend class Socket;
-        typedef std::list<uint8_t> Container;
+        typedef std::vector<char> Container;
         
     public:
         typedef uint32_t size_type;
         
-        ByteArray();
+        ByteArray(size_type size);
         ByteArray(const ByteArray& original);
         ~ByteArray();
         
         ByteArray& operator=(const ByteArray& original);
         
-        ByteArray& operator<<(const Object& object);
-        ByteArray& operator>>(Object& object);
+        void push8(uint8_t integer);
+        void push16(uint16_t integer);
+        void push32(uint32_t integer);
+        void push64(uint64_t integer);
         
-        void push(uint8_t byte);
-        uint8_t pop();
+        uint8_t pop8();
+        uint16_t pop16();
+        uint32_t pop32();
+        uint64_t pop64();
         
         size_type size() const;
+        size_type maxSize() const;
+        bool filled() const;
+        size_type fill(const char* data, size_type size, size_type shift = 0);
+        char* getData();
         
     private:
         Container *data;
+        size_type shiftBegin;
+        size_type shiftEnd;
+        bool referenceMode;
         
     };
 }

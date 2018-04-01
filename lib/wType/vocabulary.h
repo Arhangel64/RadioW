@@ -25,6 +25,7 @@ namespace W
         
         StdStr toString() const override;
         Object* copy() const override;
+        size_type length() const override;
         size_type size() const override;
         objectType getType() const override;
         

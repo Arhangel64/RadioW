@@ -33,7 +33,7 @@ var Catalogue = Controller.inherit({
                     filter.insert(key, options.filter[key]);
                 }
             }
-            if (filter.size()) {
+            if (filter.length()) {
                 this._filter = filter;
                 this._hasFilter = true;
             } else {
@@ -100,7 +100,7 @@ var Catalogue = Controller.inherit({
         this.clear();
         
         var data = ev.getData().at("data");
-        var size = data.size();
+        var size = data.length();
         for (var i = 0; i < size; ++i) {
             this.addElement(data.at(i).clone());
         }

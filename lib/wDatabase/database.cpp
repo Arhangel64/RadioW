@@ -40,11 +40,8 @@ void Database::addIndex(const W::String& fieldName, W::Object::objectType fieldT
         lmdb::val value;
         while (cursor.get(key, value, MDB_NEXT)) {
             uint64_t iKey = *((uint64_t*) key.data());
-            W::ByteArray ba;
-            char* bdata = value.data();
-            for (std::size_t i = 0; i < value.size(); ++i) {
-                ba.push(bdata[i]);
-            }
+            W::ByteArray ba(value.size());
+            ba.fill(value.data(), value.size());
             W::Vocabulary* wVal = static_cast<W::Vocabulary*>(W::Object::fromByteArray(ba));
             
             IndexMap::const_iterator itr = indexes.find(fieldName);
@@ -66,15 +63,13 @@ uint64_t Database::addElement(const W::Vocabulary& record)
     
     elements.insert(id);
     
-    W::ByteArray ba;
-    ba << record;
-    int length = ba.size();
-    uint8_t data[length];
-    for (int i = 0; i < length; ++i) {
-        data[i] = ba.pop();
-    }
+    int size = record.size();
+    W::ByteArray ba(size + 1);
+    ba.push8(record.getType());
+    record.serialize(ba);
+    
     lmdb::val key((uint8_t*) &id, 8);
-    lmdb::val value(data, length);
+    lmdb::val value(ba.getData(), ba.size());
     lmdb::txn wTrans = lmdb::txn::begin(environment);
     dbi.put(wTrans, key, value);
     wTrans.commit();
@@ -117,11 +112,8 @@ void Database::index()
     lmdb::val value;
     while (cursor.get(key, value, MDB_NEXT)) {
         uint64_t iKey = *((uint64_t*) key.data());
-        W::ByteArray ba;
-        char* bdata = value.data();
-        for (std::size_t i = 0; i < value.size(); ++i) {
-            ba.push(bdata[i]);
-        }
+        W::ByteArray ba(value.size());
+        ba.fill(value.data(), value.size());
         W::Vocabulary* wVal = static_cast<W::Vocabulary*>(W::Object::fromByteArray(ba));
         ICatalogue::addElement(*wVal);
         
@@ -141,15 +133,11 @@ W::Vocabulary* Database::getElement(uint64_t id)
     lmdb::val value;
     
     if (dbi.get(rtxn, key, value)) {
-        W::ByteArray ba;
-        char* bdata = value.data();
-        for (std::size_t i = 0; i < value.size(); ++i) {
-            ba.push(bdata[i]);
-        }
-        
-        rtxn.abort();
+        W::ByteArray ba(value.size());
+        ba.fill(value.data(), value.size());
         
         W::Vocabulary* wVal = static_cast<W::Vocabulary*>(W::Object::fromByteArray(ba));
+        rtxn.abort();
         
         return wVal;
     } else {
@@ -221,15 +209,13 @@ void Database::modifyElement(uint64_t id, const W::Vocabulary& newValue)
     if (!opened) {
         throw 6;    //TODO
     }
-    W::ByteArray ba;
-    ba << newValue;
-    int length = ba.size();
-    uint8_t data[length];
-    for (int i = 0; i < length; ++i) {
-        data[i] = ba.pop();
-    }
+    int size = newValue.size();
+    W::ByteArray ba(size + 1);
+    
+    ba.push8(newValue.getType());
+    newValue.serialize(ba);
     lmdb::val key((uint8_t*) &id, 8);
-    lmdb::val value(data, length);
+    lmdb::val value(ba.getData(), ba.size());
     lmdb::txn wTrans = lmdb::txn::begin(environment);
     dbi.put(wTrans, key, value);
     wTrans.commit();

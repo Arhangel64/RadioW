@@ -82,7 +82,7 @@ const std::set<uint64_t> & M::ICatalogue::find(const W::String& indexName, const
 std::set<uint64_t> M::ICatalogue::find(const W::Vocabulary& value) const
 {
     W::Vector keys = value.keys();
-    int size = keys.size();
+    int size = keys.length();
     
     std::set<uint64_t> result;
     bool first = true;
@@ -103,7 +103,7 @@ std::set<uint64_t> M::ICatalogue::find(const W::Vocabulary& value) const
             std::set_intersection(copy.begin(), copy.end(), current.begin(), current.end(), std::inserter(result, result.end()));
         }
         
-        if (result.size() == 0) {
+        if (result.empty()) {
             break;
         }
     }
@@ -339,9 +339,9 @@ void M::ICatalogue::h_update(const W::Event& ev)
 void M::ICatalogue::h_subscribeMember(const W::Event& ev)
 {
     const W::Address& addr = ev.getDestination();
-    W::Address lastHops = addr << address.size();
+    W::Address lastHops = addr << address.length();
     
-    if (lastHops.size() == 2 && (lastHops.ends(W::Address{u"subscribe"}) || lastHops.ends(W::Address{u"get"}))) {
+    if (lastHops.length() == 2 && (lastHops.ends(W::Address{u"subscribe"}) || lastHops.ends(W::Address{u"get"}))) {
         W::Vocabulary* record;
         try {
             uint64_t id = lastHops.front().toUint64();
@@ -376,7 +376,7 @@ bool M::ICatalogue::match(const W::Vocabulary& value, const W::Vocabulary& filte
 {
     bool m = true;
     W::Vector keys = filter.keys();
-    for (int i = 0; i < keys.size(); ++i) {
+    for (int i = 0; i < keys.length(); ++i) {
         const W::String& key = static_cast<const W::String&>(keys.at(i));
         if (filter.at(key) != value.at(key)) {
             m = false;
@@ -412,7 +412,7 @@ uint64_t M::ICatalogue::getInsertingNeighbour(const W::Vocabulary& params, const
 {
     uint64_t bid;
     if (params.has(u"sorting")) {
-        if (allowed.size() == 0) {
+        if (allowed.empty()) {
             bid = 0;
         } else {
             const W::Vocabulary& sorting = static_cast<const W::Vocabulary&>(params.at(u"sorting"));

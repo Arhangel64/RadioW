@@ -85,10 +85,27 @@ W::Object* W::Vocabulary::copy() const
     return new Vocabulary(*this);
 }
 
-W::Object::size_type W::Vocabulary::size() const
+W::Object::size_type W::Vocabulary::length() const
 {
     return data->size();
 }
+
+W::Object::size_type W::Vocabulary::size() const
+{
+    size_type size = 4;
+    
+    Map::const_iterator itr = data->begin();
+    Map::const_iterator end = data->end();
+    
+    for (; itr != end; ++itr)
+    {
+        size += itr->first.size();
+        size += itr->second->size() + 1;
+    }
+    
+    return size;
+}
+
 
 W::Object::objectType W::Vocabulary::getType() const
 {
@@ -97,14 +114,14 @@ W::Object::objectType W::Vocabulary::getType() const
 
 void W::Vocabulary::serialize(W::ByteArray& out) const
 {
-    pushSize(out);
+    out.push32(length());
     
     Map::const_iterator itr = data->begin();
     Map::const_iterator end = data->end();
     for (; itr != end; ++itr)
     {
         itr->first.serialize(out);
-        out.push(itr->second->getType());
+        out.push8(itr->second->getType());
         itr->second->serialize(out);
     }
 }
@@ -113,7 +130,7 @@ void W::Vocabulary::deserialize(W::ByteArray& in)
 {
     data->clear();
     
-    size_type length = popSize(in);
+    size_type length = in.pop32();
     
     for (size_type i = 0; i != length; ++i)
     {

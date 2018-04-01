@@ -81,15 +81,12 @@ uint64_t ResourceCache::addResource(const W::String& path)
     
     elements.insert(id);
     
-    W::ByteArray ba;
-    ba << path;
-    int length = ba.size();
-    uint8_t data[length];
-    for (int i = 0; i < length; ++i) {
-        data[i] = ba.pop();
-    }
+    W::ByteArray ba(path.size() + 1);
+    ba.push8(path.getType());
+    path.serialize(ba);
+    
     lmdb::val key((uint8_t*) &id, 8);
-    lmdb::val value(data, length);
+    lmdb::val value(ba.getData(), ba.size());
     lmdb::txn wTrans = lmdb::txn::begin(environment);
     dbi.put(wTrans, key, value);
     wTrans.commit();
@@ -189,15 +186,11 @@ W::String * ResourceCache::getElement(uint64_t id) const
     lmdb::val value;
     
     if (lmdb::dbi_get(rtxn, dbi.handle(), key, value)) {
-        W::ByteArray ba;
-        char* bdata = value.data();
-        for (std::size_t i = 0; i < value.size(); ++i) {
-            ba.push(bdata[i]);
-        }
-        
-        rtxn.abort();
+        W::ByteArray ba(value.size());
+        ba.fill(value.data(), value.size());
         
         W::String* wVal = static_cast<W::String*>(W::Object::fromByteArray(ba));
+        rtxn.abort();
         
         return wVal;
     } else {
@@ -210,9 +203,9 @@ W::String * ResourceCache::getElement(uint64_t id) const
 void ResourceCache::h_subscribeMember(const W::Event& ev)
 {
     const W::Address& addr = ev.getDestination();
-    W::Address lastHops = addr << address.size();
+    W::Address lastHops = addr << address.length();
     
-    if (lastHops.size() == 2 && (lastHops.ends(W::Address{u"subscribe"}) 
+    if (lastHops.length() == 2 && (lastHops.ends(W::Address{u"subscribe"}) 
         || lastHops.ends(W::Address{u"get"}) 
         || lastHops.ends(W::Address{u"getAdditional"}))
     ) {

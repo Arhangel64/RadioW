@@ -70,16 +70,16 @@ W::Object::objectType W::Blob::getType() const
     return type;
 }
 
-W::Object::size_type W::Blob::size() const
+W::Object::size_type W::Blob::length() const
 {
     return dataSize;
 }
 
 void W::Blob::serialize(W::ByteArray& out) const
 {
-    pushSize(out);
+    out.push32(length());
     for (uint32_t i = 0; i < dataSize; ++i) {
-        out.push(data[i]);
+        out.push8(data[i]);
     }
 }
 
@@ -90,12 +90,12 @@ void W::Blob::deserialize(W::ByteArray& in)
         qDataView = QByteArray();
     }
     
-    dataSize = popSize(in);
+    dataSize = in.pop32();
     if (dataSize > 0) {
         hasData = true;
         data = new char[dataSize];
         for (uint32_t i = 0; i < dataSize; ++i) {
-            data[i] = in.pop();
+            data[i] = in.pop8();
         }
         qDataView = QByteArray::fromRawData(data, dataSize);
     } else {
@@ -132,6 +132,11 @@ bool W::Blob::operator==(const W::Object& other) const
     } else {
         return false;
     }
+}
+
+W::Object::size_type W::Blob::size() const
+{
+    return dataSize + 4;
 }
 
 const QByteArray & W::Blob::byteArray() const

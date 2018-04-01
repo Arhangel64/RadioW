@@ -21,7 +21,7 @@ public:
     void testStringSize() 
     {
         W::String str(u"hey!");
-        TS_ASSERT_EQUALS(str.size(), 4);
+        TS_ASSERT_EQUALS(str.length(), 4);
     }
     
     void testStringToString()
@@ -44,9 +44,16 @@ public:
     void testStringSerialization()
     {
         W::String str(u"serialization");
-        W::ByteArray bytes;
-        bytes << str;
-        TS_ASSERT_EQUALS(bytes.size(), 13*2 + 1*4 + 1);
+        int testSize = 13*2 + 4;        //16 bits for each symbol and 32 bytes for length
+        int size = str.size();
+        
+        TS_ASSERT_EQUALS(size, testSize);
+        
+        W::ByteArray bytes(size + 1);   //one more byte for type
+        bytes.push8(str.getType());
+        str.serialize(bytes);
+        
+        TS_ASSERT_EQUALS(bytes.size(), testSize + 1);
         
         W::Object *obj = W::Object::fromByteArray(bytes);
         W::String *str2 = static_cast<W::String*>(obj);
@@ -60,9 +67,16 @@ public:
     void testStringSerialization2()
     {
         W::String str(u"разве сложно сразу сделать все нормально?!");
-        W::ByteArray bytes;
-        bytes << str;
-        TS_ASSERT_EQUALS(bytes.size(), 42*2 + 1*4 + 1);
+        int testSize = 42*2 + 4;        //16 bits for each symbol and 32 bytes for length
+        int size = str.size();
+        
+        TS_ASSERT_EQUALS(size, testSize);
+        
+        W::ByteArray bytes(size + 1);       //one more byte for type
+        bytes.push8(str.getType());
+        str.serialize(bytes);
+        
+        TS_ASSERT_EQUALS(bytes.size(), testSize + 1);
         
         W::Object *obj = W::Object::fromByteArray(bytes);
         W::String *str2 = static_cast<W::String*>(obj);
@@ -77,9 +91,10 @@ public:
     void testUint64Serialization()
     {
         W::Uint64 a(895458745634);
-        W::ByteArray bytes;
+        W::ByteArray bytes(a.size() + 1);
         
-        bytes << a;
+        bytes.push8(a.getType());
+        a.serialize(bytes);
         
         TS_ASSERT_EQUALS(bytes.size(), 1 + 8);
         
@@ -95,20 +110,20 @@ public:
         W::String val1(u"bar");
         
         W::Vocabulary vc;
-        
-        W::ByteArray bytes;
-        
         vc.insert(key1, val1);
-        TS_ASSERT_EQUALS(vc.size(), 1);
+        
+        W::ByteArray bytes(vc.size() + 1);
+        TS_ASSERT_EQUALS(vc.length(), 1);
         
         TS_TRACE(vc.toString());
         
-        bytes << vc;
+        bytes.push8(vc.getType());
+        vc.serialize(bytes);
         
         W::Object* deserialized = W::Object::fromByteArray(bytes);
         W::Vocabulary* dvc = static_cast<W::Vocabulary*>(deserialized);
         
-        TS_ASSERT_EQUALS(vc.size(), dvc->size());
+        TS_ASSERT_EQUALS(vc.length(), dvc->length());
         W::String val2 = static_cast<const W::String&>(dvc->at(key1));
         TS_ASSERT_EQUALS(val2, val1);
         
@@ -120,7 +135,6 @@ public:
         W::String str2(u"bar");
         
         W::Vector vec;
-        W::ByteArray bytes;
         
         vec.push(str1);
         vec.push(str2);
@@ -128,14 +142,18 @@ public:
         vec.push(str2);
         vec.push(str1);
         
-        TS_ASSERT_EQUALS(vec.size(), 5);
+        W::ByteArray bytes(vec.size() + 1);
+        
+        TS_ASSERT_EQUALS(vec.length(), 5);
         TS_TRACE(vec.toString());
         
-        bytes << vec;
+        bytes.push8(vec.getType());
+        vec.serialize(bytes);
+        
         W::Object* deserialized = W::Object::fromByteArray(bytes);
         W::Vector* dvec = static_cast<W::Vector*>(deserialized);
         
-        TS_ASSERT_EQUALS(vec.size(), dvec->size());
+        TS_ASSERT_EQUALS(vec.length(), dvec->length());
         W::String str22 = static_cast<const W::String&>(dvec->at(3));
         
         TS_ASSERT_EQUALS(str2, str22);
@@ -198,8 +216,10 @@ public:
     {
         W::Address addr({u"hello", u"world"});
         
-        W::ByteArray bytes;
-        bytes << addr;
+        W::ByteArray bytes(addr.size() + 1);
+        
+        bytes.push8(addr.getType());
+        addr.serialize(bytes);
         
         W::Object *obj = W::Object::fromByteArray(bytes);
         W::Address *addrd = static_cast<W::Address*>(obj);
@@ -224,8 +244,19 @@ public:
         TS_ASSERT_EQUALS(c, false);
         TS_ASSERT_EQUALS(d, true);
         
-        W::ByteArray bytes;
-        bytes << a << b << c << d;
+        W::ByteArray bytes(a.size() + b.size() + c.size() + d.size() + 4);
+        
+        bytes.push8(a.getType());
+        a.serialize(bytes);
+        
+        bytes.push8(b.getType());
+        b.serialize(bytes);
+        
+        bytes.push8(c.getType());
+        c.serialize(bytes);
+        
+        bytes.push8(d.getType());
+        d.serialize(bytes);
         
         W::Object *a_o = W::Object::fromByteArray(bytes);
         W::Object *b_o = W::Object::fromByteArray(bytes);
@@ -263,9 +294,10 @@ public:
         W::Event ev(dest, dat);
         ev.setSenderId(id);
         
-        W::ByteArray bytes;
+        W::ByteArray bytes(ev.size() + 1);
         
-        bytes << ev;
+        bytes.push8(ev.getType());
+        ev.serialize(bytes);
         
         W::Object *obj = W::Object::fromByteArray(bytes);
         W::Event *evd = static_cast<W::Event*>(obj);

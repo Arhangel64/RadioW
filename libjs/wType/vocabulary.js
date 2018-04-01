@@ -66,13 +66,13 @@ var Vocabulary = Object.inherit({
     "deserialize": function(ba) {
         this.clear();
         
-        this._length = Object.pop32uint(ba);
+        this._length = ba.pop32()
         
         for (var i = 0; i < this._length; ++i) {
             var key = new String();
             key.deserialize(ba);
             
-            var value = ba[">>"]();
+            var value = Object.fromByteArray(ba);
             this._data[key.toString()] = value;
         }
     },
@@ -104,18 +104,33 @@ var Vocabulary = Object.inherit({
         
         ++this._length;
     },
+    "length": function() {
+        return this._length;
+    },
     "serialize": function(ba) {
-        Object.push32uint(this._length, ba);
+        ba.push32(this._length);
         
         for (var key in this._data) {
             var sKey = new String(key);
-            sKey.serialize(ba);
+            var value = this._data[key];
             
-            ba["<<"](this._data[key]);
+            sKey.serialize(ba);
+            ba.push8(value.getType());
+            value.serialize(ba);
         }
     },
     "size": function() {
-        return this._length;
+        var size = 4;
+        
+        for (var key in this._data) {
+            var sKey = new String(key);
+            var value = this._data[key];
+            
+            size += sKey.size();
+            size += value.size() + 1;
+        }
+        
+        return size;
     },
     "toString": function() {
         var str = "{";

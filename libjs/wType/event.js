@@ -63,7 +63,7 @@ var Event = Object.inherit({
             this._senderId.deserialize(ba);
         }
         
-        this._data = ba[">>"]();
+        this._data = Object.fromByteArray(ba);
     },
     "getData": function() {
         return this._data;
@@ -77,6 +77,9 @@ var Event = Object.inherit({
     "isSystem": function() {
         return this._system.valueOf();
     },
+    "length": function() {
+        return 2 + this._destination.length() + this._data.length();
+    },
     "serialize": function(ba) {
         this._system.serialize(ba);
         
@@ -85,13 +88,21 @@ var Event = Object.inherit({
             this._senderId.serialize(ba);
         }
         
-        ba["<<"](this._data);
+        ba.push8(this._data.getType());
+        this._data.serialize(ba);
     },
     "setSenderId": function(id) {
         if (!(id instanceof Uint64)) {
             throw new Error("Can't set id, which is not Uint64");
         }
         this._senderId = id;
+    },
+    "size": function() {
+        var size = this._system.size() + this._data.size() + 1
+        if (!this.isSystem()) {
+            size += this._senderId.size() + this._destination.size();
+        }
+        return size;
     },
     "toString": function() {
         var str = "{";

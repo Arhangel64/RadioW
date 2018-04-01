@@ -81,9 +81,9 @@ var List = Page.inherit({
     },
     "_h_subscribeMember": function(ev) {
         var dest = ev.getDestination();
-        var lastHops = dest["<<"](this._address.size());
+        var lastHops = dest["<<"](this._address.length());
         
-        if (lastHops.size() === 2) {
+        if (lastHops.length() === 2) {
             var command = lastHops.back().toString();
             var numId = parseInt(lastHops.front().toString());
             if ((command === "subscribe" || command === "get" || command === "ping") && numId === numId) {

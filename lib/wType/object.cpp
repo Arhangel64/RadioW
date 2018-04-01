@@ -21,32 +21,9 @@ W::Object::~Object()
 
 }
 
-void W::Object::pushSize(W::ByteArray& out) const
-{
-    uint32_t converted = htonl(size());
-    for (uint8_t i(0); i < 4; ++i)
-    {
-        out.push(((uint8_t*)&converted)[i]);
-    }
-}
-
-W::Object::size_type W::Object::popSize(W::ByteArray& in) const
-{
-    uint8_t src[4];
-    
-    for (uint8_t i(0); i < 4; ++i)
-    {
-        src[i] = in.pop();
-    }
-    
-    
-    
-    return ntohl(*((uint32_t*) src));
-}
-
 W::Object* W::Object::fromByteArray(ByteArray& in)
 {
-    uint32_t type = in.pop();
+    uint32_t type = in.pop8();
     
     Object *answer;
     
@@ -85,8 +62,7 @@ W::Object* W::Object::fromByteArray(ByteArray& in)
             break;
     }
     
-    in >> *answer;
-    
+    answer->deserialize(in);
     return answer;
 }
 

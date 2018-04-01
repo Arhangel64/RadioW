@@ -8,6 +8,7 @@ var String = require("../wType/string");
 var Vocabulary = require("../wType/vocabulary");
 var Uint64 = require("../wType/uint64");
 var Address = require("../wType/address");
+var factory = require("../wType/factory");
 
 var Socket = Subscribable.inherit({
     "className": "Socket",
@@ -18,10 +19,12 @@ var Socket = Subscribable.inherit({
         Subscribable.fn.constructor.call(this);
         
         this._state = DISCONNECTED;
+        this._dState = SIZE;
         this._name = name instanceof String ? name : new String(name);
         this._remoteName = new String();
         this._id = new Uint64(0);
         this._serverCreated = false;
+        this._helperBuffer = new ByteArray(4);
         
         this._initProxy();
         if (socket) {
@@ -75,14 +78,7 @@ var Socket = Subscribable.inherit({
     "_onError": function(err) {
         this.trigger("error", err);
     },
-    "_onMessage": function(msg) {
-        var raw = new ByteArray(new Uint8Array(msg));
-        var ev = raw[">>"]();
-                
-        if (!(ev instanceof Event)) {
-            throw new Error("Wrong format of websocket data");
-        }
-        
+    "_onEvent": function(ev) {
         if (ev.isSystem()) {
             var cmd = ev._data.at("command").toString();
             
@@ -115,6 +111,36 @@ var Socket = Subscribable.inherit({
         }
         ev.destructor();
     },
+    "_onMessage": function(msg) {
+        var raw = new Uint8Array(msg);
+        var i = 0;
+        
+        while (i < raw.length) {
+            switch (this._dState) {
+                case SIZE:
+                    i = this._helperBuffer.fill(raw, raw.length, i);
+                    
+                    if (this._helperBuffer.filled()) {
+                        var size = this._helperBuffer.pop32();
+                        this._helperBuffer.destructor();
+                        this._helperBuffer = new ByteArray(size + 1);
+                        this._dState = BODY;
+                    }
+                    break;
+                case BODY:
+                    i = this._helperBuffer.fill(raw, raw.length, i);
+                    
+                    if (this._helperBuffer.filled()) {
+                        var ev = factory(this._helperBuffer);
+                        this._onEvent(ev);
+                        this._helperBuffer.destructor();
+                        this._helperBuffer = new ByteArray(4);
+                        this._dState = SIZE;
+                    }
+                    break;
+            }
+        }
+    },
     "open": function(addr, port) {
         if (this._state === DISCONNECTED) {
             this._state = CONNECTING;
@@ -128,10 +154,13 @@ var Socket = Subscribable.inherit({
         }
     },
     "send": function(ev) {
-        var ba = new ByteArray();
-        ba["<<"](ev);
+        var size = ev.size();
+        var ba = new ByteArray(size + 5);
+        ba.push32(size);
+        ba.push8(ev.getType());
+        ev.serialize(ba);
         
-        this._socket.send(ba.toArrayBuffer());
+        this._socket.send(ba.data().buffer);
     },
     "_setId": function(id) {
         if (this._state === CONNECTING) {
@@ -181,5 +210,8 @@ var DISCONNECTED = 111;
 var DISCONNECTING = 110;
 var CONNECTING = 101;
 var CONNECTED = 100;
+
+var SIZE = 1
+var BODY = 10;
 
 module.exports = Socket;

@@ -40,7 +40,7 @@ void C::Vocabulary::h_get(const W::Event& ev)
     const W::Vocabulary& e_data = static_cast<const W::Vocabulary&>(vc.at(u"data"));
     
     W::Vector keys = e_data.keys();
-    int size = keys.size();
+    int size = keys.length();
     for (int i = 0; i < size; ++i) {
         const W::String& key = static_cast<const W::String&>(keys.at(i));
         _newElement(key, e_data.at(key));
@@ -57,14 +57,14 @@ void C::Vocabulary::h_change(const W::Event& ev)
     const W::Vector& erase = static_cast<const W::Vector&>(vc.at(u"erase"));
     const W::Vocabulary& insert = static_cast<const W::Vocabulary&>(vc.at(u"insert"));
     
-    int eSize = erase.size();
+    int eSize = erase.length();
     for (int i = 0; i < eSize; ++i) {
         const W::String& key = static_cast<const W::String&>(erase.at(i));
         _removeElement(key);
     }
     
     W::Vector keys = insert.keys();
-    int iSize = keys.size();
+    int iSize = keys.length();
     for (int i = 0; i < iSize; ++i) {
         const W::String& key = static_cast<const W::String&>(keys.at(i));
         _newElement(key, insert.at(key));

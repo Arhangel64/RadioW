@@ -42,7 +42,7 @@ W::Address& W::Address::operator=(const W::Address& original)
     return *this;
 }
 
-W::Object::size_type W::Address::size() const
+W::Object::size_type W::Address::length() const
 {
     return data->size();
 }
@@ -81,7 +81,7 @@ W::Object* W::Address::copy() const
 
 void W::Address::serialize(W::ByteArray& out) const
 {
-    pushSize(out);
+    out.push32(length());
     
     List::const_iterator itr;
     List::const_iterator beg = data->begin();
@@ -97,7 +97,7 @@ void W::Address::deserialize(W::ByteArray& in)
 {
     data->clear();
     
-    size_type length = popSize(in);
+    size_type length = in.pop32();
     
     for (size_type i = 0; i != length; ++i)
     {
@@ -138,7 +138,7 @@ bool W::Address::operator>=(const W::Address& other) const
 
 bool W::Address::begins(const W::Address& other) const
 {
-    if (other.size() > size())
+    if (other.length() > length())
     {
         return false;
     }
@@ -163,7 +163,7 @@ bool W::Address::begins(const W::Address& other) const
 
 bool W::Address::ends(const W::Address& other) const
 {
-    if (other.size() > size())
+    if (other.length() > length())
     {
         return false;
     }
@@ -188,7 +188,7 @@ bool W::Address::ends(const W::Address& other) const
 
 bool W::Address::contains(const W::Address& other, int position) const
 {
-    if (other.size() > size() - position)
+    if (other.length() > length() - position)
     {
         return false;
     }
@@ -236,7 +236,7 @@ W::Address& W::Address::operator+=(const W::String::u16string& other)
 W::Address W::Address::operator>>(W::Object::size_type count) const
 {
     W::Address res;
-    if (count < size())
+    if (count < length())
     { 
         List::const_iterator itr = data->end();
         for (size_type i = 0; i != count; ++i)
@@ -252,7 +252,7 @@ W::Address W::Address::operator>>(W::Object::size_type count) const
 W::Address W::Address::operator<<(W::Object::size_type count) const
 {
     W::Address res;
-    if (count < size())
+    if (count < length())
     { 
         List::const_iterator itr = data->begin();
         for (size_type i = 0; i != count; ++i)
@@ -277,6 +277,8 @@ W::Address W::Address::operator+(const W::Address& other) const
 W::Address & W::Address::operator+=(const Uint64& other)
 {
     data->push_back(String(other.toString()));
+    
+    return *this;
 }
 
 
@@ -307,4 +309,18 @@ bool W::Address::operator==(const W::Object& other) const
     } else {
         return false;
     }
+}
+
+W::Object::size_type W::Address::size() const
+{
+    size_type size = 4;
+    List::const_iterator itr = data->begin();
+    List::const_iterator end = data->end();
+    
+    for (; itr != end; ++itr)
+    {
+        size += itr->size();
+    }
+    
+    return size;
 }

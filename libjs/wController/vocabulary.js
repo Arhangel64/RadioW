@@ -37,7 +37,7 @@ var Vocabulary = Controller.inherit({
         var erase = data.at("erase");
         var insert = data.at("insert");
         
-        var eSize = erase.size();
+        var eSize = erase.length();
         for (var i = 0; i < eSize; ++i) {
             key = erase.at(i).toString();;
             this.removeElement(key);

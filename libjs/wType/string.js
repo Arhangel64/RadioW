@@ -46,26 +46,26 @@ var String = Object.inherit({
     },
     "deserialize": function(ba) {
         this.clear();
-        var size = Object.pop32uint(ba);
+        var size = ba.pop32();
         
         for (var i = 0; i < size; ++i) {
-            var h = ba.pop();
-            var l = ba.pop();
-            
-            this._data += global.String.fromCharCode((h << 8) | l);
+            var cc = ba.pop16();
+            this._data += global.String.fromCharCode(cc);
         }
     },
+    "length": function() {
+        return this._data.length;
+    },
     "serialize": function(ba) {
-        Object.push32uint(this._data.length, ba);
+        ba.push32(this._data.length);
         
         for (var i = 0; i < this._data.length; ++i) {
             var code = this._data.charCodeAt(i);
-            ba.push(code >> 8);
-            ba.push(code & 0xff);
+            ba.push16(code);
         }
     },
     "size": function() {
-        return this._data.length;
+        return this._data.length * 2 + 4;
     },
     "toString": function() {
         return this._data;

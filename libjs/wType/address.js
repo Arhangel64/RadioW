@@ -131,7 +131,7 @@ var Address = Object.inherit({
     },
     "deserialize": function(ba) {
         this.clear()
-        var length = Object.pop32uint(ba);
+        var length = ba.pop32();
         
         for (var i = 0; i < length; ++i) {
             var hop = new String();
@@ -140,14 +140,22 @@ var Address = Object.inherit({
         }
     },
     "serialize": function(ba) {
-        Object.push32uint(this._data.length, ba);
+        ba.push32(this._data.length)
         
         for (var i = 0; i < this._data.length; ++i) {
             this._data[i].serialize(ba);
         }
     },
-    "size": function() {
+    "length": function() {
         return this._data.length;
+    },
+    "size": function() {
+        var size = 4;
+        for (var i = 0; i < this._data.length; ++i) {
+            size += this._data[i].size();
+        }
+        
+        return size;
     },
     "toString": function() {
         var str = "";

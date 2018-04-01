@@ -30,7 +30,7 @@ var Boolean = Object.inherit({
         return new Boolean(this._data);
     },
     "deserialize": function(ba) {
-        var int = ba.pop();
+        var int = ba.pop8();
         
         if (int === 253) {
             this._data = true;
@@ -38,11 +38,17 @@ var Boolean = Object.inherit({
             this._data = false;
         }
     },
+    "length": function() {
+        return 1;
+    },
+    "size": function() {
+        return 1;
+    },
     "serialize": function(ba) {
         if (this._data) {
-            ba.push(253);
+            ba.push8(253);
         } else {
-            ba.push(0);
+            ba.push8(0);
         }
     },
     "toString": function() {

@@ -9,10 +9,12 @@ W::Socket::Socket(const W::String& p_name, QObject* parent):
     QObject(parent),
     serverCreated(false),
     state(disconnected_s),
+    dState(dSize),
     socket(new QWebSocket()),
     id(0),
     name(p_name),
-    remoteName()
+    remoteName(),
+    helperBuffer(new W::ByteArray(4))
 {
     socket->setParent(this);
     setHandlers();
@@ -22,10 +24,12 @@ W::Socket::Socket(const W::String& p_name, QWebSocket* p_socket, uint64_t p_id, 
     QObject(parent),
     serverCreated(true),
     state(disconnected_s),
+    dState(dSize),
     socket(p_socket),
     id(p_id),
     name(p_name),
-    remoteName()
+    remoteName(),
+    helperBuffer(new W::ByteArray(4))
 {
     socket->setParent(this);
     setHandlers();
@@ -34,6 +38,8 @@ W::Socket::Socket(const W::String& p_name, QWebSocket* p_socket, uint64_t p_id, 
 W::Socket::~Socket()
 {
     close();
+    
+    delete helperBuffer;
 }
 
 void W::Socket::open(const W::String& addr, const W::Uint64& port)
@@ -58,12 +64,15 @@ void W::Socket::close()
 void W::Socket::send(const W::Event& ev) const
 {
     //std::cout << "Sending event: " << ev.toString() << std::endl;
-    ByteArray *wba = new ByteArray();
-    *wba << ev;
-    QByteArray *ba = WtoQ(*wba);
+    W::Object::size_type size = ev.size();
+    ByteArray *wba = new ByteArray(size + 5);
+    wba->push32(size);
+    wba->push8(ev.getType());
+    ev.serialize(*wba);
+    
+    QByteArray ba = QByteArray::fromRawData(wba->getData(), wba->size());
+    socket->sendBinaryMessage(ba);
     delete wba;
-    socket->sendBinaryMessage(*ba);
-    delete ba;
 }
 
 W::Uint64 W::Socket::getId() const
@@ -90,7 +99,9 @@ void W::Socket::setHandlers() {
 
 void W::Socket::onSocketConnected()
 {
-    
+    dState = dSize;
+    delete helperBuffer;
+    helperBuffer = new W::ByteArray(4);
 }
 
 void W::Socket::onSocketDisconnected()
@@ -101,10 +112,39 @@ void W::Socket::onSocketDisconnected()
 
 void W::Socket::onBinaryMessageReceived(const QByteArray& ba)
 {
-    ByteArray *wba = QtoW(ba);
-    Event *ev = static_cast<Event*>(Object::fromByteArray(*wba));
-    delete wba;
-    
+    int i = 0;
+    while (i < ba.size()) {
+        switch (dState) {
+            case dSize:
+                i = helperBuffer->fill(ba.data(), ba.size(), i);
+                
+                if (helperBuffer->filled()) {
+                    int size = helperBuffer->pop32();
+                    delete helperBuffer;
+                    helperBuffer = new W::ByteArray(size + 1);
+                    dState = dBody;
+                }
+                break;
+            case dBody:
+                i = helperBuffer->fill(ba.data(), ba.size(), i);
+                
+                if (helperBuffer->filled()) {
+                    Event* ev = static_cast<Event*>(W::Object::fromByteArray(*helperBuffer));
+                    onEvent(ev);
+                    
+                    delete ev;
+                    
+                    delete helperBuffer;
+                    helperBuffer = new W::ByteArray(4);
+                    dState = dSize;
+                }
+                break;
+        }
+    }
+}
+
+void W::Socket::onEvent(W::Event* ev)
+{
     if (ev->isSystem()) {
         const Vocabulary& vc = static_cast<const Vocabulary&>(ev->getData());
         const String& command = static_cast<const String&>(vc.at(u"command"));
@@ -130,9 +170,8 @@ void W::Socket::onBinaryMessageReceived(const QByteArray& ba)
     } else {
         emit message(*ev);
     }
-    
-    delete ev;
 }
+
 
 void W::Socket::setId(const W::Uint64& p_id)
 {
@@ -190,37 +229,6 @@ void W::Socket::setName(const W::String& p_name)
     {
         throw ErrorNameSetting();
     }
-}
-
-
-W::ByteArray* W::Socket::QtoW(const QByteArray& in)
-{
-    ByteArray *out = new ByteArray();
-    
-    QByteArray::const_iterator itr = in.begin();
-    QByteArray::const_iterator end = in.end();
-    
-    for (;itr != end; ++itr)
-    {
-        out->data->push_back(*itr);
-    }
-    
-    return out;
-}
-
-QByteArray* W::Socket::WtoQ(const ByteArray& in)
-{
-    QByteArray *out = new QByteArray();
-    
-    ByteArray::Container::const_iterator itr = in.data->begin();
-    ByteArray::Container::const_iterator end = in.data->end();
-    
-    for (;itr != end; ++itr)
-    {
-        out->push_back(*itr);
-    }
-    
-    return out;
 }
 
 void W::Socket::cantDeliver(const W::Event& event) const

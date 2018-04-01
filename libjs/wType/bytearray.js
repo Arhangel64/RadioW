@@ -1,101 +1,105 @@
 "use strict";
 var Class = require("../utils/class");
-var Object = require("./object");
-var String = require("./string");
-var Uint64 = require("./uint64");
-var Vocabulary = require("./vocabulary");
-var Address = require("./address");
-var Boolean = require("./boolean");
-var Event = require("./event");
-var Vector = require("./vector");
-var Blob = require("./blob");
 
 var ByteArray = Class.inherit({
     "className": "ByteArray",
-    "constructor": function(arr) {
+    "constructor": function(size) {
         Class.fn.constructor.call(this);
         
-        if ((arr !== undefined) && !(arr instanceof Array) && !(arr instanceof Uint8Array)) {
-            throw new Error("Wrong argument to construct ByteArray");
-        }
-        
-        this._referenceMode = arr instanceof Uint8Array;
-        this._data = arr || [];
-        this._index = 0;
+        this._referenceMode = false;
+        this._data = new Uint8Array(size);
+        this._shiftBegin = 0;
+        this._shiftEnd = 0;
     },
-    "<<": function(obj) {
-        if (!(obj instanceof Object)) {
-            throw new Error("An attempt to serialize not a W::Object");
-        }
-        this.push(obj.getType());
-        obj.serialize(this);
-    },
-    ">>": function() {
-        var type = this.pop();
-        var Type;
-        
-        switch (type) {
-            case Object.objectType.String:
-                Type = String;
-                break;
-            case Object.objectType.Uint64:
-                Type = Uint64;
-                break;
-            case Object.objectType.Vocabulary:
-                Type = Vocabulary;
-                break;
-            case Object.objectType.Address:
-                Type = Address;
-                break;
-            case Object.objectType.Boolean:
-                Type = Boolean;
-                break;
-            case Object.objectType.Event:
-                Type = Event;
-                break;
-            case Object.objectType.Vector:
-                Type = Vector;
-                break;
-            case Object.objectType.Blob:
-                Type = Blob;
-                break;
-            default:
-                throw new Error("Unsupported data type found during deserialization: " + type);
-        }
-        
-        var obj = new Type();
-        obj.deserialize(this);
-        
-        return obj;
-    },
-    "size": function() {
-        return this._data.length - this._index;
-    },
-    "push": function(int) {
-        if ((int < 0) || (int > 255)) {
-            throw new Error("An attempt to push into byte array a number bigger than byte");
-        }
-        
+    "_checkReference": function() {
         if (this._referenceMode) {
-            this._data = Array.from(this._data);
+            var buffer = new ArrayBuffer(this._data.length - this._shiftBegin);
+            var newData = new Uint8Array(buffer);
+            newData.set(this._data, this._shiftBegin);
+            this._data = newData;
+            this._shiftBegin = 0;
             this._referenceMode = false;
         }
-        
-        this._data.push(int);
     },
-    "pop": function() {
-        return this._data[this._index++];
+    "fill": function(/*Uint8Array*/arr, /*Number*/size, /*[Number]*/shift) {
+        this._checkReference();
+        shift = shift || 0;
         
-    },
-    "toArrayBuffer": function() {
-        var uarr;
-        if (this._referenceMode) {
-            uarr = this._data;
+        if (this._shiftEnd === 0 && (this._data.length <= size - shift)) {
+            this._referenceMode = true;
+            this._data = arr.subarray(shift, this._data.length + shift);
+            this._shiftEnd = this._data.length;
+            shift += this._shiftEnd;
         } else {
-            uarr = new Uint8Array(this._data);
+            while (!this.filled() && shift < size) {
+                this._data[this._shiftEnd] = arr[shift];
+                ++shift;
+                ++this._shiftEnd;
+            }
         }
         
-        return uarr.buffer;
+        return shift;
+    },
+    "filled": function() {
+        return this._data.length === this._shiftEnd;
+    },
+    "size": function() {
+        return this._shiftEnd - this._shiftBegin;
+    },
+    "maxSize": function() {
+        return this._data.length;
+    },
+    "push8": function(int) {
+        this._checkReference();
+        
+        this._data[this._shiftEnd] = int;
+        ++this._shiftEnd;
+    },
+    "push16": function(int) {
+        var h = (int >> 8) & 0xff;
+        var l = int & 0xff;
+        
+        this.push8(h);
+        this.push8(l);
+    },
+    "push32": function(int) {
+        var hh = (int >> 24) & 0xff;
+        var hl = (int >> 16) & 0xff;
+        var lh = (int >> 8) & 0xff;
+        var ll = int & 0xff;
+        
+        this.push8(hh);
+        this.push8(hl);
+        this.push8(lh);
+        this.push8(ll);
+    },
+    "push64": function(int) {
+        
+    },
+    "pop8": function(int) {
+        var ret = this._data[this._shiftBegin];
+        ++this._shiftBegin;
+        return ret;
+    },
+    "pop16": function(int) {
+        var ret = (this.pop8() << 8);
+        ret = ret | this.pop8();
+        
+        return ret;
+    },
+    "pop32": function(int) {
+        var ret = this.pop8() << 24;
+        ret = ret | (this.pop8() << 16);
+        ret = ret | (this.pop8() << 8);
+        ret = ret | this.pop8();
+        
+        return ret;
+    },
+    "pop64": function(int) {
+        
+    },
+    "data": function() {
+        return this._data.subarray(this._shiftBegin, this._shiftEnd);
     }
 });
 

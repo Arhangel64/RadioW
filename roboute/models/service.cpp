@@ -383,7 +383,7 @@ void Service::onAddCommand(const W::String& key, const W::Object& value)
     const W::Vocabulary& args = static_cast<const W::Vocabulary&>(vc.at(u"arguments"));
     
     W::Vector keys = args.keys();
-    uint64_t size = keys.size();
+    uint64_t size = keys.length();
     for (int i = 0; i < size; ++i) {
         const W::String& name = static_cast<const W::String&>(keys.at(i));
         const W::Uint64& type = static_cast<const W::Uint64&>(args.at(name));

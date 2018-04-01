@@ -86,9 +86,23 @@ W::Object* W::Vector::copy() const
     return new Vector(*this);
 }
 
-W::Object::size_type W::Vector::size() const
+W::Object::size_type W::Vector::length() const
 {
     return data->size();
+}
+
+W::Object::size_type W::Vector::size() const
+{
+    size_type size = 4;
+    
+    Vec::const_iterator itr = data->begin();
+    Vec::const_iterator end = data->end();
+    for (; itr != end; ++itr)
+    {
+        size += (*itr)->size() + 1;
+    }
+    
+    return size;
 }
 
 W::Object::objectType W::Vector::getType() const
@@ -98,13 +112,13 @@ W::Object::objectType W::Vector::getType() const
 
 void W::Vector::serialize(W::ByteArray& out) const
 {
-    pushSize(out);
+    out.push32(length());
     
     Vec::const_iterator itr = data->begin();
     Vec::const_iterator end = data->end();
     for (; itr != end; ++itr)
     {
-        out.push((*itr)->getType());
+        out.push8((*itr)->getType());
         (*itr)->serialize(out);
     }
 }
@@ -113,7 +127,7 @@ void W::Vector::deserialize(W::ByteArray& in)
 {
     data->clear();
     
-    size_type length = popSize(in);
+    size_type length = in.pop32();
     
     for (size_type i = 0; i != length; ++i)
     {
@@ -134,7 +148,7 @@ void W::Vector::push(W::Object* value)
 
 const W::Object& W::Vector::at(uint64_t index) const
 {
-    if (index >= size()) {
+    if (index >= length()) {
         throw NoElement(index);
     }
     return *(data->at(index));

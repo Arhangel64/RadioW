@@ -56,28 +56,39 @@ var Vector = Object.inherit({
     "deserialize": function(ba) {
         this.clear();
         
-        var length = Object.pop32uint(ba);
+        var length = ba.pop32();
         
         for (var i = 0; i < length; ++i) {
-            var value = ba[">>"]();
+            var value = Object.fromByteArray(ba);
             this.push(value);
         }
     },
+    "length": function() {
+        return this._data.length;
+    },
     "push": function(value) {
         if (!(value instanceof Object)) {
-            throw new Error("An attempt to insert not a W::Object into vocabulary");
+            throw new Error("An attempt to insert not a W::Object into a vector");
         }
         this._data.push(value);
     },
     "serialize": function(ba) {
-        Object.push32uint(this._data.length, ba);
+        ba.push32(this._data.length);
         
         for (var i = 0; i < this._data.length; ++i) {
-            ba["<<"](this._data[i]);
+            var el = this._data[i];
+            ba.push8(el.getType());
+            el.serialize(ba);
         }
     },
     "size": function() {
-        return this._data.length;
+        var size = 4;
+        
+        for (var i = 0; i < this._data.length; ++i) {
+            size += this._data[i].size() + 1;
+        }
+        
+        return size;
     },
     "toString": function() {
         var str = "[";

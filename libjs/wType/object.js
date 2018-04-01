@@ -27,6 +27,12 @@ var Object = Class.inherit({
         
         return type;
     },
+    "length": function() {
+        throw new Error(this.className + " has no reimplemented method \"length\"");
+    },
+    "size": function() {
+        throw new Error(this.className + " has no reimplemented method \"size\"");
+    },
     "toString": function() {
         throw new Error(this.className + " has no reimplemented method \"toString\"");
     },
@@ -46,40 +52,19 @@ Object.objectType = {
     "Blob"      :   7
 };
 
-Object.push32uint = function(int, ba) {
-    var hh = (int >> 24) & 0xff;
-    var hl = (int >> 16) & 0xff;
-    var lh = (int >> 8) & 0xff;
-    var ll = int & 0xff;
-        
-    ba.push(hh);
-    ba.push(hl);
-    ba.push(lh);
-    ba.push(ll);
-};
-
-Object.pop32uint = function(ba) {
-    var ret = ba.pop() << 24;
-    ret = ret | (ba.pop() << 16);
-    ret = ret | (ba.pop() << 8);
-    ret = ret | ba.pop();
-        
-    return ret;
+Object.reverseObjectType = {
+    0   :   "String",
+    1   :   "Vocabulary",
+    2   :   "Uint64",
+    3   :   "Address",
+    4   :   "Boolean",
+    5   :   "Event",
+    6   :   "Vector",
+    7   :   "Blob"
 }
 
-Object.push16uint = function(int, ba) {
-    var h = (int >> 8) & 0xff;
-    var l = int & 0xff;
-    
-    ba.push(h);
-    ba.push(l);
-}
-
-Object.pop16uint = function(ba) {
-    var ret = (ba.pop() << 8);
-    ret = ret | ba.pop();
-    
-    return ret;
+Object.fromByteArray = function() {
+    throw new Error("Initialization error. Object.fromByteArray is not implemented, it implements in factory.js");
 }
 
 module.exports = Object;

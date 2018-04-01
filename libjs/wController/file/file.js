@@ -27,8 +27,10 @@ var File = Controller.inherit({
     },
     "_getAdditional": function(add) {
         var ac = !this._hasAdditional || !this._additional["=="](add);
-        if (ac && this._hasAdditional) {
-            this._additional.destructor();
+        if (ac) {
+            if (this._hasAdditional) {
+                this._additional.destructor();
+            }
             this._additional = add.clone();
         }
         this._hasAdditional = true;

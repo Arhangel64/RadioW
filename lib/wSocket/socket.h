@@ -29,6 +29,11 @@ namespace W
             connected_s
         };
         
+        enum DeserializationState {
+            dSize,
+            dBody
+        };
+        
     public:
         explicit Socket(const String& p_name, QObject* parent = 0);
         ~Socket();
@@ -51,15 +56,14 @@ namespace W
         void setRemoteName();
         void setName(const String& p_name);
         
-        static ByteArray* QtoW(const QByteArray& in);
-        static QByteArray* WtoQ(const ByteArray& in);
-        
         bool serverCreated;
         State state;
+        DeserializationState dState;
         QWebSocket *socket;
         Uint64 id;
         String name;
         String remoteName;
+        ByteArray* helperBuffer;
         
     signals:
         void connected();
@@ -77,6 +81,7 @@ namespace W
         void onSocketDisconnected();
         void onSocketError(QAbstractSocket::SocketError err);
         void onBinaryMessageReceived(const QByteArray& ba);
+        void onEvent(W::Event* ev);
         
     private:
         class ErrorIdSetting: 

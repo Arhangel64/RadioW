@@ -13,7 +13,7 @@ var PanesList = List.inherit({
         this._subscriptionEnd = Infinity;
     },
     "addElement": function(element) {
-        var size = this.data.size();
+        var size = this.data.length();
         List.fn.addElement.call(this, element);
         
         if (size >= this._subscriptionStart && size < this._subscriptionEnd) {
@@ -52,8 +52,8 @@ var PanesList = List.inherit({
                     }
                 }
                 if (needEnd) {
-                    var ce = Math.min(this.data.size(), e);
-                    var coe = Math.min(this.data.size(), oe);
+                    var ce = Math.min(this.data.length(), e);
+                    var coe = Math.min(this.data.length(), oe);
                     if (ce > coe) {
                         var start = Math.max(s, oe);
                         var amount = ce - start;    //it can be negative, it's fine

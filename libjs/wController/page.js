@@ -68,7 +68,7 @@ var Page = Controller.inherit({
         this.clear();
         
         var data = ev.getData().at("data");
-        var size = data.size();
+        var size = data.length();
         for (var i = 0; i < size; ++i) {
             this.addItem(data.at(i).clone());
         }

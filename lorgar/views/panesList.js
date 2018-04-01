@@ -131,7 +131,7 @@
                 e.c.setTop(row * this._o.nestHeight + row * this._o.verticalSpace - this._scrollShift);
             },
             "_recalculateRows": function() {
-                var rows = Math.ceil(this._f.data.size() / this._cols);
+                var rows = Math.ceil(this._f.data.length() / this._cols);
                 if (rows !== this._rows) {
                     this._rows = rows;
                     this._cachedMinH = (rows * this._o.nestHeight) + (rows - 1) * this._o.verticalSpace;

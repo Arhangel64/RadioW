@@ -4,7 +4,7 @@ var Dependency = require("./dependency");
 var DepResolver = function(options) {
     Dependency.configure(options.libDir, options.target)
     
-    this._reg1 = /(?:require\s*\((?:\"(.*)\"|\'(.*)\')\)[^;]*;)(?!\s*\/\/not\sa\sd)/g;
+    this._reg1 = /(?:require\s*\((?:\"(.*)\"|\'(.*)\')\)[^;,]*(?:[;,]|$))(?!\s*\/\/not\sa\sd)/g;
     this._reg2 = /(?:\"(.+)\"|\'(.+)\'),{0,1}(?=\s*\/\/resolve as d)/g;
 }
 

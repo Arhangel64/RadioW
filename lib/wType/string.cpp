@@ -2,7 +2,6 @@
 
 #include <codecvt>
 #include <locale>
-#include <arpa/inet.h>
 
 W::String::String():
     Object(),
@@ -73,23 +72,21 @@ W::Object::StdStr W::String::toString() const
     return result;
 }
 
-W::Object::size_type W::String::size() const
+W::Object::size_type W::String::length() const
 {
     return data->size();
 }
 
 void W::String::serialize(W::ByteArray& out) const
 {
-    pushSize(out);
+    out.push32(length());;
     
     u16string::const_iterator itr = data->begin();
     u16string::const_iterator end = data->end();
     
     for(; itr != end; ++itr) 
     {
-        uint16_t n16char = htons(*itr);
-        out.push(((uint8_t*)&n16char)[0]);
-        out.push(((uint8_t*)&n16char)[1]);
+        out.push16(*itr);
     }
 }
 
@@ -97,16 +94,11 @@ void W::String::deserialize(W::ByteArray& in)
 {
     data->clear();
     
-    size_type length = popSize(in);
+    size_type length = in.pop32();
     
     for (size_type i = 0; i != length; ++i)
     {
-        uint8_t h = in.pop();
-        uint8_t l = in.pop();
-        
-        uint8_t src[2] = {h, l};
-        
-        data->push_back(ntohs(*((uint16_t*) src)));
+        data->push_back(in.pop16());
     }
 }
 
@@ -210,3 +202,7 @@ bool W::String::operator==(const W::Object& other) const
     }
 }
 
+W::Object::size_type W::String::size() const
+{
+    return data->size() * 2 + 4;
+}

@@ -70,11 +70,11 @@ W::Object::objectType W::Event::getType() const
     return Event::type;
 }
 
-W::Object::size_type W::Event::size() const
+W::Object::size_type W::Event::length() const
 {
-    size_type my_size = 3;
-    my_size += destination.size();
-    my_size += data->size();
+    size_type my_size = 2;
+    my_size += destination.length();
+    my_size += data->length();
     return my_size;
 }
 
@@ -110,7 +110,8 @@ void W::Event::serialize(W::ByteArray& out) const
         sender.serialize(out);
     }
     
-    out << *data;
+    out.push8(data->getType());
+    data->serialize(out);
 }
 
 void W::Event::deserialize(W::ByteArray& in)
@@ -167,3 +168,12 @@ bool W::Event::operator==(const W::Object& other) const
     }
 }
 
+W::Object::size_type W::Event::size() const
+{
+    size_type sz = system.size() + data->size() + 1;
+    if (!system)
+    {
+        sz += destination.size() + sender.size();
+    }
+    return sz;
+}

@@ -46,7 +46,7 @@ var GlobalControls = List.inherit({
     "addNav": function(name, address) {
         var vc = new Vocabulary();
         
-        var model = new ModelLink(this._np._address["+"](new Address(["" + this._np._data.size()])), name, address);
+        var model = new ModelLink(this._np._address["+"](new Address(["" + this._np._data.length()])), name, address);
         model.label.addProperty("fontSize", "largeFontSize");
         model.label.addProperty("fontFamily", "largeFont");
         model.label.addProperty("color", "primaryFontColor");

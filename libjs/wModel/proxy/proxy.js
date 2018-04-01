@@ -86,9 +86,9 @@ var Proxy = Model.inherit({
             return;
         }
         var dest = ev.getDestination();
-        var lastHops = dest["<<"](this._address.size());
+        var lastHops = dest["<<"](this._address.length());
         
-        if (lastHops.size() === 2) {
+        if (lastHops.length() === 2) {
             var command = lastHops.back().toString();
             var id = lastHops[">>"](1);
             if (command === "subscribe" || command === "get") {

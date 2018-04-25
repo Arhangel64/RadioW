@@ -299,6 +299,7 @@ Model.ModelType = {
     String:     0,
     List:       1,
     Vocabulary: 2,
+    Image:      3,
     
     Attributes: 50,
     

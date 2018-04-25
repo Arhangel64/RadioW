@@ -257,7 +257,9 @@
         }
 
         View.ViewType = {
-            Label:         0,
+            Label:          0,
+           
+            Image:          3,
             
             Page:           102,
             PanesList:      104
@@ -265,6 +267,8 @@
 
         View.ReversedViewType = {
             "0":        "Label",
+           
+            "3":        "Image",
             
             "101":      "Nav",
             "102":      "Page",
@@ -275,7 +279,8 @@
             Label:          "views/label",
             Nav:            "views/nav",
             Page:           "views/page",
-            PanesList:      "views/panesList"
+            PanesList:      "views/panesList",
+            Image:          "views/image"
         };
 
         View.constructors = {};

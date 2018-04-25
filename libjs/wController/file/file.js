@@ -12,6 +12,7 @@ var File = Controller.inherit({
         this._hasAdditional = false;
         this.data = null;
         this._additional = null;
+        this._need = 0;
         
         this.addHandler("get");
         this.addHandler("getAdditional");
@@ -24,6 +25,12 @@ var File = Controller.inherit({
             this._additional.destructor();
         }
         Controller.fn.destructor.call(this);
+    },
+    "dontNeedData": function() {
+        --this._need;
+    },
+    "hasData": function() {
+        return this._hasData
     },
     "_getAdditional": function(add) {
         var ac = !this._hasAdditional || !this._additional["=="](add);
@@ -38,9 +45,6 @@ var File = Controller.inherit({
     },
     "getMimeType": function() {
         return this._additional.at("mimeType").toString();
-    },
-    "hasData": function() {
-        return this._hasData;
     },
     "_h_get": function(ev) {
         var dt = ev.getData();
@@ -60,10 +64,22 @@ var File = Controller.inherit({
             this.trigger("additionalChange");
         }
     },
-    "requestData": function() {
-        var vc = new WVocabulary();
+    "needData": function() {
+        if (this._need === 0) {
+            var vc = new WVocabulary();
+            
+            this.send(vc, "get");
+        }
+        ++this._need;
+    },
+    "subscribe": function() {
+        Controller.fn.subscribe.call(this);
         
-        this.send(vc, "get");
+        if (this._need > 0) {
+            var vc = new WVocabulary();
+            
+            this.send(vc, "get");
+        }
     }
 });
 

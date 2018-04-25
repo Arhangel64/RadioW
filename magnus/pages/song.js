@@ -2,10 +2,12 @@
 
 var TempPage = require("./tempPage");
 var String = require("../lib/wModel/string");
+var Image = require("../lib/wModel/image");
 
 var VCController = require("../lib/wController/vocabulary");
 
 var Address = require("../lib/wType/address");
+var Uint64 = require("../lib/wType/uint64");
 
 var SongPage = TempPage.inherit({
     "className": "SongPage",
@@ -18,15 +20,18 @@ var SongPage = TempPage.inherit({
         
         var header = this._header = new String(this._address["+"](new Address(["header"])), "");
         header.addProperty("fontFamily", "casualFont");
-        this.addItem(header, 0, 0, 1, 1, TempPage.Aligment.CenterTop);
+        this.addItem(header, 0, 1, 1, 1, TempPage.Aligment.CenterTop);
         
         var album = this._album = new String(this._address["+"](new Address(["album"])), "Album name");
         album.addProperty("fontFamily", "casualFont");
-        this.addItem(album, 1, 0, 1, 1, TempPage.Aligment.CenterTop);
+        this.addItem(album, 1, 1, 1, 1, TempPage.Aligment.CenterTop);
         
         var artist = this._artist = new String(this._address["+"](new Address(["artist"])), "Artist name");
         artist.addProperty("fontFamily", "casualFont");
-        this.addItem(artist, 2, 0, 1, 1, TempPage.Aligment.CenterTop);
+        this.addItem(artist, 2, 1, 1, 1, TempPage.Aligment.CenterTop);
+        
+        var image = this._image = new Image(this._address["+"](new Address(["image"])), new Uint64(0));
+        this.addItem(image, 0, 0, 3, 1, TempPage.Aligment.CenterCenter);
     },
     "destructor": function() {
         this._clearCtrls();
@@ -45,6 +50,10 @@ var SongPage = TempPage.inherit({
             case "name":
                 this._album.set(el);
                 break;
+            case "image":
+                this._image.set(el);
+                break;
+                
         }
     },
     "_onAlbumRemoveElement": function(key) {
@@ -72,6 +81,10 @@ var SongPage = TempPage.inherit({
                 this._header.set(el);
                 break;
             case "album":
+                if (this._ctrls.album) {
+                    this.trigger("serviceMessage", "an album controller reinitializes in song page, not suppose to happen!", 1);
+                    this._ctrls.album.destructor();
+                }
                 var aVC = new VCController(new Address(["albums", el.toString()]));
                 aVC.on("newElement", this._onAlbumNewElement, this);
                 aVC.on("removeElement", this._onAlbumRemoveElement, this);
@@ -80,6 +93,10 @@ var SongPage = TempPage.inherit({
                 aVC.subscribe();
                 break;
             case "artist":
+                if (this._ctrls.artist) {
+                    this.trigger("serviceMessage", "an artist controller reinitializes in song page, not suppose to happen!", 1);
+                    this._ctrls.artist.destructor();
+                }
                 var arVC = new VCController(new Address(["artists", el.toString()]));
                 arVC.on("newElement", this._onArtistNewElement, this);
                 arVC.on("removeElement", this._onArtistRemoveElement, this);

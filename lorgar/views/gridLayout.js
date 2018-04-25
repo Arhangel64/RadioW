@@ -135,6 +135,13 @@
                         }
                     }
                 }
+                
+                for (var i = 0; i < this._rows.length; ++i) {
+                    this._rows[i].max = Math.max(this._rows[i].max, this._rows[i].min);
+                }
+                for (var i = 0; i < this._cols.length; ++i) {
+                    this._cols[i].max = Math.max(this._cols[i].max, this._cols[i].min);
+                }
             },
             "refreshLay": function() {
                 var totalMaxW = 0;
@@ -256,12 +263,12 @@
                             if (positioned.indexOf(child) === -1) {
                                 var tWidth = 0;
                                 var tHeight = 0;
-                                var k;
-                                for (k = 0; k < e.colspan; ++k) {
-                                    tWidth += this._cols[j + k].cur;
+                                var s;
+                                for (s = 0; s < e.colspan; ++s) {
+                                    tWidth += this._cols[j + s].cur;
                                 }
-                                for (k = 0; k < e.rowspan; ++k) {
-                                    tHeight += this._rows[i + k].cur;
+                                for (s = 0; s < e.rowspan; ++s) {
+                                    tHeight += this._rows[i + s].cur;
                                 }
                                 child.setSize(tWidth, tHeight);
                                 

@@ -13,28 +13,11 @@ var ImagePane = Vocabulary.inherit({
         this._hasImage = false;
         this.image = null;
     },
-    "destructor": function() {
-        if (this._hasImage) {
-            this._uncyclic.push(function() {
-                this.image.destructor();
-            });
-        }
-        
-        Vocabulary.fn.destructor.call(this);
-    },
     "addElement": function(key, element) {
         if (key === "image" && !this._hasImage) {
             this._hasImage = true;
             this.image = new File(new Address(["images", element.toString()]));
-            this.image.on("serviceMessage", this._onControllerServiceMessage, this);
-            
-            if (this._registered) {
-                global.registerForeignController("Corax", this.image);
-            }
-            
-            if (this._subscribed) {
-                global.subscribeForeignController("Corax", this.image);
-            }
+            this.addForeignController("Corax", this.image);
         }
         Vocabulary.fn.addElement.call(this, key, element);
     },
@@ -45,31 +28,11 @@ var ImagePane = Vocabulary.inherit({
         Vocabulary.fn.removeElement.call(this, key);
         
         if (key === "image" && this._hasImage) {
-            if (this._subscribed) {
-                global.unsubscribeForeignController("Corax", this.image);
-            }
-            
-            if (this._registered) {
-                global.unregisterForeignController("Corax", this.image);
-            }
+            this.removeForeignController(this.image);
             
             this._hasImage = false;
             this.image.destructor();
             this.image = null;
-        }
-    },
-    "unregister": function() {
-        Vocabulary.fn.unregister.call(this);
-        
-        if (this._hasImage) {
-            global.unregisterForeignController("Corax", this.image);
-        }
-    },
-    "unsubscribe": function() {
-        Vocabulary.fn.unsubscribe.call(this);
-        
-        if (this._hasImage) {
-            global.unsubscribeForeignController("Corax", this.image);
         }
     }
 });

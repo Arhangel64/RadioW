@@ -56,7 +56,7 @@
                 
                 this._map.insert(address, view);
                 
-                this.append(view, element.row, element.col, element.rowSpan, element.colSpan, element.aligment);
+                this.append(view, element.row, element.col, element.rowspan, element.colspan, element.aligment);
             },
             "_onRemoveItem": function(address) {
                 var itr = this._map.find(address);

@@ -24,6 +24,7 @@ var Controller = Subscribable.inherit({
         this._handlers = [];
         this._controllers = [];
         this.properties = [];
+        this._foreignControllers = [];
         
         this.addHandler("properties");
     },
@@ -35,6 +36,10 @@ var Controller = Subscribable.inherit({
         }
         if (this._registered) {
             this.unregister();
+        }
+        
+        for (i = 0; i < this._foreignControllers.length; ++i) {
+            this._foreignControllers[i].c.destructor();
         }
         
         for (i = 0; i < this._controllers.length; ++i) {
@@ -68,6 +73,22 @@ var Controller = Subscribable.inherit({
             this._subscribeChildController(index);
         }
         this.trigger("newController", controller, index);
+    },
+    "addForeignController": function(nodeName, ctrl) {
+        if (!(ctrl instanceof Controller)) {
+            throw new Error("An attempt to add not a controller into " + this.className);
+        }
+        
+        this._foreignControllers.push({n: nodeName, c: ctrl});
+        ctrl.on("serviceMessage", this._onControllerServiceMessage, this);
+        
+        if (this._registered) {
+            global.registerForeignController(nodeName, ctrl);
+        }
+        
+        if (this._subscribed) {
+            global.subscribeForeignController(nodeName, ctrl);
+        }
     },
     "addHandler": function(name) {
         if (!(this["_h_" + name] instanceof Function)) {
@@ -129,6 +150,12 @@ var Controller = Subscribable.inherit({
         for (i = 0; i < this._handlers.length; ++i) {
             dp.registerHandler(this._handlers[i]);
         }
+        
+        for (i = 0; i < this._foreignControllers.length; ++i) {
+            var pair = this._foreignControllers[i]
+            global.registerForeignController(pair.n, pair.c);
+        }
+        
         this._registered = true;
     },
     "removeController": function(ctrl) {
@@ -140,6 +167,33 @@ var Controller = Subscribable.inherit({
             this._removeControllerByIndex(index);
         } else {
             throw new Error("An attempt to remove not not existing controller from " + this.className);
+        }
+    },
+    "removeForeignController": function(ctrl) {
+        if (!(ctrl instanceof Controller)) {
+            throw new Error("An attempt to remove not a controller from " + this.className);
+        }
+        for (var i = 0; i < this._foreignControllers.length; ++i) {
+            if (this._foreignControllers[i].c === ctrl) {
+                break;
+            }
+        }
+        
+        if (i === this._foreignControllers.length) {
+            throw new Error("An attempt to remove not not existing controller from " + this.className);
+        } else {
+            var pair = this._foreignControllers[i];
+            if (this._subscribed) {
+                global.unsubscribeForeignController(pair.n, pair.c);
+            }
+            
+            if (this._registered) {
+                global.registerForeignController(pair.n, pair.c);
+            }
+            
+            pair.c.off("serviceMessage", this._onControllerServiceMessage, this);
+            
+            this._foreignControllers.splice(i, 1);
         }
     },
     "_removeControllerByIndex": function(index) {
@@ -180,6 +234,11 @@ var Controller = Subscribable.inherit({
         for (var i = 0; i < this._controllers.length; ++i) {
             this._subscribeChildController(i)
         }
+        
+        for (var i = 0; i < this._foreignControllers.length; ++i) {
+            var pair = this._foreignControllers[i]
+            global.subscribeForeignController(pair.n, pair.c);
+        }
     },
     "_subscribeChildController": function(index) {
         var ctrl = this._controllers[index];
@@ -190,6 +249,11 @@ var Controller = Subscribable.inherit({
             throw new Error("Controller " + this._address.toString() + " is not registered");
         }
         var i;
+        
+        for (i = 0; i < this._foreignControllers.length; ++i) {
+            var pair = this._foreignControllers[i]
+            global.unregisterForeignController(pair.n, pair.c);
+        }
         
         for (i = 0; i < this._controllers.length; ++i) {
             this._controllers[i].unregister();
@@ -212,6 +276,11 @@ var Controller = Subscribable.inherit({
         if (this._socket.isOpened()) {
             var vc = new Vocabulary();
             this.send(vc, "unsubscribe");
+        }
+        
+        for (var i = 0; i < this._foreignControllers.length; ++i) {
+            var pair = this._foreignControllers[i]
+            global.unsubscribeForeignController(pair.n, pair.c);
         }
         
         for (var i = 0; i < this._controllers.length; ++i) {
@@ -259,6 +328,7 @@ Controller.ModelType = {
     String:         0,
     List:           1,
     Vocabulary:     2,
+    Image:          3,
     
     Attributes:     50,
     
@@ -275,6 +345,7 @@ Controller.ReversedModelType = {
     "0":        "String",
     "1":        "List",
     "2":        "Vocabulary",
+    "3":        "Image",
     
     "50":       "Attributes",
     
@@ -298,7 +369,8 @@ Controller.ModelTypesPaths = {
     PageStorage:    "./pageStorage",    //resolve as dependency
     PanesList:      "./panesList",      //resolve as dependency
     Theme:          "./theme",          //resolve as dependency
-    ThemeStorage:   "./themeStorage"    //resolve as dependency
+    ThemeStorage:   "./themeStorage",   //resolve as dependency
+    Image:          "./image"           //resolve as dependency
 };
 
 Controller.constructors = {};

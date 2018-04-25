@@ -16,9 +16,12 @@
                 var el = document.createElement("img");
                 View.fn.constructor.call(this, controller, base, el);
                 
-                if (!controller.hasData()) {
-                    controller.requestData();
-                }
+                controller.needData();
+            },
+            "destructor": function() {
+                this._f.dontNeedData();
+                
+                View.fn.destructor.call(this);
             },
             "_onData": function() {
                 if (this._f.hasData()) {

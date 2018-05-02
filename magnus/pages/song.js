@@ -51,7 +51,7 @@ var SongPage = TempPage.inherit({
                 this._album.set(el);
                 break;
             case "image":
-                this._image.set(el);
+                this._image.set(el.clone());
                 break;
                 
         }
@@ -60,6 +60,9 @@ var SongPage = TempPage.inherit({
         switch(key) {
             case "name":
                 this._album.set("unknown");
+            case "image":
+                this._image.set(new Uint64(0));
+                break;
         }
     },
     "_onArtistNewElement": function(key, el) {

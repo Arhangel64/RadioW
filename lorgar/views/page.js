@@ -66,6 +66,22 @@
                 pair.second.destructor();
                 
                 this._map.erase(itr);
+            },
+            "_setLimits": function(minWidth, minHeight, maxWidth, maxHeight) {
+                var needToTell = false;
+                if (this._o.minWidth !== minWidth) {
+                    needToTell = true;
+                    this._o.minWidth = minWidth;
+                }
+                if (this._o.minHeight !== minHeight) {
+                    needToTell = true;
+                    this._o.minHeight = minHeight;
+                }
+                if (needToTell) {
+                    this.trigger("changeLimits", this);
+                }
+                
+                return needToTell && this._events.changeLimits && this._events.changeLimits.length;     //to see if someone actually going to listen that event
             }
         });
         

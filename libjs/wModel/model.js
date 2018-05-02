@@ -300,6 +300,7 @@ Model.ModelType = {
     List:       1,
     Vocabulary: 2,
     Image:      3,
+    Model:      4,
     
     Attributes: 50,
     

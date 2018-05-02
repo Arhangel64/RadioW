@@ -329,6 +329,7 @@ Controller.ModelType = {
     List:           1,
     Vocabulary:     2,
     Image:          3,
+    Controller:     4,
     
     Attributes:     50,
     
@@ -346,6 +347,7 @@ Controller.ReversedModelType = {
     "1":        "List",
     "2":        "Vocabulary",
     "3":        "Image",
+    "4":        "Controller",
     
     "50":       "Attributes",
     
@@ -373,6 +375,8 @@ Controller.ModelTypesPaths = {
     Image:          "./image"           //resolve as dependency
 };
 
-Controller.constructors = {};
+Controller.constructors = {
+    Controller: Controller
+};
 
 module.exports = Controller;

@@ -99,154 +99,10 @@
                 this._rows = [{}];
             },
             "_onChildChangeLimits": function() {
-                this._recountLimits();
-                this.refreshLay();
-            },
-            "_recountLimits": function() {
-                this._cols = [];
-                this._rows = [];
-                
-                for (var i = 0; i < this._lay.length; ++i) {
-                    while (!this._rows[i]) {
-                        this._rows.push({});
-                    }
-                    for (var j = 0; j < this._lay[i].length; ++j) {
-                        while (!this._cols[j]) {
-                            this._cols.push({});
-                        }
-                        for (var k = 0; k < this._lay[i][j].length; ++k) {
-                            var e = this._lay[i][j][k];
-                            
-                            var colMinW = this._cols[j].min || 0;
-                            var rowMinH = this._rows[i].min || 0;
-                            var colMaxW = this._cols[j].max || Infinity;
-                            var rowMaxH = this._rows[i].max || Infinity;
-                            
-                            this._cols[j].min = Math.max(colMinW, e.child._o.minWidth / e.colspan);
-                            this._rows[i].min = Math.max(rowMinH, e.child._o.minHeight / e.rowspan);
-                            this._cols[j].max = Math.min(colMaxW, e.child._o.maxWidth * e.colspan);
-                            this._rows[i].max = Math.min(rowMaxH, e.child._o.maxHeight * e.rowspan);
-                        }
-                        if (!this._lay[i][j].length) {
-                            this._cols[j].min = this._cols[j].min || 0;
-                            this._rows[i].min = this._rows[i].min || 0;
-                            this._cols[j].max = this._cols[j].max || 0;
-                            this._rows[i].max = this._rows[i].max || 0;
-                        }
-                    }
+                var notification = this._recountLimits();
+                if (!notification) {
+                    this.refreshLay();
                 }
-                
-                for (var i = 0; i < this._rows.length; ++i) {
-                    this._rows[i].max = Math.max(this._rows[i].max, this._rows[i].min);
-                }
-                for (var i = 0; i < this._cols.length; ++i) {
-                    this._cols[i].max = Math.max(this._cols[i].max, this._cols[i].min);
-                }
-            },
-            "refreshLay": function() {
-                var totalMaxW = 0;
-                var totalMaxH = 0;
-                var totalMinW = 0;
-                var totalMinH = 0;
-                var i;
-                
-                for (i = 0; i < this._cols.length; ++i) {
-                    totalMaxW += this._cols[i].max;
-                    totalMinW += this._cols[i].min
-                }
-                for (i = 0; i < this._rows.length; ++i) {
-                    totalMaxH += this._rows[i].max;
-                    totalMinH += this._rows[i].min;
-                }
-                
-                if (this._w <= totalMinW || this._w >= totalMaxW) {
-                    var kW;
-                    var keyW;
-                    if (this._w <= totalMinW) {
-                        kW = this._w / totalMinW;
-                        keyW = "min";
-                    } else {
-                        kW = this._w / totalMaxW;
-                        keyW = "max";
-                    }
-                    
-                    for (i = 0; i < this._cols.length; ++i) {
-                        this._cols[i].cur = this._cols[i][keyW] * kW;
-                    }
-                } else {
-                    var restW = this._w;
-                    var cWMax = this._cols.slice();
-                    var cWMin = this._cols.slice();
-                    
-                    cWMax.sort(GridLayout._candidatesSortMax);
-                    cWMin.sort(GridLayout._candidatesSortMin);
-                    
-                    while (restW) {
-                        var portionW = restW / cWMin.length;
-                        
-                        if (portionW < cWMin[0].min) {
-                            cWMin[0].cur = cWMin[0].min;
-                            restW -= cWMin[0].min;
-                            cWMax.splice(cWMax.indexOf(cWMin[0]), 1);
-                            cWMin.shift();
-                        } else if (portionW > cWMax[0].max) {
-                            cWMax[0].cur = cWMax[0].max;
-                            restW -= cWMax[0].max;
-                            cWMin.splice(cWMin.indexOf(cWMax[0]), 1);
-                            cWMax.shift();
-                        } else {
-                            for (i = 0; i < cWMin.length; ++i) {
-                                cWMin[i].cur = portionW;
-                            }
-                            restW = 0;
-                        }
-                    }
-                }
-                
-                if (this._h <= totalMinH || this._w >= totalMaxH) {
-                    var kH;
-                    var keyH;
-                    if (this._h <= totalMinH) {
-                        kH = this._h / totalMinH;
-                        keyH = "min";
-                    } else {
-                        kH = this._h / totalMaxH;
-                        keyH = "max";
-                    }
-                    
-                    for (i = 0; i < this._rows.length; ++i) {
-                        this._rows[i].cur = this._rows[i][keyH] * kH;
-                    }
-                } else {
-                    var restH = this._h;
-                    var cHMax = this._rows.slice();
-                    var cHMin = this._rows.slice();
-                    
-                    cHMax.sort(GridLayout._candidatesSortMax);
-                    cHMin.sort(GridLayout._candidatesSortMin);
-                    
-                    while (restH) {
-                        var portionH = restH / cHMin.length;
-                        
-                        if (portionH < cHMin[0].min) {
-                            cHMin[0].cur = cHMin[0].min;
-                            restH -= cHMin[0].min;
-                            cHMax.splice(cHMax.indexOf(cHMin[0]), 1);
-                            cHMin.shift();
-                        } else if (portionH > cHMax[0].max) {
-                            cHMax[0].cur = cHMax[0].max;
-                            restH -= cHMax[0].max;
-                            cHMin.splice(cHMin.indexOf(cHMax[0]), 1);
-                            cHMax.shift();
-                        } else {
-                            for (i = 0; i < cHMin.length; ++i) {
-                                cHMin[i].cur = portionH;
-                            }
-                            restH = 0;
-                        }
-                    }
-                }
-                this._positionElements();
             },
             "_positionElements": function() {
                 var shiftW = 0;
@@ -309,7 +165,7 @@
                                         child.setTop(shiftH + (tHeight - child._h));
                                         child.setLeft(shiftW + (tWidth - child._h));
                                         break;
-                                    
+                                        
                                 }
                                 positioned.push(child);
                             }
@@ -318,6 +174,195 @@
                     }
                     shiftH += this._rows[i].cur;
                 }
+            },
+            "_recountLimits": function() {
+                this._cols = [];
+                this._rows = [];
+                var i, j;
+                var multiCols = [];
+                var multiRows = [];
+                var proccessed = Object.create(null);
+                
+                for (i = 0; i < this._lay.length; ++i) {
+                    while (!this._rows[i]) {
+                        this._rows.push({});
+                    }
+                    for (j = 0; j < this._lay[i].length; ++j) {
+                        while (!this._cols[j]) {
+                            this._cols.push({});
+                        }
+                        for (var k = 0; k < this._lay[i][j].length; ++k) {
+                            var e = this._lay[i][j][k];
+                            
+                            if (proccessed[e.child._id]) {
+                                this._cols[j].min = this._cols[j].min || 0;
+                                this._rows[i].min = this._rows[i].min || 0;
+                                this._cols[j].max = this._cols[j].max || 0;
+                                this._rows[i].max = this._rows[i].max || 0;
+                                continue;
+                            }
+                            
+                            var colMinW = this._cols[j].min || 0;
+                            var rowMinH = this._rows[i].min || 0;
+                            var colMaxW = this._cols[j].max || Infinity;
+                            var rowMaxH = this._rows[i].max || Infinity;
+                            
+                            if (e.colspan === 1) {
+                                this._cols[j].min = Math.max(colMinW, e.child._o.minWidth);
+                                this._cols[j].max = Math.min(colMaxW, e.child._o.maxWidth);
+                            } else {
+                                this._cols[j].min = colMinW;
+                                this._cols[j].max = colMaxW;
+                                
+                                multiCols.push({
+                                    p: j,
+                                    e: e
+                                });
+                            }
+                            if (e.rowspan === 1) {
+                                this._rows[i].min = Math.max(rowMinH, e.child._o.minHeight);
+                                this._rows[i].max = Math.min(rowMaxH, e.child._o.maxHeight);
+                            } else {
+                                this._rows[i].min = rowMinH;
+                                this._rows[i].max = rowMaxH;
+                                
+                                multiRows.push({
+                                    p: i,
+                                    e: e
+                                });
+                            }
+                            
+                            proccessed[e.child._id] = true;
+                        }
+                        if (!this._lay[i][j].length) {
+                            this._cols[j].min = this._cols[j].min || 0;
+                            this._rows[i].min = this._rows[i].min || 0;
+                            this._cols[j].max = this._cols[j].max || 0;
+                            this._rows[i].max = this._rows[i].max || 0;
+                        }
+                    }
+                }
+                
+                for (i = 0; i < multiCols.length; ++i) {
+                    var e = multiCols[i].e;
+                    var pos = multiCols[i].p;
+                    var span = e.colspan;
+                    var target = pos + span;
+                    var minSize = 0;
+                    var maxSize = 0;
+                    for (j = pos; j < target; ++j) {
+                        minSize += this._cols[j].min;
+                        maxSize += this._cols[j].max;
+                    }
+                    if (e.child._o.minWidth > minSize) {
+                        var portion = (e.child._o.minWidth - minSize) / span;
+                        for (j = pos; j < target; ++j) {
+                            this._cols[j].min += portion;
+                        }
+                    }
+                    if (e.child._o.maxWidth < maxSize) {
+                        var portion = (maxSize - e.child._o.maxWidth) / span;
+                        for (j = pos; j < target; ++j) {
+                            this._cols[j].max -= portion;
+                        }
+                    }
+                }
+                
+                for (i = 0; i < multiRows.length; ++i) {
+                    var e = multiRows[i].e;
+                    var pos = multiRows[i].p;
+                    var span = e.rowspan;
+                    var target = pos + span;
+                    var minSize = 0;
+                    var maxSize = 0;
+                    for (j = pos; j < target; ++j) {
+                        minSize += this._rows[j].min;
+                        maxSize += this._rows[j].max;
+                    }
+                    if (e.child._o.minHeight > minSize) {
+                        var portion = (e.child._o.minHeight - minSize) / span;
+                        for (j = pos; j < target; ++j) {
+                            this._rows[j].min += portion;
+                        }
+                    }
+                    if (e.child._o.maxHeight < maxSize) {
+                        var portion = (maxSize - e.child._o.maxHeight) / span;
+                        for (j = pos; j < target; ++j) {
+                            this._rows[j].max -= portion;
+                        }
+                    }
+                }
+                
+                var minWidth = 0;
+                var minHeight = 0;
+                var maxWidth = 0;
+                var maxHeight = 0;
+                
+                for (i = 0; i < this._rows.length; ++i) {
+                    minHeight += this._rows[i].min;
+                    this._rows[i].max = Math.max(this._rows[i].max, this._rows[i].min);
+                    maxHeight += this._rows[i].max;
+                }
+                for (i = 0; i < this._cols.length; ++i) {
+                    minWidth += this._cols[i].min;
+                    this._cols[i].max = Math.max(this._cols[i].max, this._cols[i].min);
+                    maxWidth += this._cols[i].max;
+                }
+                
+                return this._setLimits(minWidth, minHeight, maxWidth, maxHeight);
+            },
+            "refreshLay": function() {
+                var totalMaxW = 0;
+                var totalMaxH = 0;
+                var totalMinW = 0;
+                var totalMinH = 0;
+                var i;
+                
+                for (i = 0; i < this._cols.length; ++i) {
+                    totalMaxW += this._cols[i].max;
+                    totalMinW += this._cols[i].min
+                }
+                for (i = 0; i < this._rows.length; ++i) {
+                    totalMaxH += this._rows[i].max;
+                    totalMinH += this._rows[i].min;
+                }
+                
+                if (this._w <= totalMinW || this._w >= totalMaxW) {
+                    var kW;
+                    var keyW;
+                    if (this._w <= totalMinW) {
+                        kW = this._w / totalMinW;
+                        keyW = "min";
+                    } else {
+                        kW = this._w / totalMaxW;
+                        keyW = "max";
+                    }
+                    
+                    for (i = 0; i < this._cols.length; ++i) {
+                        this._cols[i].cur = this._cols[i][keyW] * kW;
+                    }
+                } else {
+                    distribute(this._w, this._cols);
+                }
+                
+                if (this._h <= totalMinH || this._h >= totalMaxH) {
+                    var kH;
+                    var keyH;
+                    if (this._h <= totalMinH) {
+                        kH = this._h / totalMinH;
+                        keyH = "min";
+                    } else {
+                        kH = this._h / totalMaxH;
+                        keyH = "max";
+                    }
+                    
+                    for (i = 0; i < this._rows.length; ++i) {
+                        this._rows[i].cur = this._rows[i][keyH] * kH;
+                    }
+                } else {
+                    distribute(this._h, this._rows);
+                }
+                this._positionElements();
             },
             "removeChild": function(child) {
                 Layout.fn.removeChild.call(this, child);
@@ -345,11 +390,45 @@
             }
         });
         
-        GridLayout._candidatesSortMin = function(a, b) {
-            return b.min - a.min;
+        function distribute (size, array) {
+            var i, portion;
+            var cMax = [];
+            for (i = 0; i < array.length; ++i) {
+                array[i].cur = array[i].min;
+                size -= array[i].min;
+                
+                if (array[i].cur < array[i].max) {
+                    cMax.push(array[i]);
+                }
+            }
+            cMax.sort(GridLayout._candidatesSortMax);
+            
+            while (cMax.length && size) {
+                portion = size / cMax.length;
+                var last = cMax[cMax.length -1];
+                
+                if (portion >= last.max) {
+                    size -= last.max - last.cur;
+                    last.cur = last.max;
+                    cMax.pop();
+                } else {
+                    for (i = 0; i < cMax.length; ++i) {
+                        cMax[i].cur += portion;
+                    }
+                    size = 0;
+                }
+            }
+            
+            if (size) {
+                portion = size / array.length;
+                for (i = 0; i < array.length; ++i) {
+                    array.cur += portion;
+                }
+            }
         }
+        
         GridLayout._candidatesSortMax = function(a, b) {
-            return a.max - b.max;
+            return b.max - a.max;
         }
         
         return GridLayout;

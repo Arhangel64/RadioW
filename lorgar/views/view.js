@@ -111,6 +111,7 @@
                 this._e.style.left = "0";
                 this._e.style.boxSizing = "border-box";
                 this._e.style.overflow = "hidden";
+                this._e.id = this._id;
             },
             "_onAddProperty": function(key, propertyName) {
                 var value = View.theme[key];
@@ -169,6 +170,30 @@
             "setLeft": function(l) {
                 this._x = l;
                 this._e.style.left = this._x + "px";
+            },
+            "_setLimits": function(minWidth, minHeight, maxWidth, maxHeight) {
+                var needToTell = false;
+                if (this._o.minWidth !== minWidth) {
+                    needToTell = true;
+                    this._o.minWidth = minWidth;
+                }
+                if (this._o.maxWidth !== maxWidth) {
+                    needToTell = true;
+                    this._o.maxWidth = maxWidth;
+                }
+                if (this._o.minHeight !== minHeight) {
+                    needToTell = true;
+                    this._o.minHeight = minHeight;
+                }
+                if (this._o.maxHeight !== maxHeight) {
+                    needToTell = true;
+                    this._o.maxHeight = maxHeight;
+                }
+                if (needToTell) {
+                    this.trigger("changeLimits", this);
+                }
+                
+                return needToTell && this._events.changeLimits && this._events.changeLimits.length;     //to see if someone actually going to listen that event
             },
             "setMaxSize": function(w, h) {
                 this._o.maxWidth = w;
@@ -260,6 +285,7 @@
             Label:          0,
            
             Image:          3,
+            View:           4,
             
             Page:           102,
             PanesList:      104
@@ -269,6 +295,7 @@
             "0":        "Label",
            
             "3":        "Image",
+            "4":        "View",
             
             "101":      "Nav",
             "102":      "Page",
@@ -283,7 +310,9 @@
             Image:          "views/image"
         };
 
-        View.constructors = {};
+        View.constructors = {
+            View: View
+        };
         
         
         return View;

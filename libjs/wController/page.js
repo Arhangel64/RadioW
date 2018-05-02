@@ -106,7 +106,7 @@ Page.deserializeOptions = function(vc) {
         
         if (value instanceof Vocabulary) {
             value = this.deserializeOptions(value);
-        } else if(value instanceof Address) {
+        } else if(value instanceof Address) {               //todo vector!
             value = value.clone();
         } else {
             value = value.valueOf();

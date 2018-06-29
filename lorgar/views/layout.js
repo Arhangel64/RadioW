@@ -76,8 +76,12 @@
                     }
                 }
                 
+                
                 if (this._w !== undefined && this._h !== undefined) {
                     child.setSize(this._w, this._h);
+                    index = index || this._c.length - 1;
+                    var c = this._c[index];
+                    this._positionElement(c);
                 }
             },
             "clear": function() {

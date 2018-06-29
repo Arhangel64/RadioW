@@ -23,6 +23,7 @@ set(SOURCES
 )
 
 add_executable(corax ${HEADERS} ${SOURCES})
+add_subdirectory(models)
 
 target_link_libraries(corax Qt5::Core)
 target_link_libraries(corax Qt5::Network)
@@ -36,5 +37,6 @@ target_link_libraries(corax wServerUtils)
 target_link_libraries(corax wDatabase)
 target_link_libraries(corax tag)
 target_link_libraries(corax tools)
+target_link_libraries(corax coraxModels)
 
 install(TARGETS corax RUNTIME DESTINATION bin)

@@ -14,6 +14,7 @@ set(HEADERS
     attributes.h
     icatalogue.h
     catalogue.h
+    button.h
     file/file.h
 )
 
@@ -25,6 +26,7 @@ set(SOURCES
     attributes.cpp
     icatalogue.cpp
     catalogue.cpp
+    button.cpp
     file/file.cpp
 )
 

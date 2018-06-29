@@ -13,5 +13,6 @@ configure_file(themeStorage.js themeStorage.js)
 configure_file(vocabulary.js vocabulary.js)
 configure_file(attributes.js attributes.js)
 configure_file(image.js image.js)
+configure_file(button.js button.js)
 
 add_subdirectory(proxy)

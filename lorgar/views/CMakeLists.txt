@@ -11,5 +11,6 @@ configure_file(mainLayout.js mainLayout.js)
 configure_file(page.js page.js)
 configure_file(pane.js pane.js)
 configure_file(image.js image.js)
+configure_file(button.js button.js)
 
 add_subdirectory(helpers)

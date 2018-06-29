@@ -13,5 +13,6 @@ add_jslib(wModel/themeStorage.js lib/wModel/themeStorage ${MAGNUS_DIR} node)
 add_jslib(wModel/vocabulary.js lib/wModel/vocabulary ${MAGNUS_DIR} node)
 add_jslib(wModel/attributes.js lib/wModel/attributes ${MAGNUS_DIR} node)
 add_jslib(wModel/image.js lib/wModel/image ${MAGNUS_DIR} node)
+add_jslib(wModel/button.js lib/wModel/button ${MAGNUS_DIR} node)
 
 add_subdirectory(proxy)

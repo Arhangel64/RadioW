@@ -29,6 +29,9 @@ namespace M {
             list,
             vocabulary,
             catalogue,
+            image,
+            button,
+            model,
             
             attributes = 50,
             file,

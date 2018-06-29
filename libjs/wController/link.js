@@ -10,16 +10,12 @@ var Link = Controller.inherit({
     "constructor": function(addr) {
         Controller.fn.constructor.call(this, addr);
         
-        var hop = new Address(["label"]);
-        
         this.targetAddress = new Address([]);
         this.label = new String(addr['+'](hop));
         
         this.addController(this.label);
         
         this.addHandler("get");
-        
-        hop.destructor();
     },
     "destructor": function() {
         this.targetAddress.destructor();
@@ -34,5 +30,7 @@ var Link = Controller.inherit({
         this.trigger("data", this.targetAddress);
     }
 });
+
+var hop = new Address(["label"]);
 
 module.exports = Link;

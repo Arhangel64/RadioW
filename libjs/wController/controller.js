@@ -328,8 +328,10 @@ Controller.ModelType = {
     String:         0,
     List:           1,
     Vocabulary:     2,
-    Image:          3,
-    Controller:     4,
+    Catalogue:      3,
+    Image:          4,
+    Button:         5,
+    Controller:     6,
     
     Attributes:     50,
     
@@ -346,8 +348,10 @@ Controller.ReversedModelType = {
     "0":        "String",
     "1":        "List",
     "2":        "Vocabulary",
-    "3":        "Image",
-    "4":        "Controller",
+    "3":        "Catalogue",
+    "4":        "Image",
+    "5":        "Button",
+    "6":        "Controller",
     
     "50":       "Attributes",
     
@@ -372,7 +376,9 @@ Controller.ModelTypesPaths = {
     PanesList:      "./panesList",      //resolve as dependency
     Theme:          "./theme",          //resolve as dependency
     ThemeStorage:   "./themeStorage",   //resolve as dependency
-    Image:          "./image"           //resolve as dependency
+    Image:          "./image",          //resolve as dependency
+    Button:         "./button",         //resolve as dependency
+    Catalogue:      "./catalogue"       //resolve as dependency
 };
 
 Controller.constructors = {

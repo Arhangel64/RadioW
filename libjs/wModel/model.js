@@ -299,8 +299,10 @@ Model.ModelType = {
     String:     0,
     List:       1,
     Vocabulary: 2,
-    Image:      3,
-    Model:      4,
+    //Catalogue:  3,
+    Image:      4,
+    Button:     5,
+    Model:      6,
     
     Attributes: 50,
     

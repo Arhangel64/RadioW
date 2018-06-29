@@ -17,3 +17,4 @@ add_jslib(wController/localModel.js lib/wController/localModel ${LORGAR_DIR} bro
 add_jslib(wController/imagePane.js lib/wController/imagePane ${LORGAR_DIR} browser)
 add_jslib(wController/file/file.js lib/wController/file/file ${LORGAR_DIR} browser)
 add_jslib(wController/image.js lib/wController/image ${LORGAR_DIR} browser)
+add_jslib(wController/button.js lib/wController/button ${LORGAR_DIR} browser)

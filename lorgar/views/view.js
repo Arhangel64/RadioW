@@ -191,9 +191,12 @@
                 }
                 if (needToTell) {
                     this.trigger("changeLimits", this);
+                    if (this._w !== undefined && this._h !== undefined) {
+                        this.setSize(this._w, this._h);
+                    }
                 }
                 
-                return needToTell && this._events.changeLimits && this._events.changeLimits.length;     //to see if someone actually going to listen that event
+                return needToTell && this._events.changeLimits && this._events.changeLimits.length;     //to see if someone actually going to listen that event, if not - return result
             },
             "setMaxSize": function(w, h) {
                 this._o.maxWidth = w;
@@ -284,8 +287,9 @@
         View.ViewType = {
             Label:          0,
            
-            Image:          3,
-            View:           4,
+            Image:          4,
+            Button:         5,
+            View:           6,
             
             Page:           102,
             PanesList:      104
@@ -294,8 +298,9 @@
         View.ReversedViewType = {
             "0":        "Label",
            
-            "3":        "Image",
-            "4":        "View",
+            "4":        "Image",
+            "5":        "Button",
+            "6":        "View",
             
             "101":      "Nav",
             "102":      "Page",
@@ -307,7 +312,8 @@
             Nav:            "views/nav",
             Page:           "views/page",
             PanesList:      "views/panesList",
-            Image:          "views/image"
+            Image:          "views/image",
+            Button:         "views/button"
         };
 
         View.constructors = {

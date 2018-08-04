@@ -40,6 +40,7 @@ namespace C {
         void subscribe();
         void unsubscribe();
         bool isSubscribed();
+        const W::Address& getAddress() const;
         
         void removeHandler(W::Handler* handler);
         void removeController(C::Controller* ctrl);

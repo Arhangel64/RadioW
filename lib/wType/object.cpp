@@ -102,5 +102,7 @@ W::Object::StdStr W::Object::getTypeName(W::Object::objectType type)
         case blob:
             return "Blob";
     }
+    
+    throw 5;
 }
 

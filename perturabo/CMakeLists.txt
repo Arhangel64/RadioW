@@ -25,7 +25,7 @@ target_link_libraries(perturabo wSocket)
 target_link_libraries(perturabo wDispatcher)
 target_link_libraries(perturabo utils)
 target_link_libraries(perturabo wModel)
-target_link_libraries(perturabo wServerUtils)
 target_link_libraries(perturabo wDatabase)
+target_link_libraries(perturabo wServerUtils)
 
 install(TARGETS perturabo RUNTIME DESTINATION bin)

@@ -5,12 +5,12 @@ M::Model::Model(const W::Address p_address, QObject* parent):
     address(p_address),
     registered(false),
     subscribers(new Map()),
-    dispatcher(0),
-    server(0),
+    connector(0),
     subscribersCount(0),
     handlers(new HList()),
     properties(new W::Vector()),
-    models(new MList())
+    models(new MList()),
+    controllers(new Controllers())
 {
     W::Handler* subscribe = W::Handler::create(address + W::Address({u"subscribe"}), this, &M::Model::_h_subscribe);
     W::Handler* unsubscribe = W::Handler::create(address + W::Address({u"unsubscribe"}), this, &M::Model::_h_unsubscribe);
@@ -21,7 +21,7 @@ M::Model::Model(const W::Address p_address, QObject* parent):
 M::Model::~Model()
 {
     if (registered) {
-        unregisterModel();
+        getUnregistered();
     }
     
     MList::iterator itr = models->begin();
@@ -37,11 +37,19 @@ M::Model::~Model()
     for (; hItr != hEnd; ++hItr) {
         delete *hItr;
     }
+    
+    Controllers::iterator cItr = controllers->begin();
+    Controllers::iterator cEnd = controllers->end();
+    
+    for (; cItr != cEnd; ++cItr) {
+        delete cItr->first;
+    }
 
     delete subscribers;
     delete properties;
     delete handlers;
     delete models;
+    delete controllers;
 }
 
 void M::Model::addModel(M::Model* model)
@@ -49,7 +57,7 @@ void M::Model::addModel(M::Model* model)
     models->push_back(model);
     connect(model, SIGNAL(serviceMessage(const QString&)), SIGNAL(serviceMessage(const QString&)));
     if (registered) {
-        model->registerModel(dispatcher, server);
+        model->getRegistered(connector);
     }
 }
 
@@ -57,7 +65,7 @@ void M::Model::addHandler(W::Handler* handler)
 {
     handlers->push_back(handler);
     if (registered) {
-        dispatcher->registerHandler(handler);
+        connector->registerHandler(handler);
     }
 }
 
@@ -83,21 +91,20 @@ W::Address M::Model::getAddress() const
 }
 
 
-void M::Model::registerModel(W::Dispatcher* dp, W::Server* srv)
+void M::Model::getRegistered(U::Connector* cn)
 {
     if (registered) {
         emit serviceMessage(QString("Model ") + address.toString().c_str() + " is already registered");
         throw 1;
     } else {
-        dispatcher = dp;
-        server = srv;
+        connector = cn;
         
         MList::iterator itr = models->begin();
         MList::iterator end = models->end();
         
         for (; itr != end; ++itr) {
             M::Model* model = *itr;
-            model->registerModel(dispatcher, server);
+            model->getRegistered(connector);
         }
         
         HList::iterator hItr = handlers->begin();
@@ -105,14 +112,21 @@ void M::Model::registerModel(W::Dispatcher* dp, W::Server* srv)
         
         for (; hItr != hEnd; ++hItr) {
             W::Handler* handler = *hItr;
-            dispatcher->registerHandler(handler);
+            connector->registerHandler(handler);
+        }
+        
+        Controllers::iterator cItr = controllers->begin();
+        Controllers::iterator cEnd = controllers->end();
+        
+        for (; cItr != cEnd; ++cItr) {
+            connector->registerController(cItr->first, cItr->second);
         }
         
         registered = true;
     }
 }
 
-void M::Model::unregisterModel()
+void M::Model::getUnregistered()
 {
     if (!registered) {
         emit serviceMessage(QString("Model ") + address.toString().c_str() + " is not registered");
@@ -123,7 +137,7 @@ void M::Model::unregisterModel()
         
         for (; itr != end; ++itr) {
             Model* model = *itr;
-            model->unregisterModel();
+            model->getUnregistered();
         }
         
         HList::iterator hItr = handlers->begin();
@@ -131,21 +145,27 @@ void M::Model::unregisterModel()
         
         for (; hItr != hEnd; ++hItr) {
             W::Handler* handler = *hItr;
-            dispatcher->unregisterHandler(handler);
+            connector->unregisterHandler(handler);
         }
         
         Map::iterator sItr = subscribers->begin();
         Map::iterator sEnd = subscribers->end();
         
         for (; sItr != sEnd; ++sItr) {
-            const W::Socket& socket = server->getConnection(sItr->first);
-            disconnect(&socket, SIGNAL(disconnected()), this, SLOT(onSocketDisconnected()));
+            const W::Socket* socket = connector->getConnection(sItr->first);
+            disconnect(socket, SIGNAL(disconnected()), this, SLOT(onSocketDisconnected()));
         }
         subscribers->clear();
         subscribersCount = 0;
         
-        dispatcher = 0;
-        server = 0;
+        Controllers::iterator cItr = controllers->begin();
+        Controllers::iterator cEnd = controllers->end();
+        
+        for (; cItr != cEnd; ++cItr) {
+            connector->unregisterController(cItr->first, cItr->second);
+        }
+        
+        connector = 0;
         
         registered = false;
     }
@@ -162,7 +182,6 @@ void M::Model::h_subscribe(const W::Event& ev)
         params = static_cast<const W::Vocabulary&>(vc.at(u"params"));
     }
     
-    
     Map::iterator sItr = subscribers->find(id);
     
     if (sItr == subscribers->end()) {
@@ -171,8 +190,8 @@ void M::Model::h_subscribe(const W::Event& ev)
             emit serviceMessage(QString("Model ") + address.toString().c_str() + ": something completely wrong happened");
             throw 3;
         }
-        const W::Socket& socket = server->getConnection(id);
-        connect(&socket, SIGNAL(disconnected()), this, SLOT(onSocketDisconnected()));
+        const W::Socket* socket = connector->getConnection(id);
+        connect(socket, SIGNAL(disconnected()), this, SLOT(onSocketDisconnected()));
         sItr = pair.first;
     }
     SMap::const_iterator oItr = sItr->second.find(source);
@@ -238,8 +257,8 @@ void M::Model::h_unsubscribe(const W::Event& ev)
 
     smap.erase(sItr);
     if (smap.size() == 0) {
-        const W::Socket& socket = server->getConnection(itr->first);
-        disconnect(&socket, SIGNAL(disconnected()), this, SLOT(onSocketDisconnected()));
+        const W::Socket* socket = connector->getConnection(itr->first);
+        disconnect(socket, SIGNAL(disconnected()), this, SLOT(onSocketDisconnected()));
         subscribers->erase(itr);
     }
     --subscribersCount;
@@ -256,7 +275,7 @@ void M::Model::send(W::Vocabulary* vc, const W::Address& destination, uint64_t c
     }
     W::Event ev(destination, vc);
     ev.setSenderId(connectionId);
-    server->getConnection(connectionId).send(ev);
+    connector->getConnection(connectionId)->send(ev);
 }
 
 void M::Model::response(W::Vocabulary* vc, const W::Address& handlerAddress, const W::Event& src)
@@ -272,7 +291,7 @@ void M::Model::response(W::Vocabulary* vc, const W::Address& handlerAddress, con
     
     W::Event ev(source + handlerAddress, vc);
     ev.setSenderId(id);
-    server->getConnection(id).send(ev);
+    connector->getConnection(id)->send(ev);
 }
 
 void M::Model::fakeResponse(W::Vocabulary* vc, const W::Address& handlerAddress, const W::Address& sourceAddress, const W::Event& src)
@@ -288,7 +307,7 @@ void M::Model::fakeResponse(W::Vocabulary* vc, const W::Address& handlerAddress,
     
     W::Event ev(source + handlerAddress, vc);
     ev.setSenderId(id);
-    server->getConnection(id).send(ev);
+    connector->getConnection(id)->send(ev);
 }
 
 void M::Model::broadcast(W::Vocabulary* vc, const W::Address& handlerAddress)
@@ -307,7 +326,7 @@ void M::Model::broadcast(W::Vocabulary* vc, const W::Address& handlerAddress)
         for (;oItr != oEnd; ++oItr) {
             W::Event ev(oItr->first + handlerAddress, vc->copy());
             ev.setSenderId(itr->first);
-            server->getConnection(itr->first).send(ev);
+            connector->getConnection(itr->first)->send(ev);
         }
     }
     delete vc;
@@ -317,23 +336,54 @@ void M::Model::removeHandler(W::Handler* handler)
 {
     handlers->erase(handler);
     if (registered) {
-        dispatcher->unregisterHandler(handler);
+        connector->unregisterHandler(handler);
     }
 }
 
 void M::Model::removeModel(M::Model* model)
 {
     models->erase(model);
+    disconnect(model, SIGNAL(serviceMessage(const QString&)), this, SIGNAL(serviceMessage(const QString&)));
     if (registered) {
-        model->unregisterModel();
+        model->getUnregistered();
     }
 }
 
-void M::Model::passToHandler(const W::Event& event) const
+void M::Model::passToLocalHandler(const W::Event& event) const
 {
     if (registered) {
-        dispatcher->pass(event);
+        connector->passThroughDispatcher(event);
     } else {
         emit serviceMessage(QString("An attempt to pass event to dispatcher from unregistered model\nModel address ") + address.toString().c_str());
     }
 }
+
+void M::Model::addController(C::Controller* ctrl, const W::String& nodeName)
+{
+    Controllers::const_iterator itr = controllers->find(ctrl);
+    if (itr != controllers->end()) {
+        emit serviceMessage(QString("An attempt to add controller ") +  ctrl->getAddress().toString().c_str() + QString(" for the second time in model ") + address.toString().c_str());
+        throw 9;
+    }
+    controllers->insert(std::make_pair(ctrl, nodeName));
+    connect(ctrl, SIGNAL(serviceMessage(const QString&)), SIGNAL(serviceMessage(const QString&)));
+    if (registered) {
+        connector->registerController(ctrl, nodeName);;
+    }
+}
+
+void M::Model::removeController(C::Controller* ctrl)
+{
+    Controllers::const_iterator itr = controllers->find(ctrl);
+    if (itr == controllers->end()) {
+        emit serviceMessage(QString("An attempt to remove absent controller ") +  ctrl->getAddress().toString().c_str() + QString(" from the model ") + address.toString().c_str());
+        throw 10;
+    }
+    
+    disconnect(ctrl, SIGNAL(serviceMessage(const QString&)), this, SIGNAL(serviceMessage(const QString&)));
+    if (registered) {
+        connector->unregisterController(itr->first, itr->second);
+    }
+    controllers->erase(itr);
+}
+

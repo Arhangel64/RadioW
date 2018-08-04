@@ -276,3 +276,8 @@ bool C::Controller::isSubscribed()
 {
     return subscribed;
 }
+
+const W::Address & C::Controller::getAddress() const
+{
+    return address;
+}

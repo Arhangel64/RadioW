@@ -292,7 +292,8 @@
             View:           6,
             
             Page:           102,
-            PanesList:      104
+            PanesList:      104,
+            Player:         107
         };
 
         View.ReversedViewType = {
@@ -304,7 +305,9 @@
             
             "101":      "Nav",
             "102":      "Page",
-            "104":      "PanesList"
+            "104":      "PanesList",
+           
+            "107":      "Player"
         };
 
         View.ViewTypesPaths = {
@@ -313,7 +316,8 @@
             Page:           "views/page",
             PanesList:      "views/panesList",
             Image:          "views/image",
-            Button:         "views/button"
+            Button:         "views/button",
+            Player:         "views/player"
         };
 
         View.constructors = {

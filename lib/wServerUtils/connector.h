@@ -1,11 +1,14 @@
 #ifndef CONNECTOR_H
 #define CONNECTOR_H
 
+#include <utils/defines.h>
+
 #include <QtCore/QObject>
 #include <map>
 #include <set>
 
 #include <wDispatcher/dispatcher.h>
+#include <wDispatcher/handler.h>
 
 #include <wSocket/socket.h>
 #include <wSocket/server.h>
@@ -16,9 +19,11 @@
 
 #include <utils/exception.h>
 
-#include "commands.h"
+#include <wController/controller.h>
 
 namespace U {
+    class Commands;
+    
     class Connector : public QObject
     {
         Q_OBJECT
@@ -29,7 +34,13 @@ namespace U {
         
         void addIgnoredNode(const W::String& name);
         void sendTo(const W::String& name, const W::Event& event);
-        const W::Socket& getNodeSocket(const W::String& name);
+        const W::Socket* getNodeSocket(const W::String& name);
+        void registerHandler(W::Handler* handler);
+        void unregisterHandler(W::Handler* handler);
+        const W::Socket* getConnection(uint64_t p_id) const;
+        void passThroughDispatcher(const W::Event& ev) const;
+        void registerController(C::Controller* ctrl, const W::String& node);
+        void unregisterController(C::Controller* ctrl, const W::String& node);
         
     signals:
         void serviceMessage(const QString& msg);
@@ -42,6 +53,7 @@ namespace U {
         U::Commands* commands;
         Map nodes;
         std::set<W::String> ignoredNodes;
+        std::multimap<W::String, C::Controller*> controllers; 
         
     protected:
         handler(connect);

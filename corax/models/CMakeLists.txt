@@ -8,10 +8,12 @@ set(CMAKE_AUTOMOC ON)
 
 set(HEADERS
     player.h
+    proxysong.h
 )
 
 set(SOURCES
     player.cpp
+    proxysong.cpp
 )
 
 add_library(coraxModels STATIC ${HEADERS} ${SOURCES})

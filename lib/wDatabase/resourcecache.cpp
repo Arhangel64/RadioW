@@ -215,7 +215,7 @@ void ResourceCache::h_subscribeMember(const W::Event& ev)
             M::File* modelRecord = M::File::create(readFile(*record), address + lastHops >> 1);
             delete record;
             addModel(modelRecord);
-            passToHandler(ev);
+            passToLocalHandler(ev);
         } catch (int err) {
             if (err == 3) {
                 emit serviceMessage(QString("An attempt to create and subscribe record model in resourcecache, but it is not found. Event: ") + ev.toString().c_str());

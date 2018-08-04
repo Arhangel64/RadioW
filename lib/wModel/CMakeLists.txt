@@ -33,6 +33,6 @@ set(SOURCES
 add_library(wModel STATIC ${HEADERS} ${SOURCES})
 
 target_link_libraries(wModel Qt5::Core)
-target_link_libraries(wModel wSocket)
-target_link_libraries(wModel wDispatcher)
+target_link_libraries(wModel wServerUtils)
 target_link_libraries(wModel wType)
+target_link_libraries(wModel wController)

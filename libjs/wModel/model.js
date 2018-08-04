@@ -312,7 +312,8 @@ Model.ModelType = {
     PageStorage: 103,
     PanesList: 104,
     Theme: 105,
-    ThemeStorage: 106
+    ThemeStorage: 106,
+    Player: 107
 };
 
 module.exports = Model;

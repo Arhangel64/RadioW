@@ -90,11 +90,11 @@ void Corax::start()
     server->listen(8080);
     
     cout << "Registering models..." << endl;
-    attributes->registerModel(dispatcher, server);
-    commands->registerModel(dispatcher, server);
+    attributes->getRegistered(connector);
+    commands->getRegistered(connector);
     
     for (; beg != end; ++beg) {
-        beg->second->registerModel(dispatcher, server);
+        beg->second->getRegistered(connector);
     }
     
     cout << "Opening caches..." << endl;
@@ -115,11 +115,11 @@ void Corax::stop()
     std::map<W::String, ResourceCache*>::iterator end = caches.end();
     
     cout << "Stopping corax..." << endl;
-    commands->unregisterModel();
-    attributes->unregisterModel();
+    commands->getUnregistered();
+    attributes->getUnregistered();
     
     for (; beg != end; ++beg) {
-        beg->second->unregisterModel();
+        beg->second->getUnregistered();
     }
     
     server->stop();
@@ -169,10 +169,10 @@ void Corax::h_parseDirectory(const W::Event& ev)
     if (itr != parsers.end()) {
         cout << "directory " << path.toString() << " is already being parsed" << endl;
     } else {
-        const W::Socket& socket = connector->getNodeSocket(W::String(u"Perturabo"));
+        const W::Socket* socket = connector->getNodeSocket(W::String(u"Perturabo"));
         ResourceCache* music = caches.at(W::String(u"music"));
         ResourceCache* images = caches.at(W::String(u"images"));
-        Parser* parser = new Parser(&socket, dispatcher, music, images);
+        Parser* parser = new Parser(socket, dispatcher, music, images);
         parsers.insert(std::make_pair(path, parser));
         
         connect(parser, SIGNAL(serviceMessage(const QString&)), SLOT(onModelServiceMessage(const QString&)));

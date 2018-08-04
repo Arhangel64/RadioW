@@ -341,7 +341,8 @@ Controller.ModelType = {
     PageStorage:    103,
     PanesList:      104,
     Theme:          105,
-    ThemeStorage:   106
+    ThemeStorage:   106,
+    Player:         107
 };
 
 Controller.ReversedModelType = {
@@ -361,7 +362,8 @@ Controller.ReversedModelType = {
     "103":      "PageStorage",
     "104":      "PanesList",
     "105":      "Theme",
-    "106":      "ThemeStorage"
+    "106":      "ThemeStorage",
+    "107":      "Player"
 };
 
 Controller.ModelTypesPaths = {
@@ -378,7 +380,8 @@ Controller.ModelTypesPaths = {
     ThemeStorage:   "./themeStorage",   //resolve as dependency
     Image:          "./image",          //resolve as dependency
     Button:         "./button",         //resolve as dependency
-    Catalogue:      "./catalogue"       //resolve as dependency
+    Catalogue:      "./catalogue",      //resolve as dependency
+    Player:         "./player"          //resolve as dependency
 };
 
 Controller.constructors = {

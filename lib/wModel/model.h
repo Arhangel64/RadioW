@@ -13,10 +13,10 @@
 #include <wType/event.h>
 #include <wType/string.h>
 #include <wSocket/socket.h>
-#include <wSocket/server.h>
-#include <wDispatcher/dispatcher.h>
 #include <wDispatcher/handler.h>
 #include <wContainer/order.h>
+#include <wServerUtils/connector.h>
+#include <wController/controller.h>
 
 namespace M {
     
@@ -35,7 +35,9 @@ namespace M {
             
             attributes = 50,
             file,
-            resourceCache
+            resourceCache,
+            
+            player = 107
         };
         
         Model(const W::Address p_address, QObject* parent = 0);
@@ -49,13 +51,15 @@ namespace M {
         void addModel(M::Model* model);
         void addHandler(W::Handler* handler);
         void addProperty(const W::String& value, const W::String& name);
+        void addController(C::Controller* ctrl, const W::String& nodeName);
         W::Address getAddress() const;
-        void registerModel(W::Dispatcher* dp, W::Server* srv);
-        void unregisterModel();
+        void getRegistered(U::Connector* connector);
+        void getUnregistered();
         
         void removeHandler(W::Handler* handler);
         void removeModel(M::Model* model);
-        void passToHandler(const W::Event& event) const;
+        void removeController(C::Controller* ctrl);
+        void passToLocalHandler(const W::Event& event) const;
         
     signals:
         void serviceMessage(const QString& msg) const;
@@ -79,13 +83,14 @@ namespace M {
     private:
         typedef W::Order<W::Handler*> HList;
         typedef W::Order<M::Model*> MList;
+        typedef std::map<C::Controller*, W::String> Controllers;
         
-        W::Dispatcher* dispatcher;
-        W::Server* server;
+        U::Connector* connector;
         uint64_t subscribersCount;
         HList* handlers;
         W::Vector* properties;
         MList* models;
+        Controllers* controllers;
         
     private slots:
         void onSocketDisconnected();

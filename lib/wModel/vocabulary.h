@@ -12,8 +12,7 @@
 namespace M {
     class ICatalogue;
     
-    class Vocabulary : public M::Model 
-    {
+    class Vocabulary : public M::Model {
         friend class ICatalogue;
     public:
         Vocabulary(const W::Address p_address, QObject* parent = 0);

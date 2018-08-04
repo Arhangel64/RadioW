@@ -86,11 +86,11 @@ void Perturabo::start()
     server->listen(8082);
     
     cout << "Registering models..." << endl;
-    attributes->registerModel(dispatcher, server);
-    commands->registerModel(dispatcher, server);
+    attributes->getRegistered(connector);
+    commands->getRegistered(connector);
     
     for (; beg != end; ++beg) {
-        beg->second->registerModel(dispatcher, server);
+        beg->second->getRegistered(connector);
     }
     
     cout << "Opening and indexing databases..." << endl;
@@ -115,11 +115,11 @@ void Perturabo::stop()
     commands->enableCommand(W::String(u"clearDatabase"), false);
     
     for (; beg != end; ++beg) {
-        beg->second->unregisterModel();
+        beg->second->getUnregistered();
     }
     
-    commands->unregisterModel();
-    attributes->unregisterModel();
+    commands->getUnregistered();
+    attributes->getUnregistered();
     server->stop();
 }
 

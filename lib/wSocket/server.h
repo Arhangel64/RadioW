@@ -27,7 +27,7 @@ namespace W
         void listen(uint16_t port);
         void stop();
         
-        const Socket& getConnection(uint64_t p_id) const;
+        const Socket* getConnection(uint64_t p_id) const;
         uint64_t getConnectionsCount() const;
         void closeConnection(uint64_t p_id);
         void openConnection(const String& addr, const Uint64& port);

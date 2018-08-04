@@ -1,4 +1,5 @@
 #include "connector.h"
+#include "commands.h"
 
 U::Connector::Connector(W::Dispatcher* dp, W::Server* srv, U::Commands* cmds, QObject* parent):
     QObject(parent),
@@ -6,7 +7,8 @@ U::Connector::Connector(W::Dispatcher* dp, W::Server* srv, U::Commands* cmds, QO
     server(srv),
     commands(cmds),
     nodes(),
-    ignoredNodes()
+    ignoredNodes(),
+    controllers()
 {
     connect(server, SIGNAL(newConnection(const W::Socket&)), SLOT(onNewConnection(const W::Socket&)));
     connect(server, SIGNAL(closedConnection(const W::Socket&)), SLOT(onClosedConnection(const W::Socket&)));
@@ -30,6 +32,17 @@ U::Connector::~Connector()
     for (; itr != end; ++itr) {
         commands->removeCommand(dc + itr->first);
     }
+    
+    std::multimap<W::String, C::Controller*>::const_iterator cbeg = controllers.begin();
+    std::multimap<W::String, C::Controller*>::const_iterator cend = controllers.end();
+    
+    for (; cbeg != cend; ++cbeg) {
+        C::Controller* ctrl = cbeg->second;
+        if (ctrl->isSubscribed()) {
+            ctrl->unsubscribe();
+            ctrl->unregisterController();
+        }
+    }
 }
 
 void U::Connector::addIgnoredNode(const W::String& name)
@@ -43,7 +56,7 @@ void U::Connector::sendTo(const W::String& name, const W::Event& event)
     if (itr != nodes.end()) {
         throw new NodeAccessError(name);
     } else {
-        server->getConnection(itr->second).send(event);
+        server->getConnection(itr->second)->send(event);
     }
 }
 
@@ -69,6 +82,14 @@ void U::Connector::onNewConnection(const W::Socket& socket)
                 emit serviceMessage(QString("New connection, id: ") + socket.getId().toString().c_str());
                 connect(&socket, SIGNAL(message(const W::Event&)), dispatcher, SLOT(pass(const W::Event&)));
                 
+                std::multimap<W::String, C::Controller*>::const_iterator beg = controllers.lower_bound(name);
+                std::multimap<W::String, C::Controller*>::const_iterator end = controllers.upper_bound(name);
+                
+                for (; beg != end; ++beg) {
+                    beg->second->registerController(dispatcher, &socket);
+                    beg->second->subscribe();
+                }
+                
                 emit nodeConnected(name);
             }
         } else {
@@ -90,6 +111,14 @@ void U::Connector::onClosedConnection(const W::Socket& socket)
     if (ign == ignoredNodes.end()) {
         Map::const_iterator itr = nodes.find(name);
         if (itr != nodes.end()) {
+            std::multimap<W::String, C::Controller*>::const_iterator beg = controllers.lower_bound(name);
+            std::multimap<W::String, C::Controller*>::const_iterator end = controllers.upper_bound(name);
+            
+            for (; beg != end; ++beg) {
+                beg->second->unsubscribe();
+                beg->second->unregisterController();
+            }
+            
             emit nodeDisconnected(name);
             commands->removeCommand(W::String(u"disconnect") + name);
             nodes.erase(itr);
@@ -114,7 +143,7 @@ void U::Connector::h_disconnect(const W::Event& ev)
     server->closeConnection(itr->second);
 }
 
-const W::Socket& U::Connector::getNodeSocket(const W::String& name)
+const W::Socket* U::Connector::getNodeSocket(const W::String& name)
 {
     Map::const_iterator itr = nodes.find(name);
     if (itr == nodes.end()) {
@@ -122,3 +151,62 @@ const W::Socket& U::Connector::getNodeSocket(const W::String& name)
     }
     return server->getConnection(itr->second);
 }
+
+void U::Connector::registerHandler(W::Handler* handler)
+{
+    dispatcher->registerHandler(handler);
+}
+
+void U::Connector::unregisterHandler(W::Handler* handler)
+{
+    dispatcher->unregisterHandler(handler);
+}
+
+const W::Socket * U::Connector::getConnection(uint64_t p_id) const
+{
+    return server->getConnection(p_id);
+}
+
+void U::Connector::passThroughDispatcher(const W::Event& ev) const
+{
+    dispatcher->pass(ev);
+}
+
+void U::Connector::registerController(C::Controller* ctrl, const W::String& node)
+{
+    std::set<W::String>::const_iterator iitr = ignoredNodes.find(node);
+    if (iitr != ignoredNodes.end()) {
+        throw 3;    //this means you're trying to receive something from one of ignored nodes, which never going to be handled in connector, most probably it's a mistake
+    }
+    controllers.insert(std::make_pair(node, ctrl));
+    Map::const_iterator itr = nodes.find(node);
+    if (itr != nodes.end()) {
+        ctrl->registerController(dispatcher, server->getConnection(itr->second));
+        ctrl->subscribe();              //let's say I always need them subscribed, for now at least
+    }
+}
+
+void U::Connector::unregisterController(C::Controller* ctrl, const W::String& node)
+{
+    bool found = false;
+    std::multimap<W::String, C::Controller*>::const_iterator beg = controllers.lower_bound(node);
+    std::multimap<W::String, C::Controller*>::const_iterator end = controllers.upper_bound(node);
+    
+    for (; beg != end; ++beg) {
+        if (beg->second == ctrl) {
+            found = true;           //TODO make a proper way to store 'em
+            break;
+        }
+    }
+    
+    if (!found) {
+        throw 4;
+    }
+    
+    if (ctrl->isSubscribed()) {
+        ctrl->unsubscribe();
+        ctrl->unregisterController();
+    }
+    controllers.erase(beg);
+}
+
